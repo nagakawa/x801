@@ -3,6 +3,14 @@
 A customizable MMORPG with Wizard101-like mechanics that anyone can modify or
 run a server for.
 
+### Note about compilers
+
+If you are using g++, then at least use a new version. 7.0.0 is known to work,
+but 5.4.0 will *not* compile the program.
+
+Alternatively, use Clang, which will (as of 3.8.0) successfully compile the
+program.
+
 ### Licence
 
 Copyright (C) 2016 AGC.

@@ -72,6 +72,10 @@ void testReadInt() {
     "Reading uint16_t in LE");
   assertEqual(adj, (uint32_t) 0x6b6e6144L,
     "Reading uint32_t in LE");
+  std::stringstream foo = x801::base::fromCharArray((char*) ("5\0""5\0"), 4);
+  uint32_t awk = x801::base::readInt<uint32_t>(foo);
+  assertEqual(awk, (uint32_t) 0x350035, "Just a stress test");
+  assertThat(foo.good(), "Just a stress test");
 }
 
 void testWriteInt() {

@@ -29,8 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace test {
     //extern TestDiag current;
+#define asStr(c) #c
 #define assertThat(c, what) \
-  x801::test::assertPrivate(c, what, __FILE__, __LINE__, __func__)
+  x801::test::assertPrivate(c, what, __FILE__, __LINE__, __func__, \
+    asStr(c) " evaluates to false")
 #define assertEqual(a, b, what) \
   x801::test::assertEqualPrivate(a, b, (const char*) what, \
   (const char*) __FILE__, __LINE__, (const char*) __func__)

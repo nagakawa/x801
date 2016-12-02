@@ -54,5 +54,6 @@ namespace x801 {
       val = convLEW(val);
       fh.write(reinterpret_cast<char*> (&val), sizeof(T));
     }
+    std::stringstream fromCharArray(char* array, unsigned int size);
   }
 }

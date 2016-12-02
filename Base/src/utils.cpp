@@ -17,6 +17,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <sstream>
+#include <string>
+
 using namespace x801::base;
 
 template<> uint16_t x801::base::convLER<uint16_t>(uint16_t x) { return le16toh(x); }
@@ -25,3 +28,8 @@ template<> uint64_t x801::base::convLER<uint64_t>(uint64_t x) { return le64toh(x
 template<> uint16_t x801::base::convLEW<uint16_t>(uint16_t x) { return htole16(x); }
 template<> uint32_t x801::base::convLEW<uint32_t>(uint32_t x) { return htole32(x); }
 template<> uint64_t x801::base::convLEW<uint64_t>(uint64_t x) { return htole64(x); }
+
+std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
+  std::string s{array, size};
+  return std::stringstream(s);
+}
