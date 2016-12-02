@@ -29,8 +29,6 @@ using namespace x801::test;
 #include <Version.h>
 #include <utils.h>
 
-#define shouldTest(index) (isDefault || !strcmp(arg, parts[index]))
-
 int main(int argc, char** argv) {
   const char* arg = argc >= 2 ? argv[1] : DEFAULT;
   bool isDefault = argc <= 1 || !strcmp(arg, DEFAULT);
@@ -43,8 +41,6 @@ int main(int argc, char** argv) {
   } else runAll(parts, partCount, arg, isDefault);
   summary();
 }
-
-#undef shouldTest
 
 void testSystem() {
   assertThat(5 - 3 == 2, "Arithmetic should work (this should pass)");
