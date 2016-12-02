@@ -30,6 +30,12 @@ namespace x801 {
   namespace map {
     struct Block {
       uint32_t label;
+      bool isSolid() {
+        return label >> 31;
+      }
+      bool getBlockID() {
+        return label & 0xffffff;
+      }
     };
     class Layer {
     public:
