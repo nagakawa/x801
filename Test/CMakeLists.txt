@@ -7,6 +7,7 @@ INCLUDE(../dependencies.cmake)
 
 SET(PROJECT_INCLUDE_DIR
   ${PROJECT_SOURCE_DIR}/include
+  ${PROJECT_SOURCE_DIR}/../Base/include
   ${PROJECT_SOURCE_DIR}/../Map/include
 )
 
@@ -22,7 +23,10 @@ include_directories(${PROJECT_INCLUDE_DIR})
 # actual target:
 ADD_EXECUTABLE(Test ${Test_executable_SRCS})
 
-TARGET_LINK_LIBRARIES(Test ${PROJECT_SOURCE_DIR}/../../build/libMap.a)
+TARGET_LINK_LIBRARIES(Test
+  ${PROJECT_SOURCE_DIR}/../../build/libMap.a
+  ${PROJECT_SOURCE_DIR}/../../build/libBase.a
+)
 
 #ADD_CUSTOM_COMMAND(
 #  TARGET AGLTest

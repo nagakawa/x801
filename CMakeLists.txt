@@ -16,6 +16,7 @@ set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 include_directories("${PROJECT_INCLUDE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}")
 
+ADD_SUBDIRECTORY(Base)
 ADD_SUBDIRECTORY(Map)
 ADD_SUBDIRECTORY(Test)
 

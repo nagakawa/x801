@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "portable_endian.h"
 
 namespace x801 {
-  namespace map {
+  namespace base {
     // Thanks http://stackoverflow.com/a/33414109/3130218
     template<typename T> struct assert_false : std::false_type {};
     template<typename T> T convLER(T) {

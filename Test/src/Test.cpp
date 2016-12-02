@@ -57,9 +57,9 @@ void testSystem2() {
 
 void testReadInt() {
   std::stringstream input("GreyroseIsDank");
-  uint64_t noun = x801::map::readInt<uint64_t>(input);
-  uint16_t verb = x801::map::readInt<uint16_t>(input);
-  uint32_t adj = x801::map::readInt<uint32_t>(input);
+  uint64_t noun = x801::base::readInt<uint64_t>(input);
+  uint16_t verb = x801::base::readInt<uint16_t>(input);
+  uint32_t adj = x801::base::readInt<uint32_t>(input);
   // Needs the explicit cast or assertEqual will complain about not finding
   // the version of assertEqualPrivate with the right signature.
   assertEqual(noun, (uint64_t) 0x65736f7279657247LL,
@@ -72,9 +72,9 @@ void testReadInt() {
 
 void testWriteInt() {
   std::stringstream output;
-  x801::map::writeInt(output, (uint64_t) 0x65736f7279657247LL);
-  x801::map::writeInt(output, (uint16_t) 0x7349);
-  x801::map::writeInt(output, (uint32_t) 0x6b6e6144L);
+  x801::base::writeInt(output, (uint64_t) 0x65736f7279657247LL);
+  x801::base::writeInt(output, (uint16_t) 0x7349);
+  x801::base::writeInt(output, (uint32_t) 0x6b6e6144L);
   assertEqual(output.str(), "GreyroseIsDank", "Writing integers in LE");
 }
 
