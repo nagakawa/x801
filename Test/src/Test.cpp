@@ -25,6 +25,7 @@ using namespace x801::test;
 #include <stdint.h>
 #include <string.h>
 #include <sstream>
+#include <vector>
 #include <Version.h>
 #include <utils.h>
 
@@ -46,9 +47,15 @@ int main(int argc, char** argv) {
 #undef shouldTest
 
 void testSystem() {
-  assertThat(5 - 3 == 2, "Arithmetic should work");
-  assertEqual(2 + 2, 5, "Arithmetic should NOT work");
-  assertEqual("foe", "foe", "Comparing two const char*'s");
+  assertThat(5 - 3 == 2, "Arithmetic should work (this should pass)");
+  assertEqual(2 + 2, 5, "Arithmetic should NOT work (this should fail)");
+  assertEqual("foe", "foe", "Comparing two const char*'s (this should pass)");
+  std::vector<int> a;
+  std::vector<int> b;
+  a.push_back(1);
+  b.push_back(2);
+  assertEqual(a[0], b[0], "First elements should match (this should fail)");
+  assertEqual(a, b, "Vectors should match (this should fail)");
 }
 
 void testSystem2() {

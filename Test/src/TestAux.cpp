@@ -68,3 +68,15 @@ void x801::test::assertEqualPrivate(
   std::string s = ss.str();
   assertPrivate(!strcmp(a, b), what, file, line, func, s.c_str());
 }
+
+void x801::test::assertDifferentPrivate(
+    const char* a, const char* b,
+    const char* what,
+    const char* file,
+    int line,
+    const char* func) {
+  std::stringstream ss;
+  ss << a << " is equal to " << b;
+  std::string s = ss.str();
+  assertPrivate(strcmp(a, b), what, file, line, func, s.c_str());
+}

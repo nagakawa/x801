@@ -96,6 +96,25 @@ namespace x801 {
         const char* file,
         int line,
         const char* func);
+    template<typename T, typename U> void assertDifferentPrivate(
+        T a, U b,
+        const char* what,
+        const char* file,
+        int line,
+        const char* func) {
+      std::stringstream ss;
+      feed(ss, a);
+      ss << " is equal to ";
+      feed(ss, b);
+      std::string s = ss.str();
+      assertPrivate(a != b, what, file, line, func, s.c_str());
+    }
+    void assertDifferentPrivate(
+        const char* a, const char* b,
+        const char* what,
+        const char* file,
+        int line,
+        const char* func);
     void summary();
   }
 }

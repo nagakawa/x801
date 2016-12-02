@@ -34,6 +34,9 @@ namespace x801 {
 #define assertEqual(a, b, what) \
   x801::test::assertEqualPrivate(a, b, (const char*) what, \
   (const char*) __FILE__, __LINE__, (const char*) __func__)
+#define assertDifferent(a, b, what) \
+  x801::test::assertDifferentPrivate(a, b, (const char*) what, \
+  (const char*) __FILE__, __LINE__, (const char*) __func__)
     extern const char* DEFAULT;
     bool shouldTest(int index);
     struct Test {
