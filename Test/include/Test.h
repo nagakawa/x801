@@ -32,6 +32,11 @@ namespace x801 {
 #define assertThat(c, what) \
   x801::test::assertPrivate(c, what, __FILE__, __LINE__, __func__)
 #define assertEqual(a, b, what) \
-  x801::test::assertEqualPrivate(a, b, what, __FILE__, __LINE__, __func__)
+  x801::test::assertEqualPrivate(a, b, (const char*) what, \
+  (const char*) __FILE__, __LINE__, (const char*) __func__)
+    extern const char* DEFAULT;
+    extern const char* parts[];
+    extern const int partCount;
+    bool shouldTest(int index);
   }
 }

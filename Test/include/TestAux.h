@@ -24,6 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <string.h>
+#include <string>
+
 namespace x801 {
   namespace test {
     struct TestDiag {
@@ -38,14 +41,20 @@ namespace x801 {
         const char* file,
         int line,
         const char* func);
-    template<typename T> void assertEqualPrivate(
-        T a, T b,
+    template<typename T, typename U> void assertEqualPrivate(
+        T a, U b,
         const char* what,
         const char* file,
         int line,
         const char* func) {
       assertPrivate(a == b, what, file, line, func);
     }
+    void assertEqualPrivate(
+        const char* a, const char* b,
+        const char* what,
+        const char* file,
+        int line,
+        const char* func);
     void summary();
   }
 }

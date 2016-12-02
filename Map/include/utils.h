@@ -52,7 +52,7 @@ namespace x801 {
     }
     template<typename T> void writeInt(std::ostream& fh, T val) {
       val = convLEW(val);
-      val.write(reinterpret_cast<char*> (&val), sizeof(T));
+      fh.write(reinterpret_cast<char*> (&val), sizeof(T));
     }
   }
 }

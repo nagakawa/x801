@@ -52,3 +52,12 @@ void x801::test::summary() {
     std::cout << "\033[33;1mCongratulations, you passed all tests!\033[0m\n";
   }
 }
+
+void x801::test::assertEqualPrivate(
+    const char* a, const char* b,
+    const char* what,
+    const char* file,
+    int line,
+    const char* func) {
+  assertPrivate(!strcmp(a, b), what, file, line, func);
+}
