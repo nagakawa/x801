@@ -145,3 +145,8 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# exe output
+build/Test
+build/Game
+build/MapC
