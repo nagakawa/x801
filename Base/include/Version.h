@@ -33,15 +33,16 @@ namespace x801 {
     struct Version {
       uint16_t vMajor, vMinor, vPatch; // ouli
       uint16_t prerelease;
-      Version(uint16_t x, uint16_t y, uint16_t z = 0, uint16_t pre = 0xC000) :
+      Version(uint16_t x, uint16_t y, uint16_t z = 0, uint16_t pre = 0xc000) :
         vMajor(x), vMinor(y), vPatch(z), prerelease(pre) {}
       Version(
           uint16_t x, uint16_t y, uint16_t z,
           uint16_t letter, uint16_t preNum) :
-        vMajor(x), vMinor(y), vPatch(z), prerelease((letter << 14) | preNum) {}
+        vMajor(x), vMinor(y), vPatch(z),
+        prerelease((letter << 14) | (preNum & 0x3fff)) {}
       Version(std::istream& fh);
       int getPrereleaseType() { return prerelease >> 14; }
-      int getPrereleaseNumber() { return prerelease & 0x3FFF; }
+      int getPrereleaseNumber() { return prerelease & 0x3fff; }
       bool operator==(Version& other);
       bool operator<(Version& other);
       bool canSucceed(Version& other);
