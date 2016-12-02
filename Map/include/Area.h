@@ -28,40 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace map {
-    struct Block {
-      uint32_t label;
-    };
-    class Area {
-    public:
-      Area(int w, int h, int xoff = 0, int yoff = 0) :
-          width(w), height(h), xoff(xoff), yoff(yoff) {
-        allocateBlocks();
-      }
-      // Area(std::istream& handle);
-      // void write(std::ostream& handle);
-      ~Area();
-      int getWidth() { return width; }
-      int getHeight() { return height; }
-      int getXOffset() { return xoff; }
-      int getYOffset() { return yoff; }
-      Block* getMapBlocks() { return map; }
-      // NB: (x, y) is the northwest corner of the block
-      Block getMapBlockAt(int x, int y);
-      Block getMapBlockAtRaw(int x, int y);
-      void setMapBlockAt(int x, int y, Block b);
-      void setMapBlockAtRaw(int x, int y, Block b);
-      // Don't define these for now; maybe they can be defined later.
-      Area(const Area& that) = delete;
-      void operator=(const Area& that) = delete;
-    private:
-      void allocateBlocks();
-      int width, height;
-      // These are the coordinates of the northwest corner of the map.
-      // This is useful if you later want to expand the map in that direction
-      // without having players appear to move.
-      int xoff, yoff;
-      // The elements are in row-major order.
-      Block* map;
-    };
+    
   }
 }
