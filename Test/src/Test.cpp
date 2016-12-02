@@ -25,6 +25,7 @@ using namespace x801::test;
 #include <stdint.h>
 #include <string.h>
 #include <sstream>
+#include <Version.h>
 #include <utils.h>
 
 #define shouldTest(index) (isDefault || !strcmp(arg, parts[index]))
@@ -78,12 +79,39 @@ void testWriteInt() {
   assertEqual(output.str(), "GreyroseIsDank", "Writing integers in LE");
 }
 
+void testVersionBasic() {
+  x801::base::Version mine17(1, 7, 10);
+  assertEqual(mine17.vMajor, 1, "Major field");
+  assertEqual(mine17.vMinor, 7, "Minor field");
+  assertEqual(mine17.vPatch, 10, "Patch field");
+  assertEqual(mine17.prerelease, 0xc000, "Prerelease field");
+  assertEqual(mine17.getPrereleaseType(), x801::base::RELEASE,
+    "Version is release");
+  assertEqual(mine17.getPrereleaseNumber(), 0,
+    "Release number is 0");
+  x801::base::Version greatest(1, 7, 3, x801::base::BETA, 5);
+  assertEqual(greatest.prerelease, 0x4005, "Prerelease field (again)");
+  assertEqual(mine17, x801::base::Version(1, 7, 10), "Version equality");
+}
+
+void testVersionRead() {
+  std::stringstream input("Celestia");
+  x801::base::Version v(input);
+  assertEqual(v.vMajor, 0x6543, "Major field read");
+  assertEqual(v.vMinor, 0x656c, "Minor field read");
+  assertEqual(v.vPatch, 0x7473, "Revision field read");
+  assertEqual(v.getPrereleaseType(), x801::base::BETA, "Correct pretype");
+  assertEqual(v.getPrereleaseNumber(), 0x2169, "Correct prenum");
+}
+
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
   {"testSystem2", testSystem2, false},
   {"readInt", testReadInt, true},
   {"writeInt", testWriteInt, true},
+  {"versionBasic", testVersionBasic, true},
+  {"versionRead", testVersionRead, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 

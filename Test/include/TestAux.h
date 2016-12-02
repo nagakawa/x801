@@ -25,7 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <string.h>
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <type_traits>
+#include <utility>
 
 namespace x801 {
   namespace test {
@@ -35,19 +39,56 @@ namespace x801 {
       int totalTests;
       static TestDiag current;
     };
+    // This is just template metaprogramming to output a value if it can be
+    // and just output a default string if it can't.
+    // thanks http://stackoverflow.com/a/22759544/3130218
+    template<typename S, typename T>
+    class IsStreamable {
+      template<typename SS, typename TT>
+      static auto test(int)
+      -> decltype(std::declval<SS&>() << std::declval<TT>(), std::true_type());
+      template<typename, typename>
+      static auto test(...) -> std::false_type;
+    public:
+      static const bool value = decltype(test<S,T>(0))::value;
+    };
+    // And http://stackoverflow.com/a/30440624/3130218
+    template <
+      typename T,
+      typename std::enable_if<!IsStreamable<std::ostream, T>::value>
+        :: type* = nullptr
+    >
+    static void feed(std::ostream& fh, T x) {
+      fh << "(huh?)";
+      (void) x;
+    }
+    template <
+      typename T,
+      typename std::enable_if<IsStreamable<std::ostream, T>::value>
+        :: type* = nullptr
+    >
+    static void feed(std::ostream& fh, T x) {
+      fh << x;
+    }
     void assertPrivate(
         bool c,
         const char* what,
         const char* file,
         int line,
-        const char* func);
+        const char* func,
+        const char* extra = nullptr);
     template<typename T, typename U> void assertEqualPrivate(
         T a, U b,
         const char* what,
         const char* file,
         int line,
         const char* func) {
-      assertPrivate(a == b, what, file, line, func);
+      std::stringstream ss;
+      feed(ss, a);
+      ss << " is not equal to ";
+      feed(ss, b);
+      std::string s = ss.str();
+      assertPrivate(a == b, what, file, line, func, s.c_str());
     }
     void assertEqualPrivate(
         const char* a, const char* b,

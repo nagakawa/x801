@@ -39,12 +39,12 @@ namespace x801 {
         "convLEW has not been specialised for this type");
       return 0;
     }
-    template<> uint16_t convLER<uint16_t>(uint16_t x) { return le16toh(x); }
-    template<> uint32_t convLER<uint32_t>(uint32_t x) { return le32toh(x); }
-    template<> uint64_t convLER<uint64_t>(uint64_t x) { return le64toh(x); }
-    template<> uint16_t convLEW<uint16_t>(uint16_t x) { return htole16(x); }
-    template<> uint32_t convLEW<uint32_t>(uint32_t x) { return htole32(x); }
-    template<> uint64_t convLEW<uint64_t>(uint64_t x) { return htole64(x); }
+    template<> uint16_t convLER<uint16_t>(uint16_t x);
+    template<> uint32_t convLER<uint32_t>(uint32_t x);
+    template<> uint64_t convLER<uint64_t>(uint64_t x);
+    template<> uint16_t convLEW<uint16_t>(uint16_t x);
+    template<> uint32_t convLEW<uint32_t>(uint32_t x);
+    template<> uint64_t convLEW<uint64_t>(uint64_t x);
     template<typename T> T readInt(std::istream& fh) {
       T val;
       fh.read(reinterpret_cast<char*> (&val), sizeof(T));

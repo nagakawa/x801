@@ -31,7 +31,8 @@ void x801::test::assertPrivate(
     const char* what,
     const char* file,
     int line,
-    const char* func) {
+    const char* func,
+    const char* extra) {
   ++TestDiag::current.totalTests;
   if (c) {
     std::cout << "\033[32mTest passed: " << what << '\n';
@@ -40,7 +41,10 @@ void x801::test::assertPrivate(
     // \u2013 is the en-dash
     std::cout << "\033[31;1mTEST FAILED!!! \u2013 \n";
     std::cout << "  \033[0m" << what << '\n';
-    std::cout << "  at \033[35m" << file << ":\033[36m" << line;
+    if (extra != nullptr) {
+      std::cout << "  \033[33m" << extra << '\n';
+    }
+    std::cout << "  \033[0mat \033[35m" << file << ":\033[36m" << line;
     std::cout << " \033[34m(" << func << ")\n\n";
   }
 }
@@ -59,5 +63,8 @@ void x801::test::assertEqualPrivate(
     const char* file,
     int line,
     const char* func) {
-  assertPrivate(!strcmp(a, b), what, file, line, func);
+  std::stringstream ss;
+  ss << a << " is not equal to " << b;
+  std::string s = ss.str();
+  assertPrivate(!strcmp(a, b), what, file, line, func, s.c_str());
 }
