@@ -64,7 +64,9 @@ void x801::test::assertEqualPrivate(
     int line,
     const char* func) {
   std::stringstream ss;
-  ss << a << " is not equal to " << b;
+  feed(ss, a);
+  ss << " is not equal to ";
+  feed(ss, b);
   std::string s = ss.str();
   assertPrivate(!strcmp(a, b), what, file, line, func, s.c_str());
 }
@@ -76,7 +78,36 @@ void x801::test::assertDifferentPrivate(
     int line,
     const char* func) {
   std::stringstream ss;
-  ss << a << " is equal to " << b;
+  feed(ss, a);
+  ss << " is equal to ";
+  feed(ss, b);
   std::string s = ss.str();
   assertPrivate(strcmp(a, b), what, file, line, func, s.c_str());
+}
+
+template<>
+void x801::test::feed(std::ostream& fh, std::string& x) {
+  for (size_t i = 0; i < x.length(); ++i) {
+    unsigned char c = x[i];
+    if (c >= 0x20 && c < 0x7f) fh << c;
+    else {
+      switch (c) {
+      case '\0':
+        fh << "\\0"; break;
+      case '\n':
+        fh << "\\n"; break;
+      case '\t':
+        fh << "\\t"; break;
+      case '\\':
+        fh << "\\\\"; break;
+      case '\x1b':
+        fh << "\\e"; break;
+      default:
+        fh << '\\' <<
+          (char) ('0' + (c >> 6)) <<
+          (char) ('0' + ((c >> 3) & 7)) <<
+          (char) ('0' + (c & 7));
+      }
+    }
+  }
 }

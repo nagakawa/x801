@@ -26,6 +26,7 @@ using namespace x801::test;
 #include <string.h>
 #include <sstream>
 #include <vector>
+#include <Layer.h>
 #include <Version.h>
 #include <utils.h>
 
@@ -111,6 +112,53 @@ void testVersionRead() {
   assertEqual(v.getPrereleaseNumber(), 0x2169, "Correct prenum");
 }
 
+#define W "\x01\x00\x00\x80"
+#define O "\x00\x00\x00\x00"
+#define NORTH_OR_SOUTH W W W W W W W W
+#define CENTER W O O O O O O W
+
+void testLayerIO() {
+  // Make an 8x8 map with the northwest corner being (-2, -5).
+  std::string s = x801::base::construct(
+    "\x08\x00\x08\x00" // Dimensions
+    "\xfe\xff\xfb\xff" // Offset of NW corner
+    NORTH_OR_SOUTH
+    CENTER CENTER CENTER
+    CENTER CENTER CENTER
+    NORTH_OR_SOUTH
+  );
+  std::stringstream input(s);
+  x801::map::Layer layer(input);
+  assertEqual(layer.getWidth(), 8, "Width should be 8");
+  assertEqual(layer.getHeight(), 8, "Height should be 8");
+  assertEqual(layer.getXOffset(), -2, "Offset should be (-2, -5)");
+  assertEqual(layer.getYOffset(), -5, "Offset should be (-2, -5)");
+  x801::map::Block wall(0x80000001);
+  x801::map::Block space(0);
+  x801::map::Block shouldBeWall = layer.getMapBlockAt(-2, 1);
+  assertEqual(shouldBeWall, wall, "Wall on west edge");
+  shouldBeWall = layer.getMapBlockAt(5, 0);
+  assertEqual(shouldBeWall, wall, "Wall on east edge");
+  shouldBeWall = layer.getMapBlockAt(3, 2);
+  assertEqual(shouldBeWall, wall, "Wall on south edge");
+  shouldBeWall = layer.getMapBlockAt(2, -5);
+  assertEqual(shouldBeWall, wall, "Wall on north edge");
+  x801::map::Block shouldBeSpace = layer.getMapBlockAt(0, 1);
+  assertEqual(shouldBeSpace, space, "Space in center");
+  layer.setMapBlockAt(0, -1, wall);
+  shouldBeWall = layer.getMapBlockAt(0, -1);
+  assertEqual(shouldBeWall, wall, "Newly-set wall");
+  layer.setMapBlockAt(0, -1, space); // Revert the change
+  std::stringstream output;
+  layer.write(output);
+  assertEqual(output.str(), s, "Input and output match");
+}
+
+#undef W
+#undef O
+#undef NORTH_OR_SOUTH
+#undef CENTER
+
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
@@ -119,6 +167,7 @@ const Test x801::test::parts[] = {
   {"writeInt", testWriteInt, true},
   {"versionBasic", testVersionBasic, true},
   {"versionRead", testVersionRead, true},
+  {"layer", testLayerIO, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 

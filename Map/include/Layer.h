@@ -29,12 +29,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace map {
     struct Block {
+      Block() : label(0) {}
+      Block(uint32_t b) : label(b) {}
       uint32_t label;
       bool isSolid() {
         return label >> 31;
       }
       bool getBlockID() {
         return label & 0xffffff;
+      }
+      bool operator==(Block other) {
+        return label == other.label;
       }
     };
     class Layer {
@@ -43,8 +48,8 @@ namespace x801 {
           width(w), height(h), xoff(xoff), yoff(yoff) {
         allocateBlocks();
       }
-      // Layer(std::istream& handle);
-      // void write(std::ostream& handle);
+      Layer(std::istream& handle);
+      void write(std::ostream& handle);
       ~Layer();
       int getWidth() { return width; }
       int getHeight() { return height; }

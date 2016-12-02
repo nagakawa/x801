@@ -28,6 +28,12 @@ template<> uint64_t x801::base::convLER<uint64_t>(uint64_t x) { return le64toh(x
 template<> uint16_t x801::base::convLEW<uint16_t>(uint16_t x) { return htole16(x); }
 template<> uint32_t x801::base::convLEW<uint32_t>(uint32_t x) { return htole32(x); }
 template<> uint64_t x801::base::convLEW<uint64_t>(uint64_t x) { return htole64(x); }
+template<> int16_t x801::base::convLER<int16_t>(int16_t x) { return le16toh(x); }
+template<> int32_t x801::base::convLER<int32_t>(int32_t x) { return le32toh(x); }
+template<> int64_t x801::base::convLER<int64_t>(int64_t x) { return le64toh(x); }
+template<> int16_t x801::base::convLEW<int16_t>(int16_t x) { return htole16(x); }
+template<> int32_t x801::base::convLEW<int32_t>(int32_t x) { return htole32(x); }
+template<> int64_t x801::base::convLEW<int64_t>(int64_t x) { return htole64(x); }
 
 std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
   std::string s{array, size};

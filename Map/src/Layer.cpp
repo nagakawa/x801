@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::map;
 
+#include <stdint.h>
+#include <utils.h>
+
 x801::map::Layer::~Layer() {
   delete[] map;
 }
@@ -49,4 +52,25 @@ void x801::map::Layer::setMapBlockAt(int x, int y, Block b) {
 void x801::map::Layer::setMapBlockAtRaw(int x, int y, Block b) {
   int index = y * width + x;
   map[index] = b;
+}
+
+x801::map::Layer::Layer(std::istream& handle) {
+  width = x801::base::readInt<uint16_t>(handle);
+  height = x801::base::readInt<uint16_t>(handle);
+  xoff = x801::base::readInt<int16_t>(handle);
+  yoff = x801::base::readInt<int16_t>(handle);
+  allocateBlocks();
+  for (int i = 0; i < width * height; ++i) {
+    map[i] = Block(x801::base::readInt<uint32_t>(handle));
+  }
+}
+
+void x801::map::Layer::write(std::ostream& handle) {
+  x801::base::writeInt<uint16_t>(handle, width);
+  x801::base::writeInt<uint16_t>(handle, height);
+  x801::base::writeInt<int16_t>(handle, xoff);
+  x801::base::writeInt<int16_t>(handle, yoff);
+  for (int i = 0; i < width * height; ++i) {
+    x801::base::writeInt<uint32_t>(handle, map[i].label);
+  }
 }

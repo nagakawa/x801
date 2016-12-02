@@ -58,7 +58,7 @@ namespace x801 {
       typename std::enable_if<!IsStreamable<std::ostream, T>::value>
         :: type* = nullptr
     >
-    static void feed(std::ostream& fh, T x) {
+    void feed(std::ostream& fh, T& x) {
       fh << "(huh?)";
       (void) x;
     }
@@ -67,9 +67,11 @@ namespace x801 {
       typename std::enable_if<IsStreamable<std::ostream, T>::value>
         :: type* = nullptr
     >
-    static void feed(std::ostream& fh, T x) {
+    void feed(std::ostream& fh, T& x) {
       fh << x;
     }
+    template<>
+    void feed(std::ostream& fh, std::string& x);
     void assertPrivate(
         bool c,
         const char* what,

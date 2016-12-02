@@ -45,6 +45,12 @@ namespace x801 {
     template<> uint16_t convLEW<uint16_t>(uint16_t x);
     template<> uint32_t convLEW<uint32_t>(uint32_t x);
     template<> uint64_t convLEW<uint64_t>(uint64_t x);
+    template<> int16_t convLER<int16_t>(int16_t x);
+    template<> int32_t convLER<int32_t>(int32_t x);
+    template<> int64_t convLER<int64_t>(int64_t x);
+    template<> int16_t convLEW<int16_t>(int16_t x);
+    template<> int32_t convLEW<int32_t>(int32_t x);
+    template<> int64_t convLEW<int64_t>(int64_t x);
     template<typename T> T readInt(std::istream& fh) {
       T val;
       fh.read(reinterpret_cast<char*> (&val), sizeof(T));
@@ -55,5 +61,10 @@ namespace x801 {
       fh.write(reinterpret_cast<char*> (&val), sizeof(T));
     }
     std::stringstream fromCharArray(char* array, unsigned int size);
+    template<int len> std::string construct(
+        const char (&s)[len],
+        bool addNull = false) {
+      return std::string{s, static_cast<size_t>(len - (addNull ? 0 : 1))};
+    }
   }
 }
