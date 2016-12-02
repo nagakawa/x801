@@ -64,3 +64,5 @@ void x801::base::Version::write(std::ostream& fh) {
   writeInt<uint16_t>(fh, vPatch);
   writeInt<uint16_t>(fh, prerelease);
 }
+
+const Version x801::base::engineVersion(0, 0, 1, ALPHA, 0);

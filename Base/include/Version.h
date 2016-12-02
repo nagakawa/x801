@@ -37,7 +37,7 @@ namespace x801 {
         vMajor(x), vMinor(y), vPatch(z), prerelease(pre) {}
       Version(
           uint16_t x, uint16_t y, uint16_t z,
-          uint16_t letter, uint16_t preNum = 0) :
+          uint16_t letter, uint16_t preNum) :
         vMajor(x), vMinor(y), vPatch(z), prerelease((letter << 14) | preNum) {}
       Version(std::istream& fh);
       int getPrereleaseType() { return prerelease >> 14; }
@@ -47,5 +47,6 @@ namespace x801 {
       bool canSucceed(Version& other);
       void write(std::ostream& fh);
     };
+    extern const Version engineVersion;
   }
 }
