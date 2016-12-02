@@ -1,2 +1,2 @@
 #!/bin/bash
-make > /dev/null && build/Test
+make > /dev/null && build/Test $@

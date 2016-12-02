@@ -35,8 +35,15 @@ namespace x801 {
   x801::test::assertEqualPrivate(a, b, (const char*) what, \
   (const char*) __FILE__, __LINE__, (const char*) __func__)
     extern const char* DEFAULT;
-    extern const char* parts[];
-    extern const int partCount;
     bool shouldTest(int index);
+    struct Test {
+      const char* name;
+      void (*test)();
+      bool runByDefault;
+      void run(const char* arg, bool isDefault) const;
+    };
+    extern const Test parts[];
+    extern const int partCount;
+    void runAll(const Test* tests, int count, const char* arg, bool isDefault);
   }
 }
