@@ -65,7 +65,7 @@ x801::map::Layer::Layer(std::istream& handle) {
   }
 }
 
-void x801::map::Layer::write(std::ostream& handle) {
+void x801::map::Layer::write(std::ostream& handle) const {
   x801::base::writeInt<uint16_t>(handle, width);
   x801::base::writeInt<uint16_t>(handle, height);
   x801::base::writeInt<int16_t>(handle, xoff);

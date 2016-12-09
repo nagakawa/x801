@@ -33,18 +33,22 @@ namespace x801 {
   namespace map {
     class Area {
     public:
-      Area(std::istream& fh);
-      // void write(std::ostream& fh);
+      Area(std::istream& fh, bool dontCare = false);
+      void write(std::ostream& fh) const;
       ~Area();
       Area(const Area& that) = delete;
       void operator=(const Area& that) = delete;
+      int getError() const { return error; }
     private:
       x801::base::Version version;
       uint16_t worldID;
       uint16_t areaID;
       TileSec* ts = nullptr;
-      int readSection(std::istream& fh);
+      int readSection(std::istream& fh, bool dontCare);
+      void writeTileSection(std::ostream& fh, int& ds) const;
+      void writeSection(std::ostream& fh, uint32_t sectionID, const char* data, uint32_t len, int& ds) const;
       int error;
+      int index;
     };
   }
 }

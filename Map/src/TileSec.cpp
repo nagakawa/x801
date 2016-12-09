@@ -28,7 +28,7 @@ x801::map::TileSec::TileSec(std::istream& fh) {
   }
 }
 
-void x801::map::TileSec::write(std::ostream& fh) {
+void x801::map::TileSec::write(std::ostream& fh) const {
   x801::base::writeInt<uint16_t>(fh, layerCount);
   for (int i = 0; i < layerCount; ++i) {
     layers[i].write(fh);

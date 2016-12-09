@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <sstream>
 #include <string>
@@ -60,7 +61,6 @@ int x801::base::readZipped(std::istream& f, char*& block, uint32_t& amtReadC, ui
     f.read(src, CHUNK);
     strm.avail_in = f.gcount();
     if (f.bad()) {
-      (void) inflateEnd(&strm);
       ret = Z_ERRNO;
       break;
     }
@@ -75,13 +75,12 @@ int x801::base::readZipped(std::istream& f, char*& block, uint32_t& amtReadC, ui
       strm.avail_out = CHUNK;
       strm.next_out = (unsigned char*) (dest + strm.total_out);
       ret = inflate(&strm, Z_NO_FLUSH);
-      if (ret == Z_STREAM_ERROR) goto end;
+      assert(ret != Z_STREAM_ERROR);
       switch (ret) {
       case Z_NEED_DICT:
           ret = Z_DATA_ERROR;     /* and fall through */
       case Z_DATA_ERROR:
       case Z_MEM_ERROR:
-          (void) inflateEnd(&strm);
           goto end;
           break;
         default:
@@ -99,46 +98,51 @@ int x801::base::readZipped(std::istream& f, char*& block, uint32_t& amtReadC, ui
     free(dest);
     block = nullptr;
   }
+  (void) inflateEnd(&strm);
   return ret;
 }
 
 // Also based on zlib usage example doc but simpler because we're compressing
 // from a buffer, not a file.
-int x801::base::writeZipped(std::ostream& f, char*& block, int len, uint32_t& amtWrittenC, uint32_t& amtWrittenU) {
+int x801::base::writeZipped(std::ostream& f, const char* block, uint32_t len, uint32_t& amtWrittenC) {
   int ret = Z_OK;
-  char* src = (char*) malloc(CHUNK);
   char* dest = (char*) malloc(CHUNK);
   z_stream strm;
   strm.zalloc = Z_NULL;
   strm.zfree = Z_NULL;
   strm.opaque = Z_NULL;
-  strm.avail_in = 0;
-  strm.next_in = Z_NULL;
+  strm.avail_in = len;
+  strm.next_in = (unsigned char*) block;
   ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
   if (ret != Z_OK) goto end;
-  strm.avail_in = len;
-  strm.next_in = (unsigned char*) src;
   do {
     strm.avail_out = CHUNK;
-    strm.next_out = (unsigned char*) (dest + strm.total_out);
-    ret = deflate(&strm, Z_NO_FLUSH);
+    strm.next_out = (unsigned char*) (dest);
+    ret = deflate(&strm, Z_FINISH);
+    std::clog << "Zip status " << ret << '\n';
     if (ret == Z_STREAM_ERROR) goto end;
     int have = CHUNK - strm.avail_out;
-    f.write(block, have);
+    f.write(dest, have);
     if (f.bad()) {
       ret = Z_ERRNO;
       goto end;
     }
+    switch (ret) {
+    case Z_NEED_DICT:
+        ret = Z_DATA_ERROR;     /* and fall through */
+    case Z_DATA_ERROR:
+    case Z_MEM_ERROR:
+        goto end;
+        break;
+      default:
+        ret = Z_OK;
+    }
   } while (strm.avail_out == 0);
-  fprintf(stderr, "Zip: total_out %lu available space %d\n", strm.total_out);
+  assert(strm.avail_in == 0);
+  fprintf(stderr, "Zip: total_out %lu available space %d\n", strm.total_out, CHUNK);
   end:
-  amtWrittenC = strm.total_in;
-  amtWrittenU = strm.total_out;
-  free(src);
-  if (ret == 0) block = dest;
-  else {
-    free(dest);
-    block = nullptr;
-  }
+  amtWrittenC = strm.total_out;
+  free(dest);
+  (void) deflateEnd(&strm);
   return ret;
 }

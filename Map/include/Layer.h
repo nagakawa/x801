@@ -53,7 +53,7 @@ namespace x801 {
         allocateBlocks();
       }
       Layer(std::istream& handle);
-      void write(std::ostream& handle);
+      void write(std::ostream& handle) const;
       ~Layer();
       int getWidth() { return width; }
       int getHeight() { return height; }

@@ -58,7 +58,7 @@ bool x801::base::Version::canSucceed(Version& other) {
   return getPrereleaseType() == 3;
 }
 
-void x801::base::Version::write(std::ostream& fh) {
+void x801::base::Version::write(std::ostream& fh) const {
   writeInt<uint16_t>(fh, vMajor);
   writeInt<uint16_t>(fh, vMinor);
   writeInt<uint16_t>(fh, vPatch);

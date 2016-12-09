@@ -26,9 +26,11 @@ using namespace x801::test;
 #include <string.h>
 #include <sstream>
 #include <vector>
+#include "Area.h"
 #include <Layer.h>
 #include <TileSec.h>
 #include <Version.h>
+#include <mapErrors.h>
 #include <utils.h>
 
 int main(int argc, char** argv) {
@@ -193,6 +195,53 @@ void testTileSecIO() {
   assertEqual(output.str(), s, "Input and output match");
 }
 
+void testAreaIO() {
+  // Make a two-layer map.
+  // The first layer is the same as before.
+  // The second is bigger and has a square at the center.
+  std::string s = x801::base::construct(
+    "XMap" // magic number
+    "\x00\x00\x00\x00\x00\x00\x00\x00" // version
+    "\x03\x00\x03\x00" // World 3 Area 3
+    "\x01\x00\x00\x00" // This world has one data section.
+    // Data Section 0
+    "TILE" // id
+    "\x52\x03\x00\x00" // this is 850 bytes long
+    "\x00\x00\x00\x00"
+    "\x02\x00"
+    // Layer 0
+    "\x08\x00\x08\x00" // Dimensions
+    "\xfe\xff\xfb\xff" // Offset of NW corner
+    NORTH_OR_SOUTH
+    CENTER CENTER CENTER
+    CENTER CENTER CENTER
+    NORTH_OR_SOUTH
+    // Layer 1
+    "\x0c\x00\x0c\x00"
+    "\xfa\xff\xf7\xff" // (-6, -9)
+    NORTH_OR_SOUTH_2
+    EMPTY_ROW_2 EMPTY_ROW_2
+    SQUARE_EDGE_ROW_2
+    SQUARE_SIDE_ROW_2 SQUARE_SIDE_ROW_2
+    SQUARE_SIDE_ROW_2 SQUARE_SIDE_ROW_2
+    SQUARE_EDGE_ROW_2
+    EMPTY_ROW_2 EMPTY_ROW_2
+    NORTH_OR_SOUTH_2
+  );
+  std::stringstream input(s, std::ios_base::in | std::ios_base::binary);
+  x801::map::Area area(input, true);
+  std::stringstream output(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
+  area.write(output);
+  output.seekg(0);
+  // std::string str = output.str();
+  // feed(std::cout, str);
+  x801::map::Area area2(output);
+  assertEqual(area2.getError(), x801::map::MAPERR_OK, "Map should be read without error");
+  std::stringstream output2(std::ios_base::out | std::ios_base::binary);
+  area2.write(output2);
+  assertEqual(output.str(), output2.str(), "Outputs match");
+}
+
 #undef W
 #undef O
 #undef NORTH_OR_SOUTH
@@ -212,6 +261,7 @@ const Test x801::test::parts[] = {
   {"versionRead", testVersionRead, true},
   {"layer", testLayerIO, true},
   {"tileSec", testTileSecIO, true},
+  {"area", testAreaIO, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 

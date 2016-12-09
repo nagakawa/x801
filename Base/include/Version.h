@@ -41,13 +41,13 @@ namespace x801 {
         vMajor(x), vMinor(y), vPatch(z),
         prerelease((letter << 14) | (preNum & 0x3fff)) {}
       Version(std::istream& fh);
-      Version();
+      Version() {}
       int getPrereleaseType() { return prerelease >> 14; }
       int getPrereleaseNumber() { return prerelease & 0x3fff; }
       bool operator==(Version& other);
       bool operator<(Version& other);
       bool canSucceed(Version& other);
-      void write(std::ostream& fh);
+      void write(std::ostream& fh) const;
     };
     extern const Version engineVersion;
   }

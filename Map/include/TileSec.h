@@ -34,7 +34,7 @@ namespace x801 {
     class TileSec {
     public:
       TileSec(std::istream& fh);
-      void write(std::ostream& fh);
+      void write(std::ostream& fh) const;
       TileSec(const TileSec& that) :
         layerCount(that.layerCount), layers(that.layers) {}
       void operator=(const TileSec& that);
