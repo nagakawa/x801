@@ -87,7 +87,7 @@ int x801::base::readZipped(std::istream& f, char*& block, uint32_t& amtReadC, ui
           ret = Z_OK;
       }
     } while (strm.avail_out == 0);
-    fprintf(stderr, "Unzip: total_out %lu available space %d\n", strm.total_out, CHUNK * bsize);
+    //fprintf(stderr, "Unzip: total_out %lu available space %d\n", strm.total_out, CHUNK * bsize);
   } while (strm.avail_out != 0);
   end:
   amtReadC = strm.total_in;
@@ -119,7 +119,7 @@ int x801::base::writeZipped(std::ostream& f, const char* block, uint32_t len, ui
     strm.avail_out = CHUNK;
     strm.next_out = (unsigned char*) (dest);
     ret = deflate(&strm, Z_FINISH);
-    std::clog << "Zip status " << ret << '\n';
+    //std::clog << "Zip status " << ret << '\n';
     if (ret == Z_STREAM_ERROR) goto end;
     int have = CHUNK - strm.avail_out;
     f.write(dest, have);
@@ -139,7 +139,7 @@ int x801::base::writeZipped(std::ostream& f, const char* block, uint32_t len, ui
     }
   } while (strm.avail_out == 0);
   assert(strm.avail_in == 0);
-  fprintf(stderr, "Zip: total_out %lu available space %d\n", strm.total_out, CHUNK);
+  //fprintf(stderr, "Zip: total_out %lu available space %d\n", strm.total_out, CHUNK);
   end:
   amtWrittenC = strm.total_out;
   free(dest);
