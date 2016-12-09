@@ -15,6 +15,7 @@ INCLUDE(../dependencies.cmake)
 SET(Map_library_SRCS
   ${PROJECT_SOURCE_DIR}/Layer.cpp
   ${PROJECT_SOURCE_DIR}/Area.cpp
+  ${PROJECT_SOURCE_DIR}/TileSec.cpp
 )
 
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})

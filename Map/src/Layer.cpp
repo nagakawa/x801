@@ -74,3 +74,13 @@ void x801::map::Layer::write(std::ostream& handle) {
     x801::base::writeInt<uint32_t>(handle, map[i].label);
   }
 }
+
+void x801::map::Layer::operator=(const Layer& that) {
+  width = that.width;
+  height = that.height;
+  xoff = that.xoff;
+  yoff = that.yoff;
+  delete[] map;
+  allocateBlocks();
+  memcpy(map, that.map, width * height * sizeof(Block));
+}

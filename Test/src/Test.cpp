@@ -27,6 +27,7 @@ using namespace x801::test;
 #include <sstream>
 #include <vector>
 #include <Layer.h>
+#include <TileSec.h>
 #include <Version.h>
 #include <utils.h>
 
@@ -116,6 +117,10 @@ void testVersionRead() {
 #define O "\x00\x00\x00\x00"
 #define NORTH_OR_SOUTH W W W W W W W W
 #define CENTER W O O O O O O W
+#define NORTH_OR_SOUTH_2 W W NORTH_OR_SOUTH W W
+#define EMPTY_ROW_2 W O O O O O O O O O O W
+#define SQUARE_EDGE_ROW_2 W O O W W W W W W O O W
+#define SQUARE_SIDE_ROW_2 W O O W O O O O W O O W
 
 void testLayerIO() {
   // Make an 8x8 map with the northwest corner being (-2, -5).
@@ -127,7 +132,7 @@ void testLayerIO() {
     CENTER CENTER CENTER
     NORTH_OR_SOUTH
   );
-  std::stringstream input(s);
+  std::stringstream input(s, std::ios_base::in | std::ios_base::binary);
   x801::map::Layer layer(input);
   assertEqual(layer.getWidth(), 8, "Width should be 8");
   assertEqual(layer.getHeight(), 8, "Height should be 8");
@@ -149,8 +154,42 @@ void testLayerIO() {
   shouldBeWall = layer.getMapBlockAt(0, -1);
   assertEqual(shouldBeWall, wall, "Newly-set wall");
   layer.setMapBlockAt(0, -1, space); // Revert the change
-  std::stringstream output;
+  std::stringstream output(std::ios_base::out | std::ios_base::binary);
   layer.write(output);
+  assertEqual(output.str(), s, "Input and output match");
+}
+
+void testTileSecIO() {
+  // Make a two-layer map.
+  // The first layer is the same as before.
+  // The second is bigger and has a square at the center.
+  std::string s = x801::base::construct(
+    "\x02\x00"
+    // Layer 0
+    "\x08\x00\x08\x00" // Dimensions
+    "\xfe\xff\xfb\xff" // Offset of NW corner
+    NORTH_OR_SOUTH
+    CENTER CENTER CENTER
+    CENTER CENTER CENTER
+    NORTH_OR_SOUTH
+    // Layer 1
+    "\x0c\x00\x0c\x00"
+    "\xfa\xff\xf7\xff" // (-6, -9)
+    NORTH_OR_SOUTH_2
+    EMPTY_ROW_2 EMPTY_ROW_2
+    SQUARE_EDGE_ROW_2
+    SQUARE_SIDE_ROW_2 SQUARE_SIDE_ROW_2
+    SQUARE_SIDE_ROW_2 SQUARE_SIDE_ROW_2
+    SQUARE_EDGE_ROW_2
+    EMPTY_ROW_2 EMPTY_ROW_2
+    NORTH_OR_SOUTH_2
+  );
+  std::stringstream input(s, std::ios_base::in | std::ios_base::binary);
+  x801::map::TileSec ts(input);
+  assertEqual(ts[0].getWidth(), 8, "Layer 0 of TileSec probably read fine");
+  assertEqual(ts[1].getWidth(), 12, "Layer 1 of TileSec probably read fine");
+  std::stringstream output(std::ios_base::out | std::ios_base::binary);
+  ts.write(output);
   assertEqual(output.str(), s, "Input and output match");
 }
 
@@ -158,6 +197,10 @@ void testLayerIO() {
 #undef O
 #undef NORTH_OR_SOUTH
 #undef CENTER
+#undef NORTH_OR_SOUTH_2
+#undef EMPTY_ROW_2
+#undef SQUARE_EDGE_ROW_2
+#undef SQUARE_SIDE_ROW_2
 
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
@@ -168,6 +211,7 @@ const Test x801::test::parts[] = {
   {"versionBasic", testVersionBasic, true},
   {"versionRead", testVersionRead, true},
   {"layer", testLayerIO, true},
+  {"tileSec", testTileSecIO, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 

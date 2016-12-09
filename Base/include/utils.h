@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <zlib.h>
 #include <iostream>
 #include "portable_endian.h"
 
@@ -66,5 +67,8 @@ namespace x801 {
         bool addNull = false) {
       return std::string{s, static_cast<size_t>(len - (addNull ? 0 : 1))};
     }
+    const unsigned int CHUNK = 131072;
+    int readZipped(std::istream& f, char*& block, uint32_t& amtReadC, uint32_t& amtReadU);
+    int writeZipped(std::ostream& f, char*& block, int len, uint32_t& amtWrittenC, uint32_t& amtWrittenU);
   }
 }

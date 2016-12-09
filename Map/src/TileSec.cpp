@@ -1,50 +1,41 @@
-#pragma once
+#include "TileSec.h"
 
 /*
 Copyright (C) 2016 AGC.
-
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
 
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
-
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if !defined(__cplusplus) || __cplusplus < 201103L
-#error Only C++11 or later supported.
-#endif
+using namespace x801::map;
 
-#include <stdint.h>
-#include <iostream>
-#include <Version.h>
-#include <TileSec.h>
+#include <utils.h>
 
-namespace x801 {
-  namespace map {
-    class Area {
-    public:
-      Area(std::istream& fh);
-      // void write(std::ostream& fh);
-      ~Area();
-      Area(const Area& that) = delete;
-      void operator=(const Area& that) = delete;
-    private:
-      x801::base::Version version;
-      uint16_t worldID;
-      uint16_t areaID;
-      TileSec* ts = nullptr;
-      int readSection(std::istream& fh);
-      int error;
-    };
+x801::map::TileSec::TileSec(std::istream& fh) {
+  layerCount = x801::base::readInt<uint16_t>(fh);
+  for (int i = 0; i < layerCount; ++i) {
+    layers.emplace_back(fh);
   }
+}
+
+void x801::map::TileSec::write(std::ostream& fh) {
+  x801::base::writeInt<uint16_t>(fh, layerCount);
+  for (int i = 0; i < layerCount; ++i) {
+    layers[i].write(fh);
+  }
+}
+
+void x801::map::TileSec::operator=(const TileSec& that) {
+  layerCount = that.layerCount;
+  layers = that.layers;
 }

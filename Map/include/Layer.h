@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <string.h>
 #include <iostream>
 
 namespace x801 {
@@ -37,6 +38,9 @@ namespace x801 {
       }
       bool getBlockID() {
         return label & 0xffffff;
+      }
+      bool getElevation() {
+        return (label >> 25) & 63;
       }
       bool operator==(Block other) {
         return label == other.label;
@@ -61,9 +65,13 @@ namespace x801 {
       Block getMapBlockAtRaw(int x, int y);
       void setMapBlockAt(int x, int y, Block b);
       void setMapBlockAtRaw(int x, int y, Block b);
-      // Don't define these for now; maybe they can be defined later.
-      Layer(const Layer& that) = delete;
-      void operator=(const Layer& that) = delete;
+      Layer(const Layer& that) :
+          width(that.width), height(that.height),
+          xoff(that.xoff), yoff(that.yoff) {
+        allocateBlocks();
+        memcpy(map, that.map, width * height * sizeof(Block));
+      }
+      void operator=(const Layer& that);
     private:
       void allocateBlocks();
       int width, height;

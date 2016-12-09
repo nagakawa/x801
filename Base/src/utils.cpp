@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h>
 #include <sstream>
 #include <string>
 
@@ -38,4 +39,106 @@ template<> int64_t x801::base::convLEW<int64_t>(int64_t x) { return htole64(x); 
 std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
   std::string s{array, size};
   return std::stringstream(s);
+}
+
+// Working on making this code more idiomatic, since it came from a PH3
+// archive extractor written in C.
+int x801::base::readZipped(std::istream& f, char*& block, uint32_t& amtReadC, uint32_t& amtReadU) {
+  unsigned int bsize = 1;
+  int ret = Z_OK;
+  char* src = (char*) malloc(CHUNK);
+  char* dest = (char*) malloc(bsize * CHUNK);
+  z_stream strm;
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  strm.avail_in = 0;
+  strm.next_in = Z_NULL;
+  ret = inflateInit(&strm);
+  if (ret != Z_OK) goto end;
+  do {
+    f.read(src, CHUNK);
+    strm.avail_in = f.gcount();
+    if (f.bad()) {
+      (void) inflateEnd(&strm);
+      ret = Z_ERRNO;
+      break;
+    }
+    if (strm.avail_in == 0)
+      break;
+    strm.next_in = (unsigned char*) src;
+    do {
+      if (strm.total_out > CHUNK * (bsize - 1)) {
+        bsize <<= 1;
+        dest = (char*) realloc(dest, bsize * CHUNK);
+      }
+      strm.avail_out = CHUNK;
+      strm.next_out = (unsigned char*) (dest + strm.total_out);
+      ret = inflate(&strm, Z_NO_FLUSH);
+      if (ret == Z_STREAM_ERROR) goto end;
+      switch (ret) {
+      case Z_NEED_DICT:
+          ret = Z_DATA_ERROR;     /* and fall through */
+      case Z_DATA_ERROR:
+      case Z_MEM_ERROR:
+          (void) inflateEnd(&strm);
+          goto end;
+          break;
+        default:
+          ret = Z_OK;
+      }
+    } while (strm.avail_out == 0);
+    fprintf(stderr, "Unzip: total_out %lu available space %d\n", strm.total_out, CHUNK * bsize);
+  } while (strm.avail_out != 0);
+  end:
+  amtReadC = strm.total_in;
+  amtReadU = strm.total_out;
+  free(src);
+  if (ret == 0) block = dest;
+  else {
+    free(dest);
+    block = nullptr;
+  }
+  return ret;
+}
+
+// Also based on zlib usage example doc but simpler because we're compressing
+// from a buffer, not a file.
+int x801::base::writeZipped(std::ostream& f, char*& block, int len, uint32_t& amtWrittenC, uint32_t& amtWrittenU) {
+  int ret = Z_OK;
+  char* src = (char*) malloc(CHUNK);
+  char* dest = (char*) malloc(CHUNK);
+  z_stream strm;
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  strm.avail_in = 0;
+  strm.next_in = Z_NULL;
+  ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
+  if (ret != Z_OK) goto end;
+  strm.avail_in = len;
+  strm.next_in = (unsigned char*) src;
+  do {
+    strm.avail_out = CHUNK;
+    strm.next_out = (unsigned char*) (dest + strm.total_out);
+    ret = deflate(&strm, Z_NO_FLUSH);
+    if (ret == Z_STREAM_ERROR) goto end;
+    int have = CHUNK - strm.avail_out;
+    f.write(block, have);
+    if (f.bad()) {
+      ret = Z_ERRNO;
+      goto end;
+    }
+  } while (strm.avail_out == 0);
+  fprintf(stderr, "Zip: total_out %lu available space %d\n", strm.total_out);
+  end:
+  amtWrittenC = strm.total_in;
+  amtWrittenU = strm.total_out;
+  free(src);
+  if (ret == 0) block = dest;
+  else {
+    free(dest);
+    block = nullptr;
+  }
+  return ret;
 }

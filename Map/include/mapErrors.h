@@ -24,27 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
-#include <stdint.h>
-#include <iostream>
-#include <Version.h>
-#include <TileSec.h>
-
 namespace x801 {
   namespace map {
-    class Area {
-    public:
-      Area(std::istream& fh);
-      // void write(std::ostream& fh);
-      ~Area();
-      Area(const Area& that) = delete;
-      void operator=(const Area& that) = delete;
-    private:
-      x801::base::Version version;
-      uint16_t worldID;
-      uint16_t areaID;
-      TileSec* ts = nullptr;
-      int readSection(std::istream& fh);
-      int error;
-    };
+    const int MAPERR_OK = 0;
+    const int MAPERR_REDUNDANT_TILESEC = 1;
+    const int MAPERR_COMPRESSION = 2;
+    const int MAPERR_CHECKSUM_MISMATCH = 3;
+    const int MAPERR_WRONG_SIZE = 4;
+    const int MAPERR_UNRECOGNISED_SECTION = 5;
+    const int MAPERR_NOT_A_MAP = 6;
   }
 }

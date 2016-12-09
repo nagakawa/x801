@@ -26,6 +26,7 @@ ADD_EXECUTABLE(Test ${Test_executable_SRCS})
 TARGET_LINK_LIBRARIES(Test
   ${PROJECT_SOURCE_DIR}/../../build/libMap.a
   ${PROJECT_SOURCE_DIR}/../../build/libBase.a
+  ${ZLIB_LIBRARIES}
 )
 
 #ADD_CUSTOM_COMMAND(

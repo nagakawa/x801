@@ -26,25 +26,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <iostream>
-#include <Version.h>
-#include <TileSec.h>
+#include <vector>
+#include "Layer.h"
 
 namespace x801 {
   namespace map {
-    class Area {
+    class TileSec {
     public:
-      Area(std::istream& fh);
-      // void write(std::ostream& fh);
-      ~Area();
-      Area(const Area& that) = delete;
-      void operator=(const Area& that) = delete;
+      TileSec(std::istream& fh);
+      void write(std::ostream& fh);
+      TileSec(const TileSec& that) :
+        layerCount(that.layerCount), layers(that.layers) {}
+      void operator=(const TileSec& that);
+      Layer& operator[](int i) {
+        return layers[i];
+      }
     private:
-      x801::base::Version version;
-      uint16_t worldID;
-      uint16_t areaID;
-      TileSec* ts = nullptr;
-      int readSection(std::istream& fh);
-      int error;
+      int layerCount;
+      std::vector<Layer> layers;
     };
   }
 }
