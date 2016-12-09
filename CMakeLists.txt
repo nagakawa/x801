@@ -19,6 +19,7 @@ include_directories("${PROJECT_SOURCE_DIR}")
 ADD_SUBDIRECTORY(Base)
 ADD_SUBDIRECTORY(Map)
 ADD_SUBDIRECTORY(Test)
+ADD_SUBDIRECTORY(Game)
 
 # actual target:
 # ADD_LIBRARY(tdr ${tdr_library}_SRCS ${tdr_library_HDRS})
