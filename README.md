@@ -5,6 +5,8 @@ run a server for.
 
 ### Building instructions
 
+At this moment, compiling will likely work only on POSIX-based systems.
+
 #### Note about compilers
 
 If you are using g++, then at least use a new version. 7.0.0 is known to work,
@@ -36,6 +38,10 @@ And to actually build the project:
 To run tests:
 
     ./test # a shell script that runs make to build the test executable
+
+### Other Links
+
+* [The One and Only Style Guide](https://docs.google.com/document/d/1AskEPaRCH0A6xCgIYerogpheiXyx4UT886UwIGPR-vU/edit?usp=sharing)
 
 ### Licence
 
