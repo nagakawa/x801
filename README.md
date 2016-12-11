@@ -1,5 +1,9 @@
 ## Experiment801
 
+> Thousands of candles can be lit from a single candle, and the life of the
+> candle will not be shortened. Happiness never decreases by being shared.
+> ~ Wizard101
+
 A customizable MMORPG with Wizard101-like mechanics that anyone can modify or
 run a server for.
 
@@ -23,6 +27,9 @@ simply run the following command:
 
     sudo apt install libglfw3-dev libglew-dev libsoil-dev libglm-dev \
       libcairo2-dev libpango1.0-dev libglib2.0-dev zlib1g-dev cmake
+
+This project also depends on a custom version of RakNet, but this dependency
+is managed by the configuration files so no extra work for you.
 
 #### Using CMake
 

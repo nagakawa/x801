@@ -3,6 +3,19 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 cmake_policy(SET CMP0048 NEW)
 PROJECT(x801 VERSION 0.0)
 
+IF(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/RakNet/README.md)
+  # Get our fork of RakNet
+  EXECUTE_PROCESS(
+    COMMAND git submodule update --init --recursive
+  )
+ELSE()
+  MESSAGE(
+    STATUS
+    "If the build fails, try running "
+    "`git submodule update --init --recursive`."
+  )
+ENDIF()
+
 # ######### General setup ##########
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
@@ -15,6 +28,13 @@ set(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 
 include_directories("${PROJECT_INCLUDE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}")
+
+# External dependency managed by this script
+
+OPTION(RAKNET_ENABLE_SAMPLES "" FALSE)
+ADD_SUBDIRECTORY(RakNet)
+
+# Our own submodules
 
 ADD_SUBDIRECTORY(Base)
 ADD_SUBDIRECTORY(Map)
