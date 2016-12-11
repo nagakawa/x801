@@ -31,6 +31,8 @@ include_directories("${PROJECT_SOURCE_DIR}")
 
 # External dependency managed by this script
 
+# Samples don't all build on GNU / Linux for some odd reason
+# so not buliding that.
 OPTION(RAKNET_ENABLE_SAMPLES "" FALSE)
 ADD_SUBDIRECTORY(RakNet)
 

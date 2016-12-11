@@ -68,7 +68,17 @@ namespace x801 {
       return std::string{s, static_cast<size_t>(len - (addNull ? 0 : 1))};
     }
     const unsigned int CHUNK = 131072;
-    int readZipped(std::istream& f, char*& block, uint32_t& amtReadC, uint32_t& amtReadU);
-    int writeZipped(std::ostream& f, const char* block, uint32_t len, uint32_t& amtWrittenC);
+    int readZipped(
+        std::istream& f,
+        char*& block,
+        uint32_t& amtReadC,
+        uint32_t& amtReadU
+    );
+    int writeZipped(
+        std::ostream& f,
+        const char* block,
+        uint32_t len,
+        uint32_t& amtWrittenC
+    );
   }
 }

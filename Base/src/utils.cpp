@@ -44,7 +44,12 @@ std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
 
 // Working on making this code more idiomatic, since it came from a PH3
 // archive extractor written in C.
-int x801::base::readZipped(std::istream& f, char*& block, uint32_t& amtReadC, uint32_t& amtReadU) {
+int x801::base::readZipped(
+    std::istream& f,
+    char*& block,
+    uint32_t& amtReadC,
+    uint32_t& amtReadU
+) {
   unsigned int bsize = 1;
   int ret = Z_OK;
   char* src = (char*) malloc(CHUNK);
@@ -104,7 +109,12 @@ int x801::base::readZipped(std::istream& f, char*& block, uint32_t& amtReadC, ui
 
 // Also based on zlib usage example doc but simpler because we're compressing
 // from a buffer, not a file.
-int x801::base::writeZipped(std::ostream& f, const char* block, uint32_t len, uint32_t& amtWrittenC) {
+int x801::base::writeZipped(
+    std::ostream& f,
+    const char* block,
+    uint32_t len,
+    uint32_t& amtWrittenC
+) {
   int ret = Z_OK;
   char* dest = (char*) malloc(CHUNK);
   z_stream strm;
