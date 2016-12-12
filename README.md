@@ -22,11 +22,12 @@ program.
 #### Getting dependencies
 
 Right now the list of dependencies isn't really set, but the current CMake
-files ask for the same libraries as TDR, plus ZLib. On Debian / Ubuntu,
-simply run the following command:
+files ask for the same libraries as TDR, plus a few other libraries. On Debian
+/ Ubuntu, simply run the following command:
 
     sudo apt install libglfw3-dev libglew-dev libsoil-dev libglm-dev \
-      libcairo2-dev libpango1.0-dev libglib2.0-dev zlib1g-dev cmake
+      libcairo2-dev libpango1.0-dev libglib2.0-dev zlib1g-dev libbost-dev \
+      cmake
 
 This project also depends on a custom version of RakNet, but this dependency
 is managed by the configuration files so no extra work for you.

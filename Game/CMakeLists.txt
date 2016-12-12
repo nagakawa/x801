@@ -17,6 +17,7 @@ SET(Game_executable_SRCS
   ${PROJECT_SOURCE_DIR}/main.cpp
   ${PROJECT_SOURCE_DIR}/Config.cpp
   ${PROJECT_SOURCE_DIR}/Server.cpp
+  ${PROJECT_SOURCE_DIR}/Client.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})
@@ -30,6 +31,7 @@ TARGET_LINK_LIBRARIES(Game
   ${PROJECT_SOURCE_DIR}/../../build/libRakNetLibStatic.a
   ${ZLIB_LIBRARIES}
   ${LIBPTHREAD_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 #ADD_CUSTOM_COMMAND(

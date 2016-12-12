@@ -51,10 +51,27 @@ INCLUDE_DIRECTORIES(${GOBJECT_INCLUDE_DIR})
 FIND_PACKAGE(ZLIB REQUIRED)
 INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
+# OPTION(Boost_NO_BOOST_CMAKE "" ON)
+OPTION(Boost_DEBUG "" OFF)
+FIND_PACKAGE(Boost REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+
+# Will have to make this work with other platforms.
+
+IF (NOT Boost_LIBRARIES)
+  MESSAGE(STATUS "Didn't find the library files.")
+  MESSAGE(STATUS "Setting them to defaults.")
+  FILE(
+    GLOB Boost_LIBRARIES
+    /usr/lib/x86_64-linux-gnu/libboost_*.so.*.*.*
+  )
+ENDIF()
+
 FIND_PACKAGE(LibPThread REQUIRED)
 
 # RakNet
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../RakNet/Source)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../RakNet/DependentExtensions)
 
 # SET(PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/../FileUtil)
 
