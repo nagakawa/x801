@@ -1,4 +1,4 @@
-#include "Main.h"
+#include "main.h"
 
 /*
 Copyright (C) 2016 AGC.

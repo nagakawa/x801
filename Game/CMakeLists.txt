@@ -14,8 +14,9 @@ SET(PROJECT_INCLUDE_DIR
 SET(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 SET(Game_executable_SRCS
-  ${PROJECT_SOURCE_DIR}/Main.cpp
+  ${PROJECT_SOURCE_DIR}/main.cpp
   ${PROJECT_SOURCE_DIR}/Config.cpp
+  ${PROJECT_SOURCE_DIR}/Server.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})
@@ -26,7 +27,9 @@ ADD_EXECUTABLE(Game ${Game_executable_SRCS})
 TARGET_LINK_LIBRARIES(Game
   ${PROJECT_SOURCE_DIR}/../../build/libMap.a
   ${PROJECT_SOURCE_DIR}/../../build/libBase.a
+  ${PROJECT_SOURCE_DIR}/../../build/libRakNetLibStatic.a
   ${ZLIB_LIBRARIES}
+  ${LIBPTHREAD_LIBRARIES}
 )
 
 #ADD_CUSTOM_COMMAND(

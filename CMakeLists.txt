@@ -34,6 +34,7 @@ include_directories("${PROJECT_SOURCE_DIR}")
 # Samples don't all build on GNU / Linux for some odd reason
 # so not buliding that.
 OPTION(RAKNET_ENABLE_SAMPLES "" FALSE)
+OPTION(RAKNET_GENERATE_INCLUDE_ONLY_DIR "" TRUE)
 ADD_SUBDIRECTORY(RakNet)
 
 # Our own submodules
