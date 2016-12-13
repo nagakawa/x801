@@ -28,13 +28,15 @@ using namespace x801::game;
 
 void x801::game::Server::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
+  updateKeyFiles();
   RakNet::SocketDescriptor socket(port, 0);
   peer->Startup(maxConnections, &socket, 1);
   peer->SetMaximumIncomingConnections(maxConnections);
 }
 
 x801::game::Server::~Server() {
-  // nothing for now
+  if (publicKey != nullptr) delete[] publicKey;
+  if (privateKey != nullptr) delete[] privateKey;
 }
 
 const char* x801::game::KEY_DIR = "keys";
@@ -46,19 +48,54 @@ void x801::game::Server::updateKeyFiles() {
       boost::filesystem::is_directory(KEY_DIR)) {
     std::cout <<
       "Warning: overwriting " << KEY_DIR <<
-      " because it is not a directory";
+      " because it is not a directory\n";
     boost::filesystem::remove(KEY_DIR);
     boost::filesystem::create_directories(KEY_DIR);
   }
-  if (!boost::filesystem::exists(KEY_PUBLIC) ||
-      boost::filesystem::is_regular_file(KEY_PUBLIC)) {
+  int pubSize = cat::EasyHandshake::PUBLIC_KEY_BYTES;
+  publicKey = new char[pubSize];
+  int privSize = cat::EasyHandshake::PRIVATE_KEY_BYTES;
+  privateKey = new char[privSize];
+  bool ok = false;
+  if (boost::filesystem::exists(KEY_PUBLIC) &&
+      boost::filesystem::is_directory(KEY_PUBLIC)) {
+    ok = true;
+    boost::filesystem::ifstream input(
+      KEY_PUBLIC,
+      std::ios_base::in | std::ios_base::binary
+    );
+    int bytesRead = input.readsome(publicKey, pubSize);
+    if (bytesRead < pubSize) ok = false;
+  }
+  if (boost::filesystem::exists(KEY_PRIVATE) &&
+      boost::filesystem::is_directory(KEY_PRIVATE)) {
+    ok = true;
+    boost::filesystem::ifstream input(
+      KEY_PRIVATE,
+      std::ios_base::in | std::ios_base::binary
+    );
+    int bytesRead = input.readsome(privateKey, privSize);
+    if (bytesRead < privSize) ok = false;
+  } else {
+    ok = false;
+  }
+  if (!ok) {
     std::cout <<
-      "Warning: overwriting " << KEY_PUBLIC <<
-      " because it is not a file";
+      "Key files missing or corrupt; [re]generating them\n";
+    cat::EasyHandshake handshake;
+    handshake.GenerateServerKey(publicKey, privateKey);
     boost::filesystem::remove_all(KEY_PUBLIC);
-    boost::filesystem::ofstream output(
+    boost::filesystem::ofstream output1(
       KEY_PUBLIC,
       std::ios_base::out | std::ios_base::binary
     );
+    output1.write(publicKey, pubSize);
+    boost::filesystem::remove_all(KEY_PRIVATE);
+    boost::filesystem::ofstream output2(
+      KEY_PRIVATE,
+      std::ios_base::out | std::ios_base::binary
+    );
+    output2.write(privateKey, privSize);
   }
+  peer->InitializeSecurity(publicKey, privateKey, false);
 }

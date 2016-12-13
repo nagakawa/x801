@@ -32,6 +32,15 @@ files ask for the same libraries as TDR, plus a few other libraries. On Debian
 This project also depends on a custom version of RakNet, but this dependency
 is managed by the configuration files so no extra work for you.
 
+In addition, there are programs used to build assets:
+
+* MuseScore 2.0.2 or later. You can get the package in the official repositories,
+  but if you want the most up-to-date version, there's also a
+  [PPA](https://launchpad.net/~mscore-ubuntu/+archive/ubuntu/mscore-stable).
+  Other distributions might have their own ways to get the program.
+* FluidSynth (used to convert .mid files to .wav). The package name is,
+  unsurprisingly, `fluidsynth`.
+
 #### Using CMake
 
 To generate the makefile:

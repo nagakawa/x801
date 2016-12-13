@@ -51,6 +51,7 @@ namespace x801 {
           void initialise();
           RakNet::RakPeerInterface* peer = nullptr;
           std::string ipAddress;
+          // char* publicKey;
         };
     }
 }
