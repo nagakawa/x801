@@ -27,24 +27,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <RakPeerInterface.h>
 #include <RakNetTypes.h>
 #include <SecureHandshake.h>
-#include "Server.h"
 
 namespace x801 {
     namespace game {
         class Client {
           Client(
               std::string ipAddress,
-              uint16_t port,
-              unsigned short maxConnections = DEFAULT_MAX_CONNECTIONS
-          ) : maxConnections(maxConnections),
-              port(port),
+              uint16_t port
+          ) : port(port),
               ipAddress(ipAddress) {
             initialise();
           }
           ~Client();
           Client(const Client& s) = delete;
           void operator=(const Client& s) = delete;
-          const unsigned short maxConnections;
           const uint16_t port;
           std::string getIPAddress() const { return ipAddress; }
         private:

@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 const char* x801::game::USAGE =
   "Usage:\n"
   "  Game --client <address> <port>\n"
-  "  Game --server <port>";
+  "  Game --server <port>\n";
 
 int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
   bool ok = true;

@@ -30,6 +30,7 @@ void x801::game::Server::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
   updateKeyFiles();
   RakNet::SocketDescriptor socket(port, 0);
+  socket.socketFamily = AF_INET;
   peer->Startup(maxConnections, &socket, 1);
   peer->SetMaximumIncomingConnections(maxConnections);
 }
@@ -37,6 +38,7 @@ void x801::game::Server::initialise() {
 x801::game::Server::~Server() {
   if (publicKey != nullptr) delete[] publicKey;
   if (privateKey != nullptr) delete[] privateKey;
+  RakNet::RakPeerInterface::DestroyInstance(peer);
 }
 
 const char* x801::game::KEY_DIR = "keys";

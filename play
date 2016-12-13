@@ -1,2 +1,2 @@
 #!/bin/bash
-cd build && (./Game $@; cd ..)
+make && cd build && (./Game $@; cd ..)
