@@ -26,7 +26,7 @@ files ask for the same libraries as TDR, plus a few other libraries. On Debian
 / Ubuntu, simply run the following command:
 
     sudo apt install libglfw3-dev libglew-dev libsoil-dev libglm-dev \
-      libcairo2-dev libpango1.0-dev libglib2.0-dev zlib1g-dev libbost-dev \
+      libcairo2-dev libpango1.0-dev libglib2.0-dev zlib1g-dev libboost-dev \
       cmake
 
 This project also depends on a custom version of RakNet, but this dependency
