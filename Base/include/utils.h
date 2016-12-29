@@ -26,6 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include "portable_endian.h"
 
+// Since I expect Int and UInt to be used frequently,
+// I'm placing it in the default namespace.
+
+typedef int_fast32_t Int;
+typedef uint_fast32_t UInt;
+
 namespace x801 {
   namespace base {
     // Thanks http://stackoverflow.com/a/33414109/3130218
@@ -67,7 +73,7 @@ namespace x801 {
         bool addNull = false) {
       return std::string{s, static_cast<size_t>(len - (addNull ? 0 : 1))};
     }
-    const unsigned int CHUNK = 131072;
+    const UInt CHUNK = 131072L;
     int readZipped(
         std::istream& f,
         char*& block,
