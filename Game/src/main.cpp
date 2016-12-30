@@ -87,7 +87,7 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
     else ok = false;
   }
   if (!ok || cn.mode == HUH) {
-    fputs(USAGE, stderr);
+    std::cerr << USAGE;
     return -1;
   }
   return 0;
