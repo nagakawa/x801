@@ -258,7 +258,8 @@ void testDBAuth() {
   system("rm -rf `dirname $0`/saves");
   x801::game::Database db;
   // createAuthTable implicit
-  // db.createUser()
+  db.createUserDebug("ウルヰ", "GGLuisLifeHaven");
+  db.createUserDebug("TestUser", "ILoveToTest");
 }
 
 const char* x801::test::DEFAULT = "default";

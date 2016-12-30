@@ -27,8 +27,8 @@ using namespace x801::game;
 #include "sha1.h"
 
 int x801::game::stepBlock(sqlite3_stmt* statement, sqlite3* conn) {
-  int stat;
-  while ((stat = sqlite3_step(statement)) != SQLITE_BUSY) {
+  volatile int stat;
+  while ((stat = sqlite3_step(statement)) == SQLITE_BUSY) {
     if (stat != SQLITE_BUSY && stat != SQLITE_DONE && stat != SQLITE_ROW)
       throw sqlite3_errmsg(conn);
   }
@@ -40,8 +40,7 @@ const char* x801::game::DB_MAIN_PATH = "saves/me.x8d";
 const char* x801::game::DB_AUTH_PATH = "saves/auth.x8d";
 
 x801::game::Database::Database() {
-  if (!boost::filesystem::exists(DB_DIR) ||
-      !boost::filesystem::is_directory(DB_DIR)) {
+  if (!boost::filesystem::is_directory(DB_DIR)) {
     std::cout <<
       "Warning: overwriting " << DB_DIR <<
       " because it is not a directory\n";
@@ -117,4 +116,13 @@ void x801::game::Database::createUser(
   // All parameters bound.
   stepBlock(statement, auth);
   sqlite3_finalize(statement);
+}
+
+void x801::game::Database::createUser(Credentials& c) {
+  createUser(c.getUsername(), c.getHash());
+}
+
+void x801::game::Database::createUserDebug(std::string username, std::string password) {
+  Credentials c(username, password);
+  createUser(c);
 }

@@ -1101,57 +1101,82 @@
 },
 {
   "directory": "/home/uruwi/x801/build/Base",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Base/src/../RakNet/Source -I/home/uruwi/x801/Base/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Base -I/home/uruwi/x801/Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Base.dir/src/utils.cpp.o -c /home/uruwi/x801/Base/src/utils.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Base/src/../RakNet/Source -I/home/uruwi/x801/Base/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Base -I/home/uruwi/x801/Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Base.dir/src/utils.cpp.o -c /home/uruwi/x801/Base/src/utils.cpp",
   "file": "/home/uruwi/x801/Base/src/utils.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Base",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Base/src/../RakNet/Source -I/home/uruwi/x801/Base/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Base -I/home/uruwi/x801/Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Base.dir/src/Version.cpp.o -c /home/uruwi/x801/Base/src/Version.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Base/src/../RakNet/Source -I/home/uruwi/x801/Base/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Base -I/home/uruwi/x801/Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Base.dir/src/Version.cpp.o -c /home/uruwi/x801/Base/src/Version.cpp",
   "file": "/home/uruwi/x801/Base/src/Version.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Map",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Map/src/../RakNet/Source -I/home/uruwi/x801/Map/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Map -I/home/uruwi/x801/Map/include -I/home/uruwi/x801/Map/../Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Map.dir/src/Layer.cpp.o -c /home/uruwi/x801/Map/src/Layer.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Map/src/../RakNet/Source -I/home/uruwi/x801/Map/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Map -I/home/uruwi/x801/Map/include -I/home/uruwi/x801/Map/../Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Map.dir/src/Layer.cpp.o -c /home/uruwi/x801/Map/src/Layer.cpp",
   "file": "/home/uruwi/x801/Map/src/Layer.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Map",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Map/src/../RakNet/Source -I/home/uruwi/x801/Map/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Map -I/home/uruwi/x801/Map/include -I/home/uruwi/x801/Map/../Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Map.dir/src/Area.cpp.o -c /home/uruwi/x801/Map/src/Area.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Map/src/../RakNet/Source -I/home/uruwi/x801/Map/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Map -I/home/uruwi/x801/Map/include -I/home/uruwi/x801/Map/../Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Map.dir/src/Area.cpp.o -c /home/uruwi/x801/Map/src/Area.cpp",
   "file": "/home/uruwi/x801/Map/src/Area.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Map",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Map/src/../RakNet/Source -I/home/uruwi/x801/Map/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Map -I/home/uruwi/x801/Map/include -I/home/uruwi/x801/Map/../Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Map.dir/src/TileSec.cpp.o -c /home/uruwi/x801/Map/src/TileSec.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Map/src/../RakNet/Source -I/home/uruwi/x801/Map/src/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Map -I/home/uruwi/x801/Map/include -I/home/uruwi/x801/Map/../Base/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Map.dir/src/TileSec.cpp.o -c /home/uruwi/x801/Map/src/TileSec.cpp",
   "file": "/home/uruwi/x801/Map/src/TileSec.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Test",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Test/../RakNet/Source -I/home/uruwi/x801/Test/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Test -I/home/uruwi/x801/Test/include -I/home/uruwi/x801/Test/../Base/include -I/home/uruwi/x801/Test/../Map/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Test.dir/src/Test.cpp.o -c /home/uruwi/x801/Test/src/Test.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Test/../RakNet/Source -I/home/uruwi/x801/Test/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Test -I/home/uruwi/x801/Test/include -I/home/uruwi/x801/Test/../Base/include -I/home/uruwi/x801/Test/../Map/include -I/home/uruwi/x801/Test/../Game/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Test.dir/src/Test.cpp.o -c /home/uruwi/x801/Test/src/Test.cpp",
   "file": "/home/uruwi/x801/Test/src/Test.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Test",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Test/../RakNet/Source -I/home/uruwi/x801/Test/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Test -I/home/uruwi/x801/Test/include -I/home/uruwi/x801/Test/../Base/include -I/home/uruwi/x801/Test/../Map/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Test.dir/src/TestAux.cpp.o -c /home/uruwi/x801/Test/src/TestAux.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Test/../RakNet/Source -I/home/uruwi/x801/Test/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Test -I/home/uruwi/x801/Test/include -I/home/uruwi/x801/Test/../Base/include -I/home/uruwi/x801/Test/../Map/include -I/home/uruwi/x801/Test/../Game/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Test.dir/src/TestAux.cpp.o -c /home/uruwi/x801/Test/src/TestAux.cpp",
   "file": "/home/uruwi/x801/Test/src/TestAux.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Game",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/main.cpp.o -c /home/uruwi/x801/Game/src/main.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/main.cpp.o -c /home/uruwi/x801/Game/src/main.cpp",
   "file": "/home/uruwi/x801/Game/src/main.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Game",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Config.cpp.o -c /home/uruwi/x801/Game/src/Config.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Config.cpp.o -c /home/uruwi/x801/Game/src/Config.cpp",
   "file": "/home/uruwi/x801/Game/src/Config.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Game",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Server.cpp.o -c /home/uruwi/x801/Game/src/Server.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Server.cpp.o -c /home/uruwi/x801/Game/src/Server.cpp",
   "file": "/home/uruwi/x801/Game/src/Server.cpp"
 },
 {
   "directory": "/home/uruwi/x801/build/Game",
-  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Weffc++ -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Client.cpp.o -c /home/uruwi/x801/Game/src/Client.cpp",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Client.cpp.o -c /home/uruwi/x801/Game/src/Client.cpp",
   "file": "/home/uruwi/x801/Game/src/Client.cpp"
+},
+{
+  "directory": "/home/uruwi/x801/build/Game",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/GameState.cpp.o -c /home/uruwi/x801/Game/src/GameState.cpp",
+  "file": "/home/uruwi/x801/Game/src/GameState.cpp"
+},
+{
+  "directory": "/home/uruwi/x801/build/Game",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Player.cpp.o -c /home/uruwi/x801/Game/src/Player.cpp",
+  "file": "/home/uruwi/x801/Game/src/Player.cpp"
+},
+{
+  "directory": "/home/uruwi/x801/build/Game",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/Database.cpp.o -c /home/uruwi/x801/Game/src/Database.cpp",
+  "file": "/home/uruwi/x801/Game/src/Database.cpp"
+},
+{
+  "directory": "/home/uruwi/x801/build/Game",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/Game/../RakNet/Source -I/home/uruwi/x801/Game/../RakNet/DependentExtensions -I/home/uruwi/x801/build/Game -I/home/uruwi/x801/Game/include -I/home/uruwi/x801/Game/../Base/include -I/home/uruwi/x801/Game/../Map/include -I/home/uruwi/x801/Game/../argon2/include  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/Game.dir/src/sha1.cpp.o -c /home/uruwi/x801/Game/src/sha1.cpp",
+  "file": "/home/uruwi/x801/Game/src/sha1.cpp"
+},
+{
+  "directory": "/home/uruwi/x801/build/x801",
+  "command": "/usr/bin/c++    -I/home/uruwi/x801 -I/home/uruwi/x801/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/SOIL -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/home/uruwi/x801/x801/../RakNet/Source -I/home/uruwi/x801/x801/../RakNet/DependentExtensions -I/home/uruwi/x801/build/x801  -g -std=c++11 -Wall -Wpedantic -Wextra -Werror -fno-builtin -O0 -g   -o CMakeFiles/x801.dir/main.cpp.o -c /home/uruwi/x801/x801/main.cpp",
+  "file": "/home/uruwi/x801/x801/main.cpp"
 }
 ]

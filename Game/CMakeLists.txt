@@ -9,6 +9,7 @@ SET(PROJECT_INCLUDE_DIR
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/../Base/include
   ${PROJECT_SOURCE_DIR}/../Map/include
+  ${PROJECT_SOURCE_DIR}/../argon2/include
 )
 
 SET(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -22,6 +23,7 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/Player.cpp
   ${PROJECT_SOURCE_DIR}/Database.cpp
   ${PROJECT_SOURCE_DIR}/sha1.cpp
+  ${PROJECT_SOURCE_DIR}/Credentials.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

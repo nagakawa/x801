@@ -152,4 +152,5 @@ build/x801
 build/MapC
 
 # public and private keys
-keys/
+build/keys/
+build/saves

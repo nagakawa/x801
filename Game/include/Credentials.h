@@ -23,28 +23,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <string>
-#include <sqlite3.h>
-#include "Credentials.h"
 
 namespace x801 {
   namespace game {
-    extern const char* DB_DIR;
-    extern const char* DB_MAIN_PATH;
-    extern const char* DB_AUTH_PATH;
-    int stepBlock(sqlite3_stmt* statement, sqlite3* conn);
-    // Note: this is not the database used for the autopatcher.
-    class Database {
+    const int RAW_HASH_LENGTH = 256;
+    const int COOKED_HASH_LENGTH = 20; // SHA-1 digest is 160 bits long
+    class Credentials {
     public:
-      Database();
-      ~Database();
-      void createAuthTable();
-      void createUser(const char* username, const uint8_t* hash);
-      void createUser(Credentials& c);
-      void createUserDebug(std::string username, std::string password);
+      Credentials(std::string username, std::string password);
+      ~Credentials();
+      std::string getUsernameS() { return username; }
+      const char* getUsername() { return username.c_str(); }
+      // NOTE! spoils from getHash are invalidated when object is deleted
+      uint8_t* getHash() { return hash; }
     private:
-      sqlite3* me;
-      sqlite3* auth;
-      void open(sqlite3*& handle, const char* path);
+      std::string username;
+      uint8_t* hash;
     };
   }
 }
