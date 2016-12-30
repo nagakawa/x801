@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <string.h>
 #include <iostream>
 #include <random>
 #include <boost/filesystem.hpp>
@@ -177,6 +178,33 @@ bool x801::game::Database::getUserByID(uint32_t id, StoredCredentials& sc) {
   }
   userRowToSC(statement, sc);
   assert(sc.getUserID() == id);
+  sqlite3_finalize(statement);
+  return true;
+}
+
+static const char* GET_USER_BY_NAME_QUERY =
+  "SELECT * FROM logins"
+  "  WHERE username = ?;"
+  ;
+
+bool x801::game::Database::getUserByName(const char* username, StoredCredentials& sc) {
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    auth,
+    GET_USER_BY_NAME_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_ROW) {
+    sqlite3_finalize(statement);
+    return false;
+  }
+  userRowToSC(statement, sc);
+  assert(strcmp(sc.getUsername(), username) == 0);
   sqlite3_finalize(statement);
   return true;
 }

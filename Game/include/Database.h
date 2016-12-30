@@ -44,6 +44,7 @@ namespace x801 {
       void createUser(Credentials& c);
       void createUserDebug(std::string username, std::string password);
       bool getUserByID(uint32_t id, StoredCredentials& sc);
+      bool getUserByName(const char* username, StoredCredentials& sc);
     private:
       sqlite3* me;
       sqlite3* auth;
