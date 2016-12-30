@@ -22,13 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <string>
 
 namespace x801 {
   namespace game {
     enum ClientOrServer { HUH, CLIENT, SERVER };
     struct CLineConfig {
       ClientOrServer mode = HUH;
-      uint32_t ip = 0;
+      std::string ip = "localhost";
       uint16_t port = 0;
     };
   }

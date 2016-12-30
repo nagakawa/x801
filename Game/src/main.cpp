@@ -55,18 +55,9 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
       cn.mode = mode;
       if (mode == CLIENT) {
         // get an IP address and a port
-        int a, b, c, d;
-        int received = sscanf(arg, "%d.%d.%d.%d", &a, &b, &c, &d);
-        if (received != 4 || i == argc - 1) ok = false;
-        else {
-          uint32_t ip = (a << 24) | (b << 16) | (c << 8) | d;
-          int port = atoi(argv[++i]); // Come on. SLAP ME.
-          if (port == 0) ok = false;
-          else {
-            cn.ip = htobe32(ip);
-            cn.port = (uint16_t) port;
-          }
-        }
+        cn.ip = argv[i];
+        int port = atoi(argv[++i]); // Come on. SLAP ME.
+        if (port == 0) ok = false;
       } else if (mode == SERVER) {
         int port = atoi(argv[i]);
         if (port == 0) ok = false;
