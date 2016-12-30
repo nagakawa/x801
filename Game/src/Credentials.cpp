@@ -26,7 +26,7 @@ using namespace x801::game;
 #include <argon2.h>
 
 // Don't change the salt, or else logins will stop working.
-static const char SALT[] = u8"實驗ですよ";
+static const char SALT[] = "This is not the real salt";
 static const int SALT_LENGTH = sizeof(SALT) / sizeof(*SALT) - 1;
 static const int TIME_COST = 40;
 static const int MEMORY_COST = 12;
