@@ -24,10 +24,13 @@ include_directories(${PROJECT_INCLUDE_DIR})
 # actual target:
 ADD_EXECUTABLE(Test ${Test_executable_SRCS})
 
+ADD_DEPENDENCIES(Test Argon2)
+
 TARGET_LINK_LIBRARIES(Test
   ${PROJECT_SOURCE_DIR}/../../build/libGame.a
   ${PROJECT_SOURCE_DIR}/../../build/libMap.a
   ${PROJECT_SOURCE_DIR}/../../build/libBase.a
+  ${PROJECT_SOURCE_DIR}/../../argon2/libargon2.a
   ${ZLIB_LIBRARIES}
   ${SQLITE_LIBRARIES}
   ${Boost_LIBRARIES}

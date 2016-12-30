@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    const int COOKIE_LEN = 64;
+    const int COOKIE_LEN = 16;
     class Player {
     public:
       // 

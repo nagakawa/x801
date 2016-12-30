@@ -16,11 +16,14 @@ include_directories(${PROJECT_INCLUDE_DIR})
 # actual target:
 ADD_EXECUTABLE(x801 ${x801_executable_SRCS})
 
+ADD_DEPENDENCIES(x801 Argon2)
+
 TARGET_LINK_LIBRARIES(x801
   ${PROJECT_SOURCE_DIR}/../build/libGame.a
   ${PROJECT_SOURCE_DIR}/../build/libMap.a
   ${PROJECT_SOURCE_DIR}/../build/libBase.a
   ${PROJECT_SOURCE_DIR}/../build/libRakNetLibStatic.a
+  ${PROJECT_SOURCE_DIR}/../argon2/libargon2.a
   ${ZLIB_LIBRARIES}
   ${LIBPTHREAD_LIBRARIES}
   ${Boost_LIBRARIES}

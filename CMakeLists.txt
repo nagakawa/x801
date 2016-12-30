@@ -16,6 +16,14 @@ ELSE()
   )
 ENDIF()
 
+# Argon2
+
+ADD_CUSTOM_TARGET(
+  Argon2
+  COMMAND make
+  WORKING_DIRECTORY argon2
+)
+
 # ######### General setup ##########
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
