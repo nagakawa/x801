@@ -27,6 +27,8 @@ using namespace x801::game;
 #include <string.h>
 #include <iostream>
 #include <portable_endian.h>
+#include "Client.h"
+#include "Server.h"
 
 int main(int argc, char** argv) {
   CLineConfig c;
@@ -35,8 +37,10 @@ int main(int argc, char** argv) {
   std::cout << "Hello from Athena V.\n";
   if (c.mode == CLIENT) {
     std::cout << "You intend to connect to a server.\n";
+    Client client(c.ip, c.port);
   } else {
     std::cout << "You intend to start a server.\n";
+    Server server(c.port, DEFAULT_MAX_CONNECTIONS);
   }
   return 0;
 }

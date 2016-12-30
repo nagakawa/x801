@@ -41,13 +41,13 @@ x801::game::Server::~Server() {
   RakNet::RakPeerInterface::DestroyInstance(peer);
 }
 
-const char* x801::game::KEY_DIR = "keys";
+const char* x801::game::KEY_DIR = "keys/";
 const char* x801::game::KEY_PUBLIC = "keys/public.bin";
 const char* x801::game::KEY_PRIVATE = "keys/private.bin";
 
 void x801::game::Server::updateKeyFiles() {
   if (!boost::filesystem::exists(KEY_DIR) ||
-      boost::filesystem::is_directory(KEY_DIR)) {
+      !boost::filesystem::is_directory(KEY_DIR)) {
     std::cout <<
       "Warning: overwriting " << KEY_DIR <<
       " because it is not a directory\n";
@@ -60,7 +60,7 @@ void x801::game::Server::updateKeyFiles() {
   privateKey = new char[privSize];
   bool ok = false;
   if (boost::filesystem::exists(KEY_PUBLIC) &&
-      boost::filesystem::is_directory(KEY_PUBLIC)) {
+      !boost::filesystem::is_directory(KEY_PUBLIC)) {
     ok = true;
     boost::filesystem::ifstream input(
       KEY_PUBLIC,
@@ -70,7 +70,7 @@ void x801::game::Server::updateKeyFiles() {
     if (bytesRead < pubSize) ok = false;
   }
   if (boost::filesystem::exists(KEY_PRIVATE) &&
-      boost::filesystem::is_directory(KEY_PRIVATE)) {
+      !boost::filesystem::is_directory(KEY_PRIVATE)) {
     ok = true;
     boost::filesystem::ifstream input(
       KEY_PRIVATE,

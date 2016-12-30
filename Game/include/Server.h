@@ -34,6 +34,7 @@ namespace x801 {
     extern const char* KEY_PUBLIC;
     extern const char* KEY_PRIVATE;
     class Server {
+    public:
       Server(
           uint16_t port,
           unsigned short maxConnections = DEFAULT_MAX_CONNECTIONS
