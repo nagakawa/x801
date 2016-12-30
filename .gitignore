@@ -148,7 +148,7 @@ Temporary Items
 
 # exe output
 build/Test
-build/Game
+build/x801
 build/MapC
 
 # public and private keys

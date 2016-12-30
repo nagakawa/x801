@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <iostream>
+#include <boost/filesystem.hpp>
 #include "sha1.h"
 
 int x801::game::stepBlock(sqlite3_stmt* statement, sqlite3* conn) {
@@ -33,12 +35,21 @@ int x801::game::stepBlock(sqlite3_stmt* statement, sqlite3* conn) {
   return stat;
 }
 
+const char* x801::game::DB_DIR = "saves/";
 const char* x801::game::DB_MAIN_PATH = "saves/me.x8d";
 const char* x801::game::DB_AUTH_PATH = "saves/auth.x8d";
 
 x801::game::Database::Database() {
+  if (!boost::filesystem::exists(DB_DIR) ||
+      !boost::filesystem::is_directory(DB_DIR)) {
+    std::cout <<
+      "Warning: overwriting " << DB_DIR <<
+      " because it is not a directory\n";
+    boost::filesystem::remove(DB_DIR);
+    boost::filesystem::create_directories(DB_DIR);
+  }
   open(me, DB_MAIN_PATH);
-  open(me, DB_AUTH_PATH);
+  open(auth, DB_AUTH_PATH);
   createAuthTable();
 }
 

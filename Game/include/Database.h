@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    extern const char* DB_DIR;
     extern const char* DB_MAIN_PATH;
     extern const char* DB_AUTH_PATH;
     const int RAW_HASH_LENGTH = 256;

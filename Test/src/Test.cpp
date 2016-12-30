@@ -23,10 +23,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::test;
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+#include <exception>
 #include <sstream>
 #include <vector>
-#include "Area.h"
+#include <Area.h>
+#include <Database.h>
 #include <Layer.h>
 #include <TileSec.h>
 #include <Version.h>
@@ -251,6 +254,13 @@ void testAreaIO() {
 #undef SQUARE_EDGE_ROW_2
 #undef SQUARE_SIDE_ROW_2
 
+void testDBAuth() {
+  system("rm -rf `dirname $0`/saves");
+  x801::game::Database db;
+  // createAuthTable implicit
+  // db.createUser()
+}
+
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
@@ -262,11 +272,22 @@ const Test x801::test::parts[] = {
   {"layer", testLayerIO, true},
   {"tileSec", testTileSecIO, true},
   {"area", testAreaIO, true},
+  {"dbAuth", testDBAuth, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 
 void x801::test::Test::run(const char* arg, bool isDefault) const {
-  if ((isDefault && runByDefault) || !strcmp(arg, name)) test();
+  try {
+    if ((isDefault && runByDefault) || !strcmp(arg, name)) test();
+  } catch (std::exception& x) {
+    std::cerr << "\033[31;1mTEST FAILED!!! \u2013 \n";
+    std::cerr << "Exception thrown: \n  ";
+    std::cerr << x.what() << '\n';
+  } catch (const char* s) {
+    std::cerr << "\033[31;1mTEST FAILED!!! \u2013 \n";
+    std::cerr << "Exception thrown: \n  ";
+    std::cerr << s << '\n';
+  }
 }
 
 void x801::test::runAll(

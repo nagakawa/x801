@@ -9,6 +9,7 @@ SET(PROJECT_INCLUDE_DIR
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/../Base/include
   ${PROJECT_SOURCE_DIR}/../Map/include
+  ${PROJECT_SOURCE_DIR}/../Game/include
 )
 
 SET(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -24,9 +25,12 @@ include_directories(${PROJECT_INCLUDE_DIR})
 ADD_EXECUTABLE(Test ${Test_executable_SRCS})
 
 TARGET_LINK_LIBRARIES(Test
+  ${PROJECT_SOURCE_DIR}/../../build/libGame.a
   ${PROJECT_SOURCE_DIR}/../../build/libMap.a
   ${PROJECT_SOURCE_DIR}/../../build/libBase.a
   ${ZLIB_LIBRARIES}
+  ${SQLITE_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 #ADD_CUSTOM_COMMAND(
