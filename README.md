@@ -4,7 +4,7 @@
 > candle will not be shortened. Happiness never decreases by being shared.
 > ~ Wizard101
 
-A customizable MMORPG with Wizard101-like mechanics that anyone can modify or
+A customisable MMORPG with Wizard101-like mechanics that anyone can modify or
 run a server for.
 
 ### Building instructions
