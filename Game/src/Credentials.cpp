@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <string.h>
 #include <argon2.h>
 
 // Don't change the salt, or else logins will stop working.
@@ -44,4 +45,46 @@ x801::game::Credentials::Credentials(std::string username, std::string password)
 
 x801::game::Credentials::~Credentials() {
   delete[] hash;
+}
+
+x801::game::StoredCredentials::StoredCredentials(
+    uint32_t userID,
+    std::string username,
+    const uint8_t* cookedHash,
+    const uint8_t* salt) {
+  build(userID, username, cookedHash, salt);
+}
+
+x801::game::StoredCredentials::StoredCredentials(const StoredCredentials& sc) {
+  build(sc.userID, sc.username, sc.cookedHash, sc.salt);
+}
+
+x801::game::StoredCredentials::StoredCredentials(StoredCredentials&& sc) {
+  build(
+    std::move(sc.userID), std::move(sc.username),
+    std::move(sc.cookedHash), std::move(sc.salt));
+}
+
+void x801::game::StoredCredentials::operator=(const StoredCredentials& sc) {
+  delete[] cookedHash;
+  delete[] salt;
+  build(sc.userID, sc.username, sc.cookedHash, sc.salt);
+}
+
+void x801::game::StoredCredentials::build(
+    uint32_t userID,
+    std::string username,
+    const uint8_t* cookedHash,
+    const uint8_t* salt) {
+  this->userID = userID;
+  this->username = username;
+  this->cookedHash = new uint8_t[COOKED_HASH_LENGTH];
+  this->salt = new uint8_t[SALT_LENGTH];
+  memcpy(this->cookedHash, cookedHash, COOKED_HASH_LENGTH);
+  memcpy(this->salt, salt, SALT_LENGTH);
+}
+
+x801::game::StoredCredentials::~StoredCredentials() {
+  delete[] cookedHash;
+  delete[] salt;
 }

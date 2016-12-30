@@ -37,10 +37,13 @@ namespace x801 {
     public:
       Database();
       ~Database();
+      Database(const Database& other) = delete;
+      void operator=(const Database& other) = delete;
       void createAuthTable();
       void createUser(const char* username, const uint8_t* hash);
       void createUser(Credentials& c);
       void createUserDebug(std::string username, std::string password);
+      bool getUserByID(uint32_t id, StoredCredentials& sc);
     private:
       sqlite3* me;
       sqlite3* auth;

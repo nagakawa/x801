@@ -258,8 +258,13 @@ void testDBAuth() {
   system("rm -rf `dirname $0`/saves");
   x801::game::Database db;
   // createAuthTable implicit
-  db.createUserDebug("ウルヰ", "GGLuisLifeHaven");
+  db.createUserDebug("Uruwi", "GGLuisLifeHaven");
   db.createUserDebug("TestUser", "ILoveToTest");
+  x801::game::StoredCredentials sc;
+  bool success = db.getUserByID(1, sc);
+  assertThat(success, "Get user with id = 1");
+  assertEqual(sc.getUsernameS(), "Uruwi", "User with id = 1 is Uruwi");
+  assertThat(!db.getUserByID(9, sc), "No user with id = 9");
 }
 
 const char* x801::test::DEFAULT = "default";

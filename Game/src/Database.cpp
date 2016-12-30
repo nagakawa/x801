@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::game;
 
 #include <iostream>
+#include <random>
 #include <boost/filesystem.hpp>
 #include "sha1.h"
 
@@ -68,8 +69,9 @@ static const char* CREATE_AUTH_TABLE_QUERY =
   "logins("
   "  userID INTEGER PRIMARY KEY ASC,"
   "  username STRING UNIQUE NOT NULL,"
-  "  hash BLOB NOT NULL"
-  ")"
+  "  hash BLOB NOT NULL,"
+  "  salt BLOB NOT NULL"
+  ");"
   ;
 
 void x801::game::Database::createAuthTable() {
@@ -84,7 +86,7 @@ void x801::game::Database::createAuthTable() {
 }
 
 static const char* CREATE_USER_QUERY =
-  "INSERT INTO logins (username, hash) VALUES (?, ?)"
+  "INSERT INTO logins (username, hash, salt) VALUES (?, ?, ?);"
   ;
 
 void x801::game::Database::createUser(
@@ -103,10 +105,21 @@ void x801::game::Database::createUser(
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   stat = sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  uint8_t salt[SALT_LENGTH];
+  std::random_device random;
+  std::uniform_int_distribution<> dist(0, 255);
+  for (int i = 0; i < SALT_LENGTH; ++i)
+    salt[i] = static_cast<uint8_t>(dist(random));
+  stat = sqlite3_bind_blob(
+    statement, 3, static_cast<const void*>(salt), SALT_LENGTH,
+    SQLITE_STATIC
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   // Generate SHA-1 hash
   SHA1_CTX sha1;
   sha1_init(&sha1);
   sha1_update(&sha1, hash, RAW_HASH_LENGTH);
+  sha1_update(&sha1, salt, SALT_LENGTH);
   uint8_t cooked[COOKED_HASH_LENGTH];
   sha1_final(&sha1, cooked);
   stat = sqlite3_bind_blob(
@@ -125,4 +138,41 @@ void x801::game::Database::createUser(Credentials& c) {
 void x801::game::Database::createUserDebug(std::string username, std::string password) {
   Credentials c(username, password);
   createUser(c);
+}
+
+static const char* GET_USER_BY_ID_QUERY =
+  "SELECT * FROM logins"
+  "  WHERE userID = ?;"
+  ;
+
+bool x801::game::Database::getUserByID(uint32_t id, StoredCredentials& sc) {
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    auth,
+    GET_USER_BY_ID_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_int(statement, 1, id);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_ROW) {
+    sqlite3_finalize(statement);
+    return false;
+  }
+  // ID | Username | Hash | Salt
+  uint32_t userID = sqlite3_column_int(statement, 0);
+  assert(id == userID);
+  std::string username(
+    reinterpret_cast<const char*>(sqlite3_column_text(statement, 1)));
+  const void* hash = sqlite3_column_blob(statement, 2);
+  const void* salt = sqlite3_column_blob(statement, 3);
+  sc = StoredCredentials(
+    userID, username,
+    reinterpret_cast<const uint8_t*>(hash),
+    reinterpret_cast<const uint8_t*>(salt)
+  );
+  sqlite3_finalize(statement);
+  return true;
 }

@@ -41,6 +41,10 @@ In addition, there are programs used to build assets:
 * FluidSynth (used to convert .mid files to .wav). The package name is,
   unsurprisingly, `fluidsynth`.
 
+There is a bug with older versions of Valgrind that will prevent it from running
+some tests. Valgrind 3.12.0 should resolve the issue, but you'll probably have
+to build it from source.
+
 #### Using CMake
 
 To generate the makefile:

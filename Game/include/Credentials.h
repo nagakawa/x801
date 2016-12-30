@@ -28,6 +28,7 @@ namespace x801 {
   namespace game {
     const int RAW_HASH_LENGTH = 256;
     const int COOKED_HASH_LENGTH = 20; // SHA-1 digest is 160 bits long
+    const int SALT_LENGTH = 16;
     class Credentials {
     public:
       Credentials(std::string username, std::string password);
@@ -39,6 +40,36 @@ namespace x801 {
     private:
       std::string username;
       uint8_t* hash;
+    };
+    class StoredCredentials {
+    public:
+      StoredCredentials() :
+          userID(0), username(""),
+          cookedHash(nullptr), salt(nullptr) {}
+      StoredCredentials(
+        uint32_t userID,
+        std::string username,
+        const uint8_t* cookedHash,
+        const uint8_t* salt);
+      StoredCredentials(const StoredCredentials& sc);
+      StoredCredentials(StoredCredentials&& sc);
+      void operator=(const StoredCredentials& sc);
+      ~StoredCredentials();
+      uint32_t getUserID() { return userID; }
+      std::string getUsernameS() { return username; }
+      const char* getUsername() { return username.c_str(); }
+      const uint8_t* getCookedHash() { return cookedHash; }
+      const uint8_t* getSalt() { return salt; }
+    private:
+      uint32_t userID;
+      std::string username;
+      uint8_t* cookedHash;
+      uint8_t* salt;
+      void build(
+        uint32_t userID,
+        std::string username,
+        const uint8_t* cookedHash,
+        const uint8_t* salt);
     };
   }
 }
