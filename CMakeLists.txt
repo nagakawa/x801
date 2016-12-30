@@ -43,6 +43,7 @@ ADD_SUBDIRECTORY(Base)
 ADD_SUBDIRECTORY(Map)
 ADD_SUBDIRECTORY(Test)
 ADD_SUBDIRECTORY(Game)
+ADD_SUBDIRECTORY(x801)
 
 # actual target:
 # ADD_LIBRARY(tdr ${tdr_library}_SRCS ${tdr_library_HDRS})

@@ -30,7 +30,7 @@ using namespace x801::game;
 #include "Client.h"
 #include "Server.h"
 
-int main(int argc, char** argv) {
+int lmain(int argc, char** argv) {
   CLineConfig c;
   int res = readSettings(c, argc, argv);
   if (res != 0) return res;

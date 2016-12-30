@@ -13,26 +13,21 @@ SET(PROJECT_INCLUDE_DIR
 
 SET(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-SET(Game_executable_SRCS
+SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/main.cpp
   ${PROJECT_SOURCE_DIR}/Config.cpp
   ${PROJECT_SOURCE_DIR}/Server.cpp
   ${PROJECT_SOURCE_DIR}/Client.cpp
+  ${PROJECT_SOURCE_DIR}/GameState.cpp
+  ${PROJECT_SOURCE_DIR}/Player.cpp
+  ${PROJECT_SOURCE_DIR}/Database.cpp
+  ${PROJECT_SOURCE_DIR}/sha1.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})
 include_directories(${PROJECT_INCLUDE_DIR})
 # actual target:
-ADD_EXECUTABLE(Game ${Game_executable_SRCS})
-
-TARGET_LINK_LIBRARIES(Game
-  ${PROJECT_SOURCE_DIR}/../../build/libMap.a
-  ${PROJECT_SOURCE_DIR}/../../build/libBase.a
-  ${PROJECT_SOURCE_DIR}/../../build/libRakNetLibStatic.a
-  ${ZLIB_LIBRARIES}
-  ${LIBPTHREAD_LIBRARIES}
-  ${Boost_LIBRARIES}
-)
+ADD_LIBRARY(Game ${Game_library_SRCS})
 
 #ADD_CUSTOM_COMMAND(
 #  TARGET AGLTest
@@ -41,4 +36,4 @@ TARGET_LINK_LIBRARIES(Game
 #)
 
 # add install target:
-INSTALL(TARGETS Game DESTINATION bin)
+INSTALL(TARGETS Game DESTINATION lib)
