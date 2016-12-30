@@ -73,6 +73,8 @@ static const char* CREATE_AUTH_TABLE_QUERY =
   "  hash BLOB NOT NULL,"
   "  salt BLOB NOT NULL"
   ");"
+  "CREATE INDEX IF NOT EXISTS "
+  "  loginsByUsername ON logins (username);"
   ;
 
 void x801::game::Database::createAuthTable() {
