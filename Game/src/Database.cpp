@@ -140,6 +140,20 @@ void x801::game::Database::createUserDebug(std::string username, std::string pas
   createUser(c);
 }
 
+void x801::game::Database::userRowToSC(sqlite3_stmt* statement, StoredCredentials& sc) {
+  // ID | Username | Hash | Salt
+  uint32_t userID = sqlite3_column_int(statement, 0);
+  std::string username(
+    reinterpret_cast<const char*>(sqlite3_column_text(statement, 1)));
+  const void* hash = sqlite3_column_blob(statement, 2);
+  const void* salt = sqlite3_column_blob(statement, 3);
+  sc = StoredCredentials(
+    userID, username,
+    reinterpret_cast<const uint8_t*>(hash),
+    reinterpret_cast<const uint8_t*>(salt)
+  );
+}
+
 static const char* GET_USER_BY_ID_QUERY =
   "SELECT * FROM logins"
   "  WHERE userID = ?;"
@@ -161,18 +175,8 @@ bool x801::game::Database::getUserByID(uint32_t id, StoredCredentials& sc) {
     sqlite3_finalize(statement);
     return false;
   }
-  // ID | Username | Hash | Salt
-  uint32_t userID = sqlite3_column_int(statement, 0);
-  assert(id == userID);
-  std::string username(
-    reinterpret_cast<const char*>(sqlite3_column_text(statement, 1)));
-  const void* hash = sqlite3_column_blob(statement, 2);
-  const void* salt = sqlite3_column_blob(statement, 3);
-  sc = StoredCredentials(
-    userID, username,
-    reinterpret_cast<const uint8_t*>(hash),
-    reinterpret_cast<const uint8_t*>(salt)
-  );
+  userRowToSC(statement, sc);
+  assert(sc.getUserID() == id);
   sqlite3_finalize(statement);
   return true;
 }

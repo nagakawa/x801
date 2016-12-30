@@ -48,6 +48,7 @@ namespace x801 {
       sqlite3* me;
       sqlite3* auth;
       void open(sqlite3*& handle, const char* path);
+      void userRowToSC(sqlite3_stmt* statement, StoredCredentials& sc);
     };
   }
 }
