@@ -52,6 +52,7 @@ x801::game::Database::Database() {
   open(me, DB_MAIN_PATH);
   open(auth, DB_AUTH_PATH);
   createAuthTable();
+  createPlayerLocationTable();
 }
 
 x801::game::Database::~Database() {
@@ -240,13 +241,13 @@ uint32_t x801::game::Database::getUserIDByName(const char* username) {
 static const char* CREATE_PLAYER_LOCATION_TABLE_QUERY =
   "CREATE TABLE IF NOT EXISTS "
   "playerLocations("
-  "  userID INTEGER PRIMARY KEY ASC,"
+  "  userID INTEGER UNIQUE NOT NULL,"
   "  worldID INTEGER NOT NULL,"
   "  areaID INTEGER NOT NULL,"
   "  layer INTEGER NOT NULL,"
   "  x DOUBLE NOT NULL,"
   "  y DOUBLE NOT NULL,"
-  "  rot DOUBLE NOT NULL,"
+  "  rot DOUBLE NOT NULL"
   ");"
   ;
 
@@ -259,4 +260,80 @@ void x801::game::Database::createPlayerLocationTable() {
     &errMessage
   );
   if (stat != SQLITE_OK) throw errMessage;
+}
+
+static const char* SAVE_PLAYER_LOCATION_QUERY =
+  "INSERT OR REPLACE INTO playerLocations"
+  "  (userID, worldID, areaID, layer, x, y, rot)"
+  "  VALUES (?, ?, ?, ?, ?, ?, ?);"
+  ;
+
+void x801::game::Database::savePlayerLocation(
+    uint32_t userID,
+    Location& location) {
+  if (userID == 0) throw "userID must not be 0";
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    me,
+    SAVE_PLAYER_LOCATION_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_int(statement, 1, userID);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_int(statement, 2, location.areaID.worldID);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_int(statement, 3, location.areaID.areaID);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_int(statement, 4, location.layer);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_double(statement, 5, location.x);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_double(statement, 6, location.y);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_double(statement, 7, location.rot);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  // All parameters bound.
+  stepBlock(statement, auth);
+  sqlite3_finalize(statement);
+}
+
+uint32_t x801::game::Database::locationRowToStruct(
+    sqlite3_stmt* statement,
+    Location& location) {
+  location.areaID.worldID = (uint16_t) sqlite3_column_int(statement, 1);
+  location.areaID.areaID = (uint16_t) sqlite3_column_int(statement, 2);
+  location.layer = sqlite3_column_int(statement, 3);
+  location.x = (float) sqlite3_column_double(statement, 4);
+  location.y = (float) sqlite3_column_double(statement, 5);
+  location.rot = (float) sqlite3_column_double(statement, 6);
+  return sqlite3_column_int(statement, 0);
+}
+
+static const char* LOAD_PLAYER_LOCATION_QUERY =
+  "SELECT * FROM playerLocations"
+  "  WHERE userID = ?;"
+  ;
+
+bool x801::game::Database::loadPlayerLocation(uint32_t userID, Location& location) {
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    me,
+    LOAD_PLAYER_LOCATION_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_int(statement, 1, userID);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_ROW) {
+    sqlite3_finalize(statement);
+    return false;
+  }
+  uint32_t actualID = locationRowToStruct(statement, location);
+  assert(actualID == userID);
+  sqlite3_finalize(statement);
+  return true;
 }

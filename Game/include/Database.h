@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <sqlite3.h>
 #include "Credentials.h"
+#include "Location.h"
 
 namespace x801 {
   namespace game {
@@ -51,11 +52,18 @@ namespace x801 {
       uint32_t getUserIDByName(const char* username);
       // --- PLAYER LOCATION-RELATED METHODS
       void createPlayerLocationTable();
+      void savePlayerLocation(uint32_t userID, Location& location);
+      // If none is found, the method returns false and the
+      // Location struct is unmodified.
+      // Recommended practice: Initialise location to a default value
+      // before calling this method.
+      bool loadPlayerLocation(uint32_t userID, Location& location);
     private:
       sqlite3* me;
       sqlite3* auth;
       void open(sqlite3*& handle, const char* path);
       void userRowToSC(sqlite3_stmt* statement, StoredCredentials& sc);
+      uint32_t locationRowToStruct(sqlite3_stmt* statement, Location& location);
     };
   }
 }

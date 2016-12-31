@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::test;
 
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,7 @@ using namespace x801::test;
 #include <Area.h>
 #include <Database.h>
 #include <Layer.h>
+#include <Location.h>
 #include <TileSec.h>
 #include <Version.h>
 #include <mapErrors.h>
@@ -273,6 +275,18 @@ void testDBAuth() {
   assertEqual(id, 1, "ID of Uruwi is 1");
   id = db.getUserIDByName("Dworgyn");
   assertEqual(id, 0, "User Dworgyn does not exist, so 0 is returned");
+  x801::game::Location locationOfUruwi = {
+    { 0, 0 }, // Presumably messing around in the x801 counterpart of the Commons?
+    0,
+    3.7f, 9.2f, -0.14f
+  };
+  db.savePlayerLocation(1, locationOfUruwi);
+  x801::game::Location shouldBeSame;
+  db.loadPlayerLocation(1, shouldBeSame);
+  assertThat(
+    fabs(locationOfUruwi.x - shouldBeSame.x) < 1e-5f,
+    "Uruwi is at about the same x-coordinate"
+  );
 }
 
 const char* x801::test::DEFAULT = "default";

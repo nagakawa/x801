@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
-#include <QualifiedAreaID.h>
 #include "Location.h"
 
 namespace x801 {
