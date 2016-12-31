@@ -29,18 +29,6 @@ namespace x801 {
     const int RAW_HASH_LENGTH = 256;
     const int COOKED_HASH_LENGTH = 20; // SHA-1 digest is 160 bits long
     const int SALT_LENGTH = 16;
-    class Credentials {
-    public:
-      Credentials(std::string username, std::string password);
-      ~Credentials();
-      std::string getUsernameS() { return username; }
-      const char* getUsername() { return username.c_str(); }
-      // NOTE! spoils from getHash are invalidated when object is deleted
-      uint8_t* getHash() { return hash; }
-    private:
-      std::string username;
-      uint8_t* hash;
-    };
     class StoredCredentials {
     public:
       StoredCredentials() :
@@ -70,6 +58,19 @@ namespace x801 {
         std::string username,
         const uint8_t* cookedHash,
         const uint8_t* salt);
+    };
+    class Credentials {
+    public:
+      Credentials(std::string username, std::string password);
+      ~Credentials();
+      std::string getUsernameS() { return username; }
+      const char* getUsername() { return username.c_str(); }
+      // NOTE! spoils from getHash are invalidated when object is deleted
+      uint8_t* getHash() { return hash; }
+      bool matches(StoredCredentials& sc);
+    private:
+      std::string username;
+      uint8_t* hash;
     };
   }
 }

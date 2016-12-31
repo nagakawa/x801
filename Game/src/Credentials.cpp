@@ -24,6 +24,7 @@ using namespace x801::game;
 
 #include <string.h>
 #include <argon2.h>
+#include "sha1.h"
 
 // Don't change the salt, or else logins will stop working.
 static const char SALT[] = "This is not the real salt";
@@ -45,6 +46,24 @@ x801::game::Credentials::Credentials(std::string username, std::string password)
 
 x801::game::Credentials::~Credentials() {
   delete[] hash;
+}
+
+bool x801::game::Credentials::matches(StoredCredentials& sc) {
+  // Generate SHA-1 hash
+  SHA1_CTX sha1;
+  sha1_init(&sha1);
+  sha1_update(&sha1, hash, RAW_HASH_LENGTH);
+  sha1_update(&sha1, sc.getSalt(), SALT_LENGTH);
+  uint8_t cooked[COOKED_HASH_LENGTH];
+  sha1_final(&sha1, cooked);
+  // Below code is the same as
+  // return memcmp(cooked, sc.getCookedHash(), COOKED_HASH_LENGTH) == 0;
+  // but not subject to timing attacks
+  uint8_t res = 0;
+  for (int i = 0; i < COOKED_HASH_LENGTH; ++i) {
+    res |= cooked[i] ^ sc.getCookedHash()[i];
+  }
+  return res == 0;
 }
 
 x801::game::StoredCredentials::StoredCredentials(

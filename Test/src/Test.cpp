@@ -287,6 +287,10 @@ void testDBAuth() {
     fabs(locationOfUruwi.x - shouldBeSame.x) < 1e-5f,
     "Uruwi is at about the same x-coordinate"
   );
+  x801::game::Credentials attempt1("TestUser", "ILoveToTest");
+  assertThat(attempt1.matches(sc), "Correct password input");
+  x801::game::Credentials attempt2("TestUser", "WrongPassword");
+  assertThat(!attempt2.matches(sc), "Wrong password input");
 }
 
 const char* x801::test::DEFAULT = "default";
