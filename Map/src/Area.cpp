@@ -36,8 +36,8 @@ x801::map::Area::Area(std::istream& fh, bool dontCare) {
     index = -1;
   }
   version = x801::base::Version(fh);
-  worldID = x801::base::readInt<uint16_t>(fh);
-  areaID = x801::base::readInt<uint16_t>(fh);
+  id.worldID = x801::base::readInt<uint16_t>(fh);
+  id.areaID = x801::base::readInt<uint16_t>(fh);
   uint32_t dataSectionCount = x801::base::readInt<uint32_t>(fh);
   for (unsigned int i = 0; i < dataSectionCount; ++i) {
     int res = readSection(fh, dontCare);
@@ -52,8 +52,8 @@ x801::map::Area::Area(std::istream& fh, bool dontCare) {
 void x801::map::Area::write(std::ostream& fh) const {
   x801::base::writeInt<uint32_t>(fh, 0x70614d58L);
   x801::base::engineVersion.write(fh);
-  x801::base::writeInt<uint16_t>(fh, worldID);
-  x801::base::writeInt<uint16_t>(fh, areaID);
+  x801::base::writeInt<uint16_t>(fh, id.worldID);
+  x801::base::writeInt<uint16_t>(fh, id.areaID);
   int pos = fh.tellp();
   x801::base::writeInt<uint32_t>(fh, 0);
   int ds = 0;
@@ -189,7 +189,7 @@ void x801::map::Area::writeSection(std::ostream& fh, uint32_t sectionID, const c
 void x801::map::Area::writeTileSection(std::ostream& fh, int& ds) const {
   std::stringstream data;
   if (ts == nullptr) {
-
+    throw "x801::map::Area::writeTileSection: ts is nullptr?";
   }
   ts->write(data);
   std::string s = data.str();

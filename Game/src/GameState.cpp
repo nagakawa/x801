@@ -21,3 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using namespace x801::game;
+
+x801::game::AreaWithPlayers::~AreaWithPlayers() {
+  delete area;
+}

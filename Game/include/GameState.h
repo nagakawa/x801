@@ -21,14 +21,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <Area.h>
 #include "Database.h"
 
 namespace x801 {
   namespace game {
+    class GameState;
+    class AreaWithPlayers {
+    public:
+      AreaWithPlayers(GameState* g, std::istream& fh) :
+          g(g), area(new x801::map::Area(fh)) {}
+      ~AreaWithPlayers();
+    private:
+      GameState* g;
+      x801::map::Area* area = nullptr;
+    };
     class GameState {
-
+    public:
+      std::string getUsernameByID(int id) { return usernamesByID[id]; }
+      int getIDByUsername(std::string& name) { return idsByUsername[name]; }
     private:
       Database db;
+      std::unordered_map<int, std::string> usernamesByID;
+      std::unordered_map<std::string, int> idsByUsername;
     };
   }
 }

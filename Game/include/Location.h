@@ -22,22 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
-#include <QualifiedAreaID.h>
-#include "Location.h"
 
 namespace x801 {
   namespace game {
-    const int COOKIE_LEN = 16;
-    class Player {
-    public:
-      // 
-      Player(const char* username, const uint8_t* passHash);
-      Location& getLocation() { return location; }
-      ~Player();
-    private:
-      uint32_t playerID;
-      uint8_t* cookie;
-      Location location;
+    struct Location {
+      x801::map::QualifiedAreaID areaID;
+      int layer;
+      float x, y, rot;
     };
   }
 }

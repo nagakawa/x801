@@ -39,6 +39,7 @@ namespace x801 {
       ~Database();
       Database(const Database& other) = delete;
       void operator=(const Database& other) = delete;
+      // --- USER ACCOUNT-RELATED METHODS
       void createAuthTable();
       void createUser(const char* username, const uint8_t* hash);
       void createUser(Credentials& c);
@@ -48,6 +49,8 @@ namespace x801 {
       bool getUserByName(const char* username, StoredCredentials& sc);
       // 0 if none
       uint32_t getUserIDByName(const char* username);
+      // --- PLAYER LOCATION-RELATED METHODS
+      void createPlayerLocationTable();
     private:
       sqlite3* me;
       sqlite3* auth;

@@ -3,15 +3,18 @@
 /*
 Copyright (C) 2016 AGC.
 
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
+
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -22,22 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
-#include <QualifiedAreaID.h>
-#include "Location.h"
 
 namespace x801 {
-  namespace game {
-    const int COOKIE_LEN = 16;
-    class Player {
-    public:
-      // 
-      Player(const char* username, const uint8_t* passHash);
-      Location& getLocation() { return location; }
-      ~Player();
-    private:
-      uint32_t playerID;
-      uint8_t* cookie;
-      Location location;
+  namespace map {
+    struct QualifiedAreaID {
+      uint16_t worldID;
+      uint16_t areaID;
     };
   }
 }

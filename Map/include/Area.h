@@ -27,7 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <iostream>
 #include <Version.h>
-#include <TileSec.h>
+#include "QualifiedAreaID.h"
+#include "TileSec.h"
 
 namespace x801 {
   namespace map {
@@ -39,10 +40,11 @@ namespace x801 {
       Area(const Area& that) = delete;
       void operator=(const Area& that) = delete;
       int getError() const { return error; }
+      QualifiedAreaID getQualifiedAreaID() { return id; }
+      TileSec& getTileSec() { return *ts; }
     private:
       x801::base::Version version;
-      uint16_t worldID;
-      uint16_t areaID;
+      QualifiedAreaID id;
       TileSec* ts = nullptr;
       int readSection(std::istream& fh, bool dontCare);
       void writeTileSection(std::ostream& fh, int& ds) const;

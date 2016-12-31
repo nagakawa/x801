@@ -236,3 +236,27 @@ uint32_t x801::game::Database::getUserIDByName(const char* username) {
   sqlite3_finalize(statement);
   return userID;
 }
+
+static const char* CREATE_PLAYER_LOCATION_TABLE_QUERY =
+  "CREATE TABLE IF NOT EXISTS "
+  "playerLocations("
+  "  userID INTEGER PRIMARY KEY ASC,"
+  "  worldID INTEGER NOT NULL,"
+  "  areaID INTEGER NOT NULL,"
+  "  layer INTEGER NOT NULL,"
+  "  x DOUBLE NOT NULL,"
+  "  y DOUBLE NOT NULL,"
+  "  rot DOUBLE NOT NULL,"
+  ");"
+  ;
+
+void x801::game::Database::createPlayerLocationTable() {
+  char* errMessage;
+  int stat = sqlite3_exec(
+    me,
+    CREATE_PLAYER_LOCATION_TABLE_QUERY,
+    nullptr, nullptr, // don't callback
+    &errMessage
+  );
+  if (stat != SQLITE_OK) throw errMessage;
+}
