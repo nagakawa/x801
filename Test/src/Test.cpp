@@ -269,6 +269,10 @@ void testDBAuth() {
   assertThat(success, "Get user with username = TestUser");
   assertEqual(sc.getUserID(), 2U, "User with username = TestUser is user #2");
   assertThat(!db.getUserByName("MM101", sc), "No user with username = MM101");
+  int id = db.getUserIDByName("Uruwi");
+  assertEqual(id, 1, "ID of Uruwi is 1");
+  id = db.getUserIDByName("Dworgyn");
+  assertEqual(id, 0, "User Dworgyn does not exist, so 0 is returned");
 }
 
 const char* x801::test::DEFAULT = "default";

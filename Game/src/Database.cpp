@@ -210,3 +210,29 @@ bool x801::game::Database::getUserByName(const char* username, StoredCredentials
   sqlite3_finalize(statement);
   return true;
 }
+
+static const char* GET_USER_ID_BY_NAME_QUERY =
+  "SELECT userID FROM logins"
+  "  WHERE username = ?;"
+  ;
+
+uint32_t x801::game::Database::getUserIDByName(const char* username) {
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    auth,
+    GET_USER_ID_BY_NAME_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_ROW) {
+    sqlite3_finalize(statement);
+    return 0;
+  }
+  uint32_t userID = sqlite3_column_int(statement, 0);
+  sqlite3_finalize(statement);
+  return userID;
+}
