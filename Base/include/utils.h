@@ -86,5 +86,6 @@ namespace x801 {
         uint32_t len,
         uint32_t& amtWrittenC
     );
+    void writeRandomBytes(uint8_t* buffer, int length);
   }
 }

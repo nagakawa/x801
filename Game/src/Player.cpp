@@ -21,3 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 using namespace x801::game;
+
+#include <utils.h>
+
+x801::game::Player::Player(uint32_t id) {
+  playerID = id;
+  x801::base::writeRandomBytes(cookie, COOKIE_LEN);
+}
+
+x801::game::Player::~Player() {
+  // nothing
+}

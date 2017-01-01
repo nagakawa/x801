@@ -24,8 +24,8 @@ using namespace x801::game;
 
 #include <string.h>
 #include <iostream>
-#include <random>
 #include <boost/filesystem.hpp>
+#include <utils.h>
 #include "sha1.h"
 
 int x801::game::stepBlock(sqlite3_stmt* statement, sqlite3* conn) {
@@ -110,10 +110,7 @@ void x801::game::Database::createUser(
   stat = sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   uint8_t salt[SALT_LENGTH];
-  std::random_device random;
-  std::uniform_int_distribution<> dist(0, 255);
-  for (int i = 0; i < SALT_LENGTH; ++i)
-    salt[i] = static_cast<uint8_t>(dist(random));
+  x801::base::writeRandomBytes(salt, SALT_LENGTH);
   stat = sqlite3_bind_blob(
     statement, 3, static_cast<const void*>(salt), SALT_LENGTH,
     SQLITE_STATIC

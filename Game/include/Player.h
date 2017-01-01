@@ -29,13 +29,13 @@ namespace x801 {
     const int COOKIE_LEN = 16;
     class Player {
     public:
-      // 
-      Player(const char* username, const uint8_t* passHash);
+      Player(uint32_t id);
+      // Player(const char* username, const uint8_t* passHash);
       Location& getLocation() { return location; }
       ~Player();
     private:
       uint32_t playerID;
-      uint8_t* cookie;
+      uint8_t cookie[COOKIE_LEN];
       Location location;
     };
   }
