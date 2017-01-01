@@ -29,6 +29,7 @@ using namespace x801::test;
 #include <exception>
 #include <sstream>
 #include <vector>
+#include <boost/filesystem.hpp>
 #include <Area.h>
 #include <Database.h>
 #include <Layer.h>
@@ -38,7 +39,10 @@ using namespace x801::test;
 #include <mapErrors.h>
 #include <utils.h>
 
+const char* currentEXE = nullptr;
+
 int main(int argc, char** argv) {
+  currentEXE = argv[0];
   const char* arg = argc >= 2 ? argv[1] : DEFAULT;
   bool isDefault = argc <= 1 || !strcmp(arg, DEFAULT);
   if (!strcmp(arg, "list")) {
@@ -257,7 +261,8 @@ void testAreaIO() {
 #undef SQUARE_SIDE_ROW_2
 
 void testDBAuth() {
-  system("rm -rf `dirname $0`/saves");
+  boost::filesystem::path p = boost::filesystem::system_complete(currentEXE);
+  boost::filesystem::remove_all(p);
   x801::game::Database db;
   // createAuthTable implicit
   db.createUserDebug("Uruwi", "GGLuisLifeHaven");

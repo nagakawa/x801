@@ -334,6 +334,7 @@ bool x801::game::Database::loadPlayerLocation(uint32_t userID, Location& locatio
   }
   uint32_t actualID = locationRowToStruct(statement, location);
   assert(actualID == userID);
+  (void) actualID; // assert not used in release mode
   sqlite3_finalize(statement);
   return true;
 }
