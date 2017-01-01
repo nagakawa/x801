@@ -49,6 +49,7 @@ namespace x801 {
     private:
       void initialise();
       void updateKeyFiles();
+      void listen();
       RakNet::RakPeerInterface* peer = nullptr;
       char* publicKey = nullptr;
       char* privateKey = nullptr;

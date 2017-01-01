@@ -46,6 +46,7 @@ namespace x801 {
           std::string getIPAddress() const { return ipAddress; }
         private:
           void initialise();
+          void listen();
           RakNet::RakPeerInterface* peer = nullptr;
           std::string ipAddress;
           // char* publicKey;

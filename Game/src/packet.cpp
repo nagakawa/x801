@@ -1,4 +1,4 @@
-#include "Client.h"
+#include "packet.h"
 
 /*
 Copyright (C) 2016 AGC.
@@ -22,20 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
-#include <iostream>
-
-void x801::game::Client::initialise() {
-  peer = RakNet::RakPeerInterface::GetInstance();
-  RakNet::SocketDescriptor clientSocket(0, 0);
-  clientSocket.socketFamily = AF_INET;
-  peer->Startup(1, &clientSocket, 1);
-  peer->SetOccasionalPing(true);
-  auto status = peer->Connect(ipAddress.c_str(), port, nullptr, 0);
-  if (status != RakNet::CONNECTION_ATTEMPT_STARTED) {
-    throw "Connection failed...";
-  }
-}
-
-x801::game::Client::~Client() {
-  RakNet::RakPeerInterface::DestroyInstance(peer);
+uint8_t x801::game::getPacketType(RakNet::Packet* p) {
+  if (p->data[0] == ID_TIMESTAMP)
+    return p->data[sizeof(uint8_t) + sizeof(RakNet::TimeMS)];
+  return p->data[0];
 }

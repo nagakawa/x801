@@ -24,6 +24,7 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/Database.cpp
   ${PROJECT_SOURCE_DIR}/sha1.cpp
   ${PROJECT_SOURCE_DIR}/Credentials.cpp
+  ${PROJECT_SOURCE_DIR}/packet.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

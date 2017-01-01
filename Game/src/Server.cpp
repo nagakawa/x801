@@ -25,6 +25,7 @@ using namespace x801::game;
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include "packet.h"
 
 void x801::game::Server::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
@@ -33,6 +34,20 @@ void x801::game::Server::initialise() {
   socket.socketFamily = AF_INET;
   peer->Startup(maxConnections, &socket, 1);
   peer->SetMaximumIncomingConnections(maxConnections);
+}
+
+void x801::game::Server::listen() {
+  while (true) {
+    for (
+        RakNet::Packet* p = peer->Receive();
+        p != nullptr;
+        peer->DeallocatePacket(p), p = peer->Receive()) {
+      uint8_t packetType = getPacketType(p);
+      switch (packetType) {
+        //
+      }
+    }
+  }
 }
 
 x801::game::Server::~Server() {

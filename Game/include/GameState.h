@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <Area.h>
@@ -37,6 +38,7 @@ namespace x801 {
       LOGIN_SERVER_FULL = 2,
       LOGIN_BANNED = 3,
       LOGIN_ALREADY_LOGGED_IN = 4,
+      LOGIN_FAILED = 5,
     };
     class GameState;
     class AreaWithPlayers {
@@ -67,7 +69,7 @@ namespace x801 {
       std::unordered_map<uint32_t, std::string> usernamesByID;
       std::unordered_map<std::string, uint32_t> idsByUsername;
       std::unordered_map<
-        x801::map::QualifiedAreaID, AreaWithPlayers,
+        x801::map::QualifiedAreaID, std::unique_ptr<AreaWithPlayers>,
         x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
       > areas;
     };
