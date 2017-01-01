@@ -22,6 +22,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <assert.h>
+#include <string.h>
+#include "Credentials.h"
+
 x801::game::AreaWithPlayers::~AreaWithPlayers() {
   delete area;
+}
+
+LoginStatus GameState::login(Credentials& c) {
+  StoredCredentials sc;
+  bool succeeded = db.getUserByName(c.getUsername(), sc);
+  if (!succeeded) return LOGIN_INVALID_CREDENTIALS;
+  assert(strcmp(c.getUsername(), sc.getUsername()) == 0);
+  if (!c.matches(sc)) return LOGIN_INVALID_CREDENTIALS;
+  uint32_t id = sc.getUserID();
+  if (usernamesByID.count(id) != 0) return LOGIN_ALREADY_LOGGED_IN;
+  usernamesByID[id] = sc.getUsernameS();
+  idsByUsername[sc.getUsernameS()] = id;
+  // allPlayers[id] = Player(id, db);
+  allPlayers.emplace(
+    std::piecewise_construct,
+    std::forward_as_tuple(id),
+    std::forward_as_tuple(id, db)  
+  );
+  return LOGIN_OK;
 }

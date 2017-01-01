@@ -43,11 +43,11 @@ namespace x801 {
       StoredCredentials(StoredCredentials&& sc);
       void operator=(const StoredCredentials& sc);
       ~StoredCredentials();
-      uint32_t getUserID() { return userID; }
-      std::string getUsernameS() { return username; }
-      const char* getUsername() { return username.c_str(); }
-      const uint8_t* getCookedHash() { return cookedHash; }
-      const uint8_t* getSalt() { return salt; }
+      uint32_t getUserID() const { return userID; }
+      std::string getUsernameS() const { return username; }
+      const char* getUsername() const { return username.c_str(); }
+      const uint8_t* getCookedHash() const { return cookedHash; }
+      const uint8_t* getSalt() const { return salt; }
     private:
       uint32_t userID;
       std::string username;
@@ -63,11 +63,11 @@ namespace x801 {
     public:
       Credentials(std::string username, std::string password);
       ~Credentials();
-      std::string getUsernameS() { return username; }
-      const char* getUsername() { return username.c_str(); }
+      std::string getUsernameS() const { return username; }
+      const char* getUsername() const { return username.c_str(); }
       // NOTE! spoils from getHash are invalidated when object is deleted
-      uint8_t* getHash() { return hash; }
-      bool matches(StoredCredentials& sc);
+      uint8_t* getHash() const { return hash; }
+      bool matches(StoredCredentials& sc) const;
     private:
       std::string username;
       uint8_t* hash;

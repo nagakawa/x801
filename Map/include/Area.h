@@ -40,8 +40,8 @@ namespace x801 {
       Area(const Area& that) = delete;
       void operator=(const Area& that) = delete;
       int getError() const { return error; }
-      QualifiedAreaID getQualifiedAreaID() { return id; }
-      TileSec& getTileSec() { return *ts; }
+      QualifiedAreaID getQualifiedAreaID() const { return id; }
+      TileSec& getTileSec() const { return *ts; }
     private:
       x801::base::Version version;
       QualifiedAreaID id;

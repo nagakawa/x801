@@ -25,12 +25,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <boost/functional/hash.hpp>
 
 namespace x801 {
   namespace map {
     struct QualifiedAreaID {
       uint16_t worldID;
       uint16_t areaID;
+    };
+    inline bool operator==(QualifiedAreaID a, QualifiedAreaID b) {
+      return a.worldID == b.worldID && a.areaID == b.areaID;
+    }
+    struct QualifiedAreaIDHash {
+      size_t operator()(const QualifiedAreaID& id) const {
+        size_t val = 0;
+        boost::hash_combine(val, id.worldID);
+        boost::hash_combine(val, id.areaID);
+        return val;
+      }
+    };
+    struct QualifiedAreaIDEqual {
+      bool operator()(QualifiedAreaID a, QualifiedAreaID b) const {
+        return a == b;
+      }
     };
   }
 }

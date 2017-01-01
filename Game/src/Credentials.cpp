@@ -48,7 +48,7 @@ x801::game::Credentials::~Credentials() {
   delete[] hash;
 }
 
-bool x801::game::Credentials::matches(StoredCredentials& sc) {
+bool x801::game::Credentials::matches(StoredCredentials& sc) const {
   // Generate SHA-1 hash
   SHA1_CTX sha1;
   sha1_init(&sha1);

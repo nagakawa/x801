@@ -25,13 +25,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <unordered_map>
 #include <Area.h>
+#include <QualifiedAreaID.h>
 #include "Database.h"
+#include "Player.h"
 
 namespace x801 {
   namespace game {
+    enum LoginStatus {
+      LOGIN_OK = 0,
+      LOGIN_INVALID_CREDENTIALS = 1,
+      LOGIN_SERVER_FULL = 2,
+      LOGIN_BANNED = 3,
+      LOGIN_ALREADY_LOGGED_IN = 4,
+    };
     class GameState;
     class AreaWithPlayers {
     public:
+      AreaWithPlayers();
       AreaWithPlayers(GameState* g, std::istream& fh) :
           g(g), area(new x801::map::Area(fh)) {}
       ~AreaWithPlayers();
@@ -41,12 +51,25 @@ namespace x801 {
     };
     class GameState {
     public:
-      std::string getUsernameByID(int id) { return usernamesByID[id]; }
-      int getIDByUsername(std::string& name) { return idsByUsername[name]; }
+      LoginStatus login(Credentials& c);
+      Player& getPlayer(uint32_t id) {
+        return allPlayers[id];
+      }
+      const std::string& getUsernameByID(uint32_t id) {
+        return usernamesByID[id];
+      }
+      uint32_t getIDByUsername(std::string& name) {
+        return idsByUsername[name];
+      }
     private:
       Database db;
-      std::unordered_map<int, std::string> usernamesByID;
-      std::unordered_map<std::string, int> idsByUsername;
+      std::unordered_map<uint32_t, Player> allPlayers;
+      std::unordered_map<uint32_t, std::string> usernamesByID;
+      std::unordered_map<std::string, uint32_t> idsByUsername;
+      std::unordered_map<
+        x801::map::QualifiedAreaID, AreaWithPlayers,
+        x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
+      > areas;
     };
   }
 }
