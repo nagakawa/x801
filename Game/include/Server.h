@@ -22,14 +22,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <array>
+#include <unordered_map>
+#include <boost/functional/hash.hpp>
 #include <MessageIdentifiers.h>
 #include <RakPeerInterface.h>
 #include <RakNetTypes.h>
 #include <SecureHandshake.h>
+#include <utils.h>
 
 namespace x801 {
   namespace game {
     const int DEFAULT_MAX_CONNECTIONS = 1024;
+    const int COOKIE_LEN = 16;
     extern const char* KEY_DIR;
     extern const char* KEY_PUBLIC;
     extern const char* KEY_PRIVATE;
@@ -53,6 +58,10 @@ namespace x801 {
       RakNet::RakPeerInterface* peer = nullptr;
       char* publicKey = nullptr;
       char* privateKey = nullptr;
+      std::unordered_map<
+        std::array<uint8_t, COOKIE_LEN>, uint32_t,
+        x801::base::STDArrayHash<uint8_t, COOKIE_LEN>
+      > playersByCookie;
     };
   }
 }

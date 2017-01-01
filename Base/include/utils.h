@@ -22,8 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
-#include <zlib.h>
+#include <array>
 #include <iostream>
+#include <zlib.h>
+#include <boost/functional/hash.hpp>
 #include "portable_endian.h"
 
 // Since I expect Int and UInt to be used frequently,
@@ -87,5 +89,11 @@ namespace x801 {
         uint32_t& amtWrittenC
     );
     void writeRandomBytes(uint8_t* buffer, int length);
+    template<typename T, size_t n>
+    struct STDArrayHash {
+      size_t operator()(const std::array<T, n>& array) const {
+        return boost::hash_value(array);
+      }
+    };
   }
 }

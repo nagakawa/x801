@@ -27,18 +27,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    const int COOKIE_LEN = 16;
     class Player {
     public:
       Player() : playerID(0), location{{0, 0}, 0, 0.0f, 0.0f, 0.0f} {}
       Player(uint32_t id, Database& db);
+      Player(const Player& other) :
+        playerID(other.playerID), location(other.location) {}
+      inline void operator=(const Player& other) {
+        playerID = other.playerID;
+        location = other.location;
+      }
       // Player(const char* username, const uint8_t* passHash);
       Location& getLocation() { return location; }
       const Location& getLocation() const { return location; }
       ~Player();
     private:
       uint32_t playerID;
-      uint8_t cookie[COOKIE_LEN];
       Location location;
     };
   }

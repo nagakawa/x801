@@ -26,7 +26,6 @@ using namespace x801::game;
 
 x801::game::Player::Player(uint32_t id, Database& db) {
   playerID = id;
-  x801::base::writeRandomBytes(cookie, COOKIE_LEN);
   db.loadPlayerLocation(id, location);
 }
 
