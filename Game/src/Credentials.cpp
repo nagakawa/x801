@@ -88,9 +88,7 @@ x801::game::StoredCredentials::StoredCredentials(StoredCredentials&& sc) {
 }
 
 StoredCredentials& x801::game::StoredCredentials::operator=(const StoredCredentials& sc) {
-  delete[] cookedHash;
-  delete[] salt;
-  build(sc.userID, sc.username, sc.cookedHash, sc.salt);
+  replace(sc.userID, sc.username, sc.cookedHash, sc.salt);
   return *this;
 }
 
@@ -99,10 +97,22 @@ void x801::game::StoredCredentials::build(
     std::string username,
     const uint8_t* cookedHash,
     const uint8_t* salt) {
-  this->userID = userID;
-  this->username = username;
   this->cookedHash = new uint8_t[COOKED_HASH_LENGTH];
   this->salt = new uint8_t[SALT_LENGTH];
+  replace(userID, username, cookedHash, salt);
+}
+
+void x801::game::StoredCredentials::replace(
+    uint32_t userID,
+    std::string username,
+    const uint8_t* cookedHash,
+    const uint8_t* salt) {
+  if (this->cookedHash == nullptr)
+    this->cookedHash = new uint8_t[COOKED_HASH_LENGTH];
+  if (this->salt == nullptr)
+    this->salt = new uint8_t[SALT_LENGTH];
+  this->userID = userID;
+  this->username = username;
   memcpy(this->cookedHash, cookedHash, COOKED_HASH_LENGTH);
   memcpy(this->salt, salt, SALT_LENGTH);
 }

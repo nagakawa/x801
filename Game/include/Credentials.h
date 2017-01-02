@@ -59,6 +59,11 @@ namespace x801 {
         std::string username,
         const uint8_t* cookedHash,
         const uint8_t* salt);
+      void replace(
+        uint32_t userID,
+        std::string username,
+        const uint8_t* cookedHash,
+        const uint8_t* salt);
     };
     class Credentials {
     public:
