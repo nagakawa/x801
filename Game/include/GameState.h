@@ -46,9 +46,11 @@ namespace x801 {
       AreaWithPlayers();
       AreaWithPlayers(GameState* g, std::istream& fh) :
           g(g), area(new x801::map::Area(fh)) {}
+      AreaWithPlayers(const AreaWithPlayers& other) = delete;
+      AreaWithPlayers& operator=(const AreaWithPlayers& other) = delete;
       ~AreaWithPlayers();
     private:
-      GameState* g;
+      GameState* g = nullptr;
       x801::map::Area* area = nullptr;
     };
     class GameState {
