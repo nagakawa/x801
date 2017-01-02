@@ -41,9 +41,6 @@ namespace x801 {
     extern const char* KEY_DIR;
     extern const char* KEY_PUBLIC;
     extern const char* KEY_PRIVATE;
-    class Server;
-    template <typename T>
-    void listenToPackets(T& t);
     class Server {
     public:
       Server(
@@ -86,7 +83,6 @@ namespace x801 {
         uint32_t, std::array<uint8_t, COOKIE_LEN>
       > cookiesByPlayer;
       GameState g;
-      friend void listenToPackets<Server>(Server& s);
     };
   }
 }

@@ -30,9 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    class Client;
-    template <typename T>
-    void listenToPackets(T& t);
     class Client {
     public:
       Client(
@@ -63,7 +60,6 @@ namespace x801 {
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       // char* publicKey;
-      friend void listenToPackets<Client>(Client& c);
     };
   }
 }
