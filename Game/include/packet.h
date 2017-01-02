@@ -43,5 +43,31 @@ namespace x801 {
         "RakNet defined too many pre-defined packet types!");
     uint8_t getPacketType(RakNet::Packet* p);
     size_t getPacketOffset(RakNet::Packet* p);
+    // To use this implement the following methods for T:
+    // void handlePacket(uint8_t packetType, uint8_t* body, size_t length, RakNet::Packet* p);
+    // void handleLPacket(uint16_t lPacketType, uint8_t* cookie, uint8_t* lbody, size_t llength, RakNet::Packet* p);
+    template <typename T>
+    void listenToPackets(T& t) {
+      while (true) {
+        for (
+            RakNet::Packet* p = t.peer->Receive();
+            p != nullptr;
+            t.peer->DeallocatePacket(p), p = t.peer->Receive()) {
+          uint8_t packetType = getPacketType(p);
+          size_t offset = getPacketOffset(p);
+          uint8_t* body = p->data + offset;
+          size_t length = p->length - offset;
+          if (packetType == PACKET_IM_LOGGED_IN) {
+            uint16_t lpacketType = (body[0] << 8) | body[1];
+            uint8_t* cookie = body + 2;
+            uint8_t* lbody = body + 10;
+            size_t llength = length - 10;
+            t.handleLPacket(lpacketType, cookie, lbody, llength, p);
+          } else {
+            t.handlePacket(packetType, body, length, p);
+          }
+        }
+      }
+    }
   }
 }
