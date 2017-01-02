@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <stdint.h>
+#include "utils.h"
 
 namespace x801 {
   namespace base {
@@ -40,8 +41,13 @@ namespace x801 {
           uint16_t letter, uint16_t preNum) :
         vMajor(x), vMinor(y), vPatch(z),
         prerelease((letter << 14) | (preNum & 0x3fff)) {}
-      Version(std::istream& fh);
-      Version() {}
+      Version(std::istream& fh) :
+        vMajor(readInt<uint16_t>(fh)),
+        vMinor(readInt<uint16_t>(fh)),
+        vPatch(readInt<uint16_t>(fh)),
+        prerelease(readInt<uint16_t>(fh)) {}
+      Version() :
+        vMajor(0), vMinor(0), vPatch(0), prerelease(0) {}
       int getPrereleaseType() { return prerelease >> 14; }
       int getPrereleaseNumber() { return prerelease & 0x3fff; }
       bool operator==(Version& other);

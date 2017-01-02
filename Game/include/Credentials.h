@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <string.h>
 #include <string>
 
 namespace x801 {
@@ -41,7 +42,7 @@ namespace x801 {
         const uint8_t* salt);
       StoredCredentials(const StoredCredentials& sc);
       StoredCredentials(StoredCredentials&& sc);
-      void operator=(const StoredCredentials& sc);
+      StoredCredentials& operator=(const StoredCredentials& sc);
       ~StoredCredentials();
       uint32_t getUserID() const { return userID; }
       std::string getUsernameS() const { return username; }
@@ -61,7 +62,15 @@ namespace x801 {
     };
     class Credentials {
     public:
-      Credentials(std::string username, std::string password);
+      Credentials(const std::string& username, const std::string& password) :
+        username(username), hash(new uint8_t[RAW_HASH_LENGTH]) {
+        fillHash(password);
+      }
+      Credentials(const Credentials& other) :
+        username(other.username), hash(new uint8_t[RAW_HASH_LENGTH]) {
+        memcpy(hash, other.hash, RAW_HASH_LENGTH);
+      }
+      Credentials& operator=(const Credentials& other);
       ~Credentials();
       std::string getUsernameS() const { return username; }
       const char* getUsername() const { return username.c_str(); }
@@ -71,6 +80,7 @@ namespace x801 {
     private:
       std::string username;
       uint8_t* hash;
+      void fillHash(const std::string& password);
     };
   }
 }

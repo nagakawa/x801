@@ -28,6 +28,8 @@ using namespace x801::map;
 #include <utils.h>
 #include "mapErrors.h"
 
+#pragma GCC diagnostic push                // we DO want an explicit ctor
+#pragma GCC diagnostic ignored "-Weffc++"  // since it has complex behaviour
 x801::map::Area::Area(std::istream& fh, bool dontCare) {
   error = 0;
   int header = x801::base::readInt<uint32_t>(fh);
@@ -48,6 +50,7 @@ x801::map::Area::Area(std::istream& fh, bool dontCare) {
     }
   }
 }
+#pragma GCC diagnostic pop
 
 void x801::map::Area::write(std::ostream& fh) const {
   x801::base::writeInt<uint32_t>(fh, 0x70614d58L);

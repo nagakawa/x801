@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
-#include <string.h>
 #include <argon2.h>
 #include "sha1.h"
 
@@ -33,15 +32,19 @@ static const int TIME_COST = 40;
 static const int MEMORY_COST = 12;
 static const int PARALLELISM = 1;
 
-x801::game::Credentials::Credentials(std::string username, std::string password) {
-  this->username = username;
-  hash = new uint8_t[RAW_HASH_LENGTH];
+void x801::game::Credentials::fillHash(const std::string& password) {
   argon2i_hash_raw(
     TIME_COST, MEMORY_COST, PARALLELISM,
     password.c_str(), password.length(),
     SALT, SALT_LENGTH,
     hash, RAW_HASH_LENGTH
   );
+}
+
+Credentials& x801::game::Credentials::operator=(const Credentials& other) {
+  username = other.username;
+  memcpy(hash, other.hash, RAW_HASH_LENGTH);
+  return *this;
 }
 
 x801::game::Credentials::~Credentials() {
@@ -84,10 +87,11 @@ x801::game::StoredCredentials::StoredCredentials(StoredCredentials&& sc) {
     std::move(sc.cookedHash), std::move(sc.salt));
 }
 
-void x801::game::StoredCredentials::operator=(const StoredCredentials& sc) {
+StoredCredentials& x801::game::StoredCredentials::operator=(const StoredCredentials& sc) {
   delete[] cookedHash;
   delete[] salt;
   build(sc.userID, sc.username, sc.cookedHash, sc.salt);
+  return *this;
 }
 
 void x801::game::StoredCredentials::build(

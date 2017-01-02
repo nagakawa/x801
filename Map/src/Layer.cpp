@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::map;
 
 #include <stdint.h>
-#include <utils.h>
 
 x801::map::Layer::~Layer() {
   delete[] map;
@@ -54,7 +53,7 @@ void x801::map::Layer::setMapBlockAtRaw(int x, int y, Block b) {
   map[index] = b;
 }
 
-x801::map::Layer::Layer(std::istream& handle) {
+/*x801::map::Layer::Layer(std::istream& handle) {
   width = x801::base::readInt<uint16_t>(handle);
   height = x801::base::readInt<uint16_t>(handle);
   xoff = x801::base::readInt<int16_t>(handle);
@@ -63,7 +62,7 @@ x801::map::Layer::Layer(std::istream& handle) {
   for (int i = 0; i < width * height; ++i) {
     map[i] = Block(x801::base::readInt<uint32_t>(handle));
   }
-}
+}*/
 
 void x801::map::Layer::write(std::ostream& handle) const {
   x801::base::writeInt<uint16_t>(handle, width);
@@ -75,7 +74,7 @@ void x801::map::Layer::write(std::ostream& handle) const {
   }
 }
 
-void x801::map::Layer::operator=(const Layer& that) {
+Layer& x801::map::Layer::operator=(const Layer& that) {
   width = that.width;
   height = that.height;
   xoff = that.xoff;
@@ -83,4 +82,5 @@ void x801::map::Layer::operator=(const Layer& that) {
   delete[] map;
   allocateBlocks();
   memcpy(map, that.map, width * height * sizeof(Block));
+  return *this;
 }

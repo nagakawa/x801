@@ -22,15 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::base;
 
-#include "utils.h"
-
-x801::base::Version::Version(std::istream& fh) {
-  vMajor = readInt<uint16_t>(fh);
-  vMinor = readInt<uint16_t>(fh);
-  vPatch = readInt<uint16_t>(fh);
-  prerelease = readInt<uint16_t>(fh);
-}
-
 bool x801::base::Version::operator==(Version& other) {
   return
     vMajor == other.vMajor &&

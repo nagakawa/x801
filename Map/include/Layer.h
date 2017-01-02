@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string.h>
 #include <iostream>
+#include <utils.h>
 
 namespace x801 {
   namespace map {
@@ -49,10 +50,18 @@ namespace x801 {
     class Layer {
     public:
       Layer(int w, int h, int xoff = 0, int yoff = 0) :
-          width(w), height(h), xoff(xoff), yoff(yoff) {
-        allocateBlocks();
+          width(w), height(h), xoff(xoff), yoff(yoff),
+          map(new Block[w * h]) {}
+      Layer(std::istream& handle) :
+        width(x801::base::readInt<uint16_t>(handle)),
+        height(x801::base::readInt<uint16_t>(handle)),
+        xoff(x801::base::readInt<int16_t>(handle)),
+        yoff(x801::base::readInt<int16_t>(handle)),
+        map(new Block[width * height]) {
+        for (int i = 0; i < width * height; ++i) {
+          map[i] = Block(x801::base::readInt<uint32_t>(handle));
+        }
       }
-      Layer(std::istream& handle);
       void write(std::ostream& handle) const;
       ~Layer();
       int getWidth() { return width; }
@@ -67,11 +76,11 @@ namespace x801 {
       void setMapBlockAtRaw(int x, int y, Block b);
       Layer(const Layer& that) :
           width(that.width), height(that.height),
-          xoff(that.xoff), yoff(that.yoff) {
-        allocateBlocks();
+          xoff(that.xoff), yoff(that.yoff),
+          map(new Block[that.width * that.height]) {
         memcpy(map, that.map, width * height * sizeof(Block));
       }
-      void operator=(const Layer& that);
+      Layer& operator=(const Layer& that);
     private:
       void allocateBlocks();
       int width, height;
