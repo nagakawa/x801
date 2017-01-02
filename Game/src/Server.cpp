@@ -43,6 +43,10 @@ void x801::game::Server::listen() {
         p != nullptr;
         peer->DeallocatePacket(p), p = peer->Receive()) {
       uint8_t packetType = getPacketType(p);
+      size_t offset = getPacketOffset(p);
+      uint8_t* body = p->data + offset;
+      size_t length = p->length - offset;
+      (void) body; (void) length;
       switch (packetType) {
         // Need to check packet type and follow the appropriate behaviour.
       }

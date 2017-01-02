@@ -41,6 +41,8 @@ const char* x801::game::DB_DIR = "saves/";
 const char* x801::game::DB_MAIN_PATH = "saves/me.x8d";
 const char* x801::game::DB_AUTH_PATH = "saves/auth.x8d";
 
+#pragma GCC diagnostic push                // we DO want an explicit ctor
+#pragma GCC diagnostic ignored "-Weffc++"  // since it has complex behaviour
 x801::game::Database::Database() {
   if (!boost::filesystem::is_directory(DB_DIR)) {
     std::cout <<
@@ -59,6 +61,7 @@ x801::game::Database::~Database() {
   sqlite3_close(me);
   sqlite3_close(auth);
 }
+#pragma GCC diagnostic pop
 
 void x801::game::Database::open(sqlite3*& handle, const char* path) {
   int status = sqlite3_open(path, &handle);

@@ -37,7 +37,7 @@ namespace x801 {
       void write(std::ostream& fh) const;
       TileSec(const TileSec& that) :
         layerCount(that.layerCount), layers(that.layers) {}
-      void operator=(const TileSec& that);
+      TileSec& operator=(const TileSec& that);
       Layer& operator[](int i) {
         return layers[i];
       }

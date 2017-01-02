@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <RakNetTypes.h>
 #include <SecureHandshake.h>
 #include <utils.h>
+#include "GameState.h"
 
 namespace x801 {
   namespace game {
@@ -62,6 +63,7 @@ namespace x801 {
         std::array<uint8_t, COOKIE_LEN>, uint32_t,
         x801::base::STDArrayHash<uint8_t, COOKIE_LEN>
       > playersByCookie;
+      GameState g;
     };
   }
 }

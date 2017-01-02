@@ -29,13 +29,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace game {
     enum PacketIDs {
-      PACKET_MOTD = ID_USER_PACKET_ENUM + 1,
+      PACKET_MOTD = 175,
       PACKET_LOGIN,
       PACKET_IM_LOGGED_IN,
+      PACKET_UNRECOGNISED_COOKIE,
     };
     enum LoggedPacketIDs {
       LPACKET_CHAT = 0,
+      LPACKET_RECEIVED_CHAT,
+      LPACKET_MOVE,
     };
+    static_assert((RakNet::MessageID) PACKET_MOTD > ID_USER_PACKET_ENUM,
+        "RakNet defined too many pre-defined packet types!");
     uint8_t getPacketType(RakNet::Packet* p);
+    size_t getPacketOffset(RakNet::Packet* p);
   }
 }

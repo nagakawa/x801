@@ -21,12 +21,15 @@ using namespace x801::map;
 
 #include <utils.h>
 
+#pragma GCC diagnostic push                // we DO want an explicit ctor
+#pragma GCC diagnostic ignored "-Weffc++"  // since it has complex behaviour
 x801::map::TileSec::TileSec(std::istream& fh) {
   layerCount = x801::base::readInt<uint16_t>(fh);
   for (int i = 0; i < layerCount; ++i) {
     layers.emplace_back(fh);
   }
 }
+#pragma GCC diagnostic pop
 
 void x801::map::TileSec::write(std::ostream& fh) const {
   x801::base::writeInt<uint16_t>(fh, layerCount);
@@ -35,7 +38,8 @@ void x801::map::TileSec::write(std::ostream& fh) const {
   }
 }
 
-void x801::map::TileSec::operator=(const TileSec& that) {
+TileSec& x801::map::TileSec::operator=(const TileSec& that) {
   layerCount = that.layerCount;
   layers = that.layers;
+  return *this;
 }
