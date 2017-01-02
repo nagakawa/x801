@@ -56,6 +56,7 @@ namespace x801 {
     class GameState {
     public:
       LoginStatus login(Credentials& c);
+      void logout(uint32_t id);
       Player& getPlayer(uint32_t id) {
         return allPlayers[id];
       }

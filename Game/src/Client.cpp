@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::game;
 
 #include <iostream>
+#include "packet.h"
 
 void x801::game::Client::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
@@ -33,6 +34,54 @@ void x801::game::Client::initialise() {
   auto status = peer->Connect(ipAddress.c_str(), port, nullptr, 0);
   if (status != RakNet::CONNECTION_ATTEMPT_STARTED) {
     throw "Connection failed...";
+  }
+}
+
+void x801::game::Client::handlePacket(
+    uint8_t packetType,
+    uint8_t* body, size_t length,
+    RakNet::Packet* p) {
+  (void) body; (void) length; (void) p;
+  switch (packetType) {
+  case ID_NO_FREE_INCOMING_CONNECTIONS:
+    std::cout << "The server is full.\n";
+    break;
+  case ID_CONNECTION_LOST:
+  case ID_DISCONNECTION_NOTIFICATION:
+    std::cout << "Connection lost.\n";
+    break;
+  }
+}
+void x801::game::Client::handleLPacket(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p) {
+  // TODO implement
+  (void) lbody; (void) llength; (void) p;
+  switch (lPacketType) {
+    
+  }
+}
+
+void x801::game::Client::listen() {
+  while (true) {
+    for (
+        RakNet::Packet* p = peer->Receive();
+        p != nullptr;
+        peer->DeallocatePacket(p), p = peer->Receive()) {
+      uint8_t packetType = getPacketType(p);
+      size_t offset = getPacketOffset(p);
+      uint8_t* body = p->data + offset;
+      size_t length = p->length - offset;
+      if (packetType == PACKET_IM_LOGGED_IN) {
+        uint16_t lpacketType = (body[0] << 8) | body[1];
+        uint8_t* lbody = body + 2;
+        size_t llength = length - 2;
+        handleLPacket(lpacketType, lbody, llength, p);
+      } else {
+        handlePacket(packetType, body, length, p);
+      }
+    }
   }
 }
 

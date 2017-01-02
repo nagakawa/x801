@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <array>
+#include <map>
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
 #include <MessageIdentifiers.h>
@@ -31,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <SecureHandshake.h>
 #include <utils.h>
 #include "GameState.h"
+#include "packet.h"
 
 namespace x801 {
   namespace game {
@@ -39,6 +41,9 @@ namespace x801 {
     extern const char* KEY_DIR;
     extern const char* KEY_PUBLIC;
     extern const char* KEY_PRIVATE;
+    class Server;
+    template <typename T>
+    void listenToPackets(T& t);
     class Server {
     public:
       Server(
@@ -55,15 +60,33 @@ namespace x801 {
     private:
       void initialise();
       void updateKeyFiles();
+      void handlePacket(
+        uint8_t packetType,
+        uint8_t* body, size_t length,
+        RakNet::Packet* p
+      );
+      void handleLPacket(
+        uint16_t lPacketType, uint8_t* cookie,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
       void listen();
+      void logout(uint32_t playerID);
       RakNet::RakPeerInterface* peer = nullptr;
       char* publicKey = nullptr;
       char* privateKey = nullptr;
+      // When the client disconnects without sending a proper logout message,
+      // all we have will be their address.
+      std::map<RakNet::SystemAddress, uint32_t> playersByAddress;
       std::unordered_map<
         std::array<uint8_t, COOKIE_LEN>, uint32_t,
         x801::base::STDArrayHash<uint8_t, COOKIE_LEN>
       > playersByCookie;
+      std::unordered_map<
+        uint32_t, std::array<uint8_t, COOKIE_LEN>
+      > cookiesByPlayer;
       GameState g;
+      friend void listenToPackets<Server>(Server& s);
     };
   }
 }

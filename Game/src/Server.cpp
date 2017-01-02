@@ -36,6 +36,43 @@ void x801::game::Server::initialise() {
   peer->SetMaximumIncomingConnections(maxConnections);
 }
 
+void x801::game::Server::logout(uint32_t playerID) {
+  std::array<uint8_t, COOKIE_LEN>& cookie = cookiesByPlayer[playerID];
+  playersByCookie.erase(cookie);
+  cookiesByPlayer.erase(playerID);
+  g.logout(playerID);
+}
+
+void x801::game::Server::handlePacket(
+    uint8_t packetType,
+    uint8_t* body, size_t length,
+    RakNet::Packet* p) {
+  (void) body; (void) length;
+  switch (packetType) {
+  case ID_CONNECTION_LOST:
+  case ID_DISCONNECTION_NOTIFICATION: {
+      // gracefully log out player
+      uint32_t playerID = playersByAddress[p->systemAddress];
+      logout(playerID);
+      playersByAddress.erase(p->systemAddress);
+    }
+  }
+}
+void x801::game::Server::handleLPacket(
+    uint16_t lPacketType, uint8_t* cookie,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p) {
+  // TODO implement
+  (void) lbody; (void) llength; (void) p;
+  std::array<uint8_t, COOKIE_LEN> cookieAsArray;
+  for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
+  uint32_t playerID = playersByCookie[cookieAsArray];
+  (void) playerID;
+  switch (lPacketType) {
+    
+  }
+}
+
 void x801::game::Server::listen() {
   while (true) {
     for (
@@ -46,9 +83,14 @@ void x801::game::Server::listen() {
       size_t offset = getPacketOffset(p);
       uint8_t* body = p->data + offset;
       size_t length = p->length - offset;
-      (void) body; (void) length;
-      switch (packetType) {
-        // Need to check packet type and follow the appropriate behaviour.
+      if (packetType == PACKET_IM_LOGGED_IN) {
+        uint16_t lpacketType = (body[0] << 8) | body[1];
+        uint8_t* cookie = body + 2;
+        uint8_t* lbody = body + 10;
+        size_t llength = length - 10;
+        handleLPacket(lpacketType, cookie, lbody, llength, p);
+      } else {
+        handlePacket(packetType, body, length, p);
       }
     }
   }

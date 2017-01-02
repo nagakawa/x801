@@ -29,27 +29,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <SecureHandshake.h>
 
 namespace x801 {
-    namespace game {
-        class Client {
-        public:
-          Client(
-              std::string ipAddress,
-              uint16_t port
-          ) : port(port),
-              ipAddress(ipAddress) {
-            initialise();
-          }
-          ~Client();
-          Client(const Client& s) = delete;
-          void operator=(const Client& s) = delete;
-          const uint16_t port;
-          std::string getIPAddress() const { return ipAddress; }
-        private:
-          void initialise();
-          void listen();
-          RakNet::RakPeerInterface* peer = nullptr;
-          std::string ipAddress;
-          // char* publicKey;
-        };
-    }
+  namespace game {
+    class Client;
+    template <typename T>
+    void listenToPackets(T& t);
+    class Client {
+    public:
+      Client(
+          std::string ipAddress,
+          uint16_t port
+      ) : port(port),
+          ipAddress(ipAddress) {
+        initialise();
+      }
+      ~Client();
+      Client(const Client& s) = delete;
+      void operator=(const Client& s) = delete;
+      const uint16_t port;
+      std::string getIPAddress() const { return ipAddress; }
+    private:
+      void initialise();
+      void handlePacket(
+        uint8_t packetType,
+        uint8_t* body, size_t length,
+        RakNet::Packet* p
+      );
+      void handleLPacket(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
+      void listen();
+      RakNet::RakPeerInterface* peer = nullptr;
+      std::string ipAddress;
+      // char* publicKey;
+      friend void listenToPackets<Client>(Client& c);
+    };
+  }
 }

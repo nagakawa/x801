@@ -30,7 +30,7 @@ x801::game::AreaWithPlayers::~AreaWithPlayers() {
   delete area;
 }
 
-LoginStatus GameState::login(Credentials& c) {
+LoginStatus x801::game::GameState::login(Credentials& c) {
   StoredCredentials sc;
   bool succeeded = db.getUserByName(c.getUsername(), sc);
   if (!succeeded) return LOGIN_INVALID_CREDENTIALS;
@@ -47,4 +47,10 @@ LoginStatus GameState::login(Credentials& c) {
     std::forward_as_tuple(id, db)  
   );
   return LOGIN_OK;
+}
+
+void x801::game::GameState::logout(uint32_t id) {
+  allPlayers.erase(id);
+  idsByUsername.erase(usernamesByID[id]);
+  usernamesByID.erase(id);
 }
