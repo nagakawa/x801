@@ -43,7 +43,7 @@ namespace x801 {
       Server(
           uint16_t port,
           unsigned short maxConnections = DEFAULT_MAX_CONNECTIONS
-      ) : maxConnections(maxConnections), port(port) {
+      ) : maxConnections(maxConnections), port(port), playersByCookie() {
         initialise();
       }
       ~Server();

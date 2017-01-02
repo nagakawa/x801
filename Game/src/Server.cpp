@@ -44,7 +44,7 @@ void x801::game::Server::listen() {
         peer->DeallocatePacket(p), p = peer->Receive()) {
       uint8_t packetType = getPacketType(p);
       switch (packetType) {
-        //
+        // Need to check packet type and follow the appropriate behaviour.
       }
     }
   }
