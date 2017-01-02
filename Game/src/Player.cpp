@@ -24,10 +24,12 @@ using namespace x801::game;
 
 #include <utils.h>
 
-x801::game::Player::Player(uint32_t id, Database& db) {
-  playerID = id;
-  db.loadPlayerLocation(id, location);
-}
+const Location x801::game::defaultLocation = {
+  {0, 0},
+  0,
+  0.0f, 0.0f,
+  0.0f
+};
 
 x801::game::Player::~Player() {
   // nothing

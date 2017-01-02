@@ -69,6 +69,8 @@ bool x801::game::Credentials::matches(StoredCredentials& sc) const {
   return res == 0;
 }
 
+#pragma GCC diagnostic push                // we DO want an explicit ctor since the header
+#pragma GCC diagnostic ignored "-Weffc++"  // would otherwise be hard to read
 x801::game::StoredCredentials::StoredCredentials(
     uint32_t userID,
     std::string username,
@@ -116,6 +118,8 @@ void x801::game::StoredCredentials::replace(
   memcpy(this->cookedHash, cookedHash, COOKED_HASH_LENGTH);
   memcpy(this->salt, salt, SALT_LENGTH);
 }
+
+#pragma GCC diagnostic pop
 
 x801::game::StoredCredentials::~StoredCredentials() {
   delete[] cookedHash;

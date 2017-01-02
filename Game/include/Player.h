@@ -27,15 +27,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    extern const Location defaultLocation;
     class Player {
     public:
-      Player() : playerID(0), location{{0, 0}, 0, 0.0f, 0.0f, 0.0f} {}
-      Player(uint32_t id, Database& db);
+      Player() : playerID(0), location(defaultLocation) {}
+#pragma GCC diagnostic push                // fixing this warning will affect
+#pragma GCC diagnostic ignored "-Weffc++"  // the signature of the method at hand
+      Player(uint32_t id, Database& db) : playerID(id) {
+        if (!db.loadPlayerLocation(id, location))
+          location = defaultLocation;
+      }
+#pragma GCC diagnostic pop
       Player(const Player& other) :
         playerID(other.playerID), location(other.location) {}
-      inline void operator=(const Player& other) {
+      inline Player& operator=(const Player& other) {
         playerID = other.playerID;
         location = other.location;
+        return *this;
       }
       // Player(const char* username, const uint8_t* passHash);
       Location& getLocation() { return location; }
