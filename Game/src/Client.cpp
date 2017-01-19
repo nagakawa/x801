@@ -22,8 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <algorithm>
 #include <iostream>
-#include "packet.h"
 
 void x801::game::Client::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
@@ -51,6 +51,14 @@ void x801::game::Client::handlePacket(
     std::cout << "Connection lost.\n";
     break;
   }
+  auto range = callbacks.equal_range(packetType);
+  for_each(
+    range.first, range.second,
+    [packetType, body, length, p](auto& pair) {
+      pair.second.call(packetType, body, length, p);
+      --pair.second.timesLeft;
+    }
+  );
 }
 void x801::game::Client::handleLPacket(
     uint16_t lPacketType,
@@ -59,8 +67,16 @@ void x801::game::Client::handleLPacket(
   // TODO implement
   (void) lbody; (void) llength; (void) p;
   switch (lPacketType) {
-    
+    //
   }
+  auto range = lCallbacks.equal_range(lPacketType);
+  for_each(
+    range.first, range.second,
+    [lPacketType, lbody, llength, p](auto& pair) {
+      pair.second.call(lPacketType, nullptr, lbody, llength, p);
+      --pair.second.timesLeft;
+    }
+  );
 }
 
 void x801::game::Client::listen() {

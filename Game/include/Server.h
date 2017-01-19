@@ -82,6 +82,8 @@ namespace x801 {
       std::unordered_map<
         uint32_t, std::array<uint8_t, COOKIE_LEN>
       > cookiesByPlayer;
+      std::unordered_multimap<uint8_t, PacketCallback> callbacks;
+      std::unordered_multimap<uint16_t, LPacketCallback> lCallbacks;
       GameState g;
     };
   }

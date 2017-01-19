@@ -22,10 +22,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <algorithm>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <BitStream.h>
+#include <RakNetTypes.h>
 #include "packet.h"
+
+static const char* SERVER_MOTD =
+  "This is the default server MOTD (message of the day).\n"
+  "Currently this is hardcoded into the application, but eventually\n"
+  "you'll be able to change it through configuration files."
+  ;
 
 void x801::game::Server::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
@@ -56,7 +65,26 @@ void x801::game::Server::handlePacket(
       logout(playerID);
       playersByAddress.erase(p->systemAddress);
     }
+  case PACKET_MOTD: {
+      RakNet::BitStream stream;
+      stream.Write(static_cast<RakNet::MessageID>(PACKET_MOTD));
+      writeStringToBitstream32(stream, SERVER_MOTD);
+      peer->Send(
+        &stream,
+        HIGH_PRIORITY, RELIABLE_ORDERED,
+        0, p->systemAddress,
+        false
+      );
+    }
   }
+  auto range = callbacks.equal_range(packetType);
+  for_each(
+    range.first, range.second,
+    [packetType, body, length, p](auto& pair) {
+      pair.second.call(packetType, body, length, p);
+      --pair.second.timesLeft;
+    }
+  );
 }
 void x801::game::Server::handleLPacket(
     uint16_t lPacketType, uint8_t* cookie,
@@ -69,8 +97,16 @@ void x801::game::Server::handleLPacket(
   uint32_t playerID = playersByCookie[cookieAsArray];
   (void) playerID;
   switch (lPacketType) {
-    
+    //
   }
+  auto range = lCallbacks.equal_range(lPacketType);
+  for_each(
+    range.first, range.second,
+    [lPacketType, cookie, lbody, llength, p](auto& pair) {
+      pair.second.call(lPacketType, cookie, lbody, llength, p);
+      --pair.second.timesLeft;
+    }
+  );
 }
 
 void x801::game::Server::listen() {

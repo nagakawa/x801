@@ -95,5 +95,28 @@ namespace x801 {
         return boost::hash_value(array);
       }
     };
+
+    template <typename Str>
+    size_t getLength(const Str s) {
+      static_assert(x801::base::assert_false<Str>::value,
+        "getLength has not been specialised for this type");
+      (void) s;
+      return 0;
+    }
+    template <typename Str>
+    const char* getPointer(const Str s) {
+      static_assert(x801::base::assert_false<Str>::value,
+        "getPointer has not been specialised for this type");
+      (void) s;
+      return nullptr;
+    }
+    template<>
+    size_t getLength(const char* s);
+    template<>
+    size_t getLength(std::string s);
+    template<>
+    const char* getPointer(const char* s);
+    template<>
+    const char* getPointer(std::string s);
   }
 }

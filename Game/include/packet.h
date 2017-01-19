@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <functional>
+#include <BitStream.h>
 #include <MessageIdentifiers.h>
 #include <RakNetTypes.h>
 
@@ -43,5 +44,29 @@ namespace x801 {
         "RakNet defined too many pre-defined packet types!");
     uint8_t getPacketType(RakNet::Packet* p);
     size_t getPacketOffset(RakNet::Packet* p);
+    void writeStringToBitstream32(RakNet::BitStream& stream, const char* string);
+    void writeStringToBitstream16(RakNet::BitStream& stream, const char* string);
+    void writeStringToBitstream32(RakNet::BitStream& stream, const std::string& string);
+    void writeStringToBitstream16(RakNet::BitStream& stream, const std::string& string);
+    struct PacketCallback {
+      std::function<
+        void(
+          uint8_t packetType,
+          uint8_t* body, size_t length,
+          RakNet::Packet* p
+        )
+      > call;
+      int timesLeft;
+    };
+    struct LPacketCallback {
+      std::function<
+        void(
+          uint16_t lPacketType, uint8_t* cookie,
+          uint8_t* lbody, size_t llength,
+          RakNet::Packet* p
+        )
+      > call;
+      int timesLeft;
+    };
   }
 }

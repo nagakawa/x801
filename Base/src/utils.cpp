@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sstream>
 #include <string>
 #include <boost/random/random_device.hpp>
@@ -164,4 +165,28 @@ void x801::base::writeRandomBytes(uint8_t* buffer, int length) {
   boost::random::uniform_int_distribution<> dist(0, 255);
   for (int i = 0; i < length; ++i)
     buffer[i] = static_cast<uint8_t>(dist(random));
+}
+
+namespace x801 {
+  namespace base {
+    template<>
+    size_t getLength(const char* s) {
+      return strlen(s);
+    }
+
+    template<>
+    size_t getLength(std::string s) {
+      return s.length();
+    }
+
+    template<>
+    const char* getPointer(const char* s) {
+      return s;
+    }
+
+    template<>
+    const char* getPointer(std::string s) {
+      return s.c_str();
+    }
+  }
 }

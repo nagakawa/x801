@@ -23,10 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <string>
+#include <unordered_map>
 #include <MessageIdentifiers.h>
 #include <RakPeerInterface.h>
 #include <RakNetTypes.h>
 #include <SecureHandshake.h>
+#include "packet.h"
 
 namespace x801 {
   namespace game {
@@ -59,6 +61,8 @@ namespace x801 {
       void listen();
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
+      std::unordered_multimap<uint8_t, PacketCallback> callbacks;
+      std::unordered_multimap<uint16_t, LPacketCallback> lCallbacks;
       // char* publicKey;
     };
   }
