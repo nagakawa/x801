@@ -52,13 +52,12 @@ void x801::game::Client::handlePacket(
     break;
   }
   auto range = callbacks.equal_range(packetType);
-  for_each(
-    range.first, range.second,
-    [packetType, body, length, p](auto& pair) {
-      pair.second.call(packetType, body, length, p);
-      --pair.second.timesLeft;
-    }
-  );
+  for (auto iterator = range.first; iterator != range.second;) {
+    iterator->second.call(packetType, body, length, p);
+    if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
+    if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
+    else ++iterator;
+  }
 }
 void x801::game::Client::handleLPacket(
     uint16_t lPacketType,
@@ -70,13 +69,12 @@ void x801::game::Client::handleLPacket(
     //
   }
   auto range = lCallbacks.equal_range(lPacketType);
-  for_each(
-    range.first, range.second,
-    [lPacketType, lbody, llength, p](auto& pair) {
-      pair.second.call(lPacketType, nullptr, lbody, llength, p);
-      --pair.second.timesLeft;
-    }
-  );
+  for (auto iterator = range.first; iterator != range.second;) {
+    iterator->second.call(lPacketType, nullptr, lbody, llength, p);
+    if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
+    if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
+    else ++iterator;
+  }
 }
 
 void x801::game::Client::listen() {
