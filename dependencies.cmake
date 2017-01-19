@@ -82,8 +82,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
 
-# Was going to pass in -Weffc++ but RakNet code doesn't comply with its rules.
-SET(COMMON_FLAGS "-std=c++14 -Wall -Wpedantic -Wextra -Werror -fno-builtin -Wno-error=effc++ -Weffc++")
+# Was going to pass in -Weffc++ but it blindly tells you to initialise fields in an
+# initialiser list, even when it's more readable to initialise it in the constructor
+# body.
+SET(COMMON_FLAGS "-std=c++14 -Wall -Wpedantic -Wextra -Werror -fno-builtin")
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${COMMON_FLAGS} -O0 -g")
 #SET(CMAKE_C_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -ffat-lto-objects -flto")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${COMMON_FLAGS} -O3 -ffat-lto-objects -flto")
