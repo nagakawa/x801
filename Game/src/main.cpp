@@ -31,24 +31,33 @@ using namespace x801::game;
 #include "Server.h"
 
 int lmain(int argc, char** argv) {
-  CLineConfig c;
-  int res = readSettings(c, argc, argv);
-  if (res != 0) return res;
-  std::cout << "Hello from Athena V.\n";
-  if (c.mode == CLIENT) {
-    std::cout << "You intend to connect to a server.\n";
-    Client client(c.ip, c.port);
-  } else {
-    std::cout << "You intend to start a server.\n";
-    Server server(c.port, DEFAULT_MAX_CONNECTIONS);
+  try {
+    CLineConfig c;
+    int res = readSettings(c, argc, argv);
+    if (res != 0) return res;
+    std::cout << "Hello from Athena V.\n";
+    if (c.mode == CLIENT) {
+      std::cout << "You intend to connect to a server.\n";
+      Client client(c.ip, c.port, c.useIPV6);
+    } else {
+      std::cout << "You intend to start a server.\n";
+      Server server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);
+    }
+  } catch (const char* c) {
+    std::cerr << c << '\n';
+    return -1;
   }
   return 0;
 }
 
 const char* x801::game::USAGE =
   "Usage:\n"
-  "  Game --client <address> <port>\n"
-  "  Game --server <port>\n";
+  "  Game [-6] --client <address> <port>\n"
+  "  Game [-6] --server <port>\n"
+  "  -6 (--use-ipv6): use IPV6\n"
+  "  --client <address> <port> (-c): start a client\n"
+  "  --server <port> (-s): start a server\n"
+  ;
 
 int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
   bool ok = true;
@@ -60,8 +69,12 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
       if (mode == CLIENT) {
         // get an IP address and a port
         cn.ip = argv[i];
-        int port = atoi(argv[++i]); // Come on. SLAP ME.
-        if (port == 0) ok = false;
+        if (i + 1 >= argc) ok = false;
+        else {
+          int port = atoi(argv[++i]); // Come on. SLAP ME.
+          if (port == 0) ok = false;
+          else cn.port = (uint16_t) port;
+        }
       } else if (mode == SERVER) {
         int port = atoi(argv[i]);
         if (port == 0) ok = false;
@@ -72,6 +85,7 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
       if (arg[1] == '-') {
         if (!strcmp(arg + 2, "client")) mode = CLIENT;
         else if (!strcmp(arg + 2, "server")) mode = SERVER;
+        else if (!strcmp(arg + 2, "use-ipv6")) cn.useIPV6 = true;
         else ok = false;
       } else {
         for (int j = 1; arg[j] != '\0'; ++j) {
@@ -81,6 +95,8 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
             mode = CLIENT; break;
           case 's':
             mode = SERVER; break;
+          case '6':
+            cn.useIPV6 = true; break;
           default:
             ok = false;
           }

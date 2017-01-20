@@ -24,61 +24,99 @@ using namespace x801::game;
 
 #include <algorithm>
 #include <iostream>
+#include <BitStream.h>
+#include <SecureHandshake.h>
 
 void x801::game::Client::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
   RakNet::SocketDescriptor clientSocket(0, 0);
-  clientSocket.socketFamily = AF_INET;
+  clientSocket.socketFamily = useIPV6 ? AF_INET6 : AF_INET;
   peer->Startup(1, &clientSocket, 1);
   peer->SetOccasionalPing(true);
-  auto status = peer->Connect(ipAddress.c_str(), port, nullptr, 0);
+  RakNet::PublicKey pk;
+  pk.publicKeyMode = RakNet::PKM_ACCEPT_ANY_PUBLIC_KEY;
+  publicKey = new char[cat::EasyHandshake::PUBLIC_KEY_BYTES];
+  pk.remoteServerPublicKey = publicKey;
+  auto status = peer->Connect(ipAddress.c_str(), port, nullptr, 0, &pk);
   if (status != RakNet::CONNECTION_ATTEMPT_STARTED) {
     throw "Connection failed...";
   }
+  // set packet callbacks
+  PacketCallback logoutCallback = {
+    [](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        (void) packetType; (void) body; (void) length; (void) p;
+        std::cout << "You have been disconnected.";
+      }, -1
+  };
+  callbacks.insert({ID_CONNECTION_LOST, logoutCallback});
+  callbacks.insert({ID_DISCONNECTION_NOTIFICATION, logoutCallback});
+  PacketCallback connectCallback = {
+    [this](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        (void) packetType; (void) body; (void) length; (void) p;
+        std::cout << "MOTD:\n";
+        this->requestMOTD();
+      }, -1
+  };
+  callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
+  listen();
 }
 
-void x801::game::Client::handlePacket(
+bool x801::game::Client::handlePacket(
     uint8_t packetType,
     uint8_t* body, size_t length,
     RakNet::Packet* p) {
   (void) body; (void) length; (void) p;
+  std::cerr << "It's a packet! ID = " << (int) packetType << "\n";
   switch (packetType) {
   case ID_NO_FREE_INCOMING_CONNECTIONS:
     std::cout << "The server is full.\n";
-    break;
+    return false;
   case ID_CONNECTION_LOST:
   case ID_DISCONNECTION_NOTIFICATION:
     std::cout << "Connection lost.\n";
-    break;
+    return false;
+  case ID_CONNECTION_ATTEMPT_FAILED:
+    std::cout << "Failed to connect to server.\n";
+    return false;
   }
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
-    iterator->second.call(packetType, body, length, p);
+    (iterator->second.call)(packetType, body, length, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
     else ++iterator;
   }
+  return true;
 }
-void x801::game::Client::handleLPacket(
+bool x801::game::Client::handleLPacket(
     uint16_t lPacketType,
     uint8_t* lbody, size_t llength,
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
+  std::cerr << "It's an lpacket!\n";
   switch (lPacketType) {
     //
   }
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
-    iterator->second.call(lPacketType, nullptr, lbody, llength, p);
+    (iterator->second.call)(lPacketType, nullptr, lbody, llength, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
   }
+  return true;
 }
 
 void x801::game::Client::listen() {
-  while (true) {
+  bool shouldContinue = true;
+  while (shouldContinue) {
     for (
         RakNet::Packet* p = peer->Receive();
         p != nullptr;
@@ -91,14 +129,41 @@ void x801::game::Client::listen() {
         uint16_t lpacketType = (body[0] << 8) | body[1];
         uint8_t* lbody = body + 2;
         size_t llength = length - 2;
-        handleLPacket(lpacketType, lbody, llength, p);
+        shouldContinue = handleLPacket(lpacketType, lbody, llength, p);
       } else {
-        handlePacket(packetType, body, length, p);
+        shouldContinue = handlePacket(packetType, body, length, p);
       }
     }
   }
 }
 
+void x801::game::Client::requestMOTD(PacketCallback motdCallback) {
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(PACKET_MOTD));
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+  callbacks.insert({PACKET_MOTD, motdCallback});
+}
+
+void x801::game::Client::requestMOTD() {
+  PacketCallback motdCallback = {
+    [this](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        (void) packetType; (void) p;
+        RakNet::BitStream stream(body, length, false);
+        const char* s = readStringFromBitstream32(stream);
+        std::cout << s << '\n';
+        delete[] s;
+      }, 1
+  };
+  requestMOTD(motdCallback);
+}
+
 x801::game::Client::~Client() {
   RakNet::RakPeerInterface::DestroyInstance(peer);
+  delete[] publicKey;
 }

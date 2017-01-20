@@ -63,3 +63,21 @@ void x801::game::writeStringToBitstream16(
   RakNet::BitStream& stream, const std::string& string) {
   writeString<const std::string&, uint16_t>(stream, string);
 }
+
+char* x801::game::readStringFromBitstream32(RakNet::BitStream& stream) {
+  uint32_t length;
+  stream.Read(length);
+  char* c = new char[length + 1];
+  stream.Read(c, length);
+  c[length] = '\0';
+  return c;
+}
+
+char* x801::game::readStringFromBitstream16(RakNet::BitStream& stream) {
+  uint16_t length;
+  stream.Read(length);
+  char* c = new char[length + 1];
+  stream.Read(c, length);
+  c[length] = '\0';
+  return c;
+}

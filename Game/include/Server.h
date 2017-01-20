@@ -45,8 +45,10 @@ namespace x801 {
     public:
       Server(
           uint16_t port,
-          unsigned short maxConnections = DEFAULT_MAX_CONNECTIONS
-      ) : maxConnections(maxConnections), port(port), playersByCookie() {
+          unsigned short maxConnections = DEFAULT_MAX_CONNECTIONS,
+          bool useIPV6 = false
+      ) : maxConnections(maxConnections), port(port),
+          useIPV6(useIPV6), playersByCookie() {
         initialise();
       }
       ~Server();
@@ -69,9 +71,20 @@ namespace x801 {
       );
       void listen();
       void logout(uint32_t playerID);
+      void logoutByPacket(
+        uint8_t packetType,
+        uint8_t* body, size_t length,
+        RakNet::Packet* p
+      );
+      void sendMOTD(
+        uint8_t packetType,
+        uint8_t* body, size_t length,
+        RakNet::Packet* p
+      );
       RakNet::RakPeerInterface* peer = nullptr;
       char* publicKey = nullptr;
       char* privateKey = nullptr;
+      bool useIPV6;
       // When the client disconnects without sending a proper logout message,
       // all we have will be their address.
       std::map<RakNet::SystemAddress, uint32_t> playersByAddress;
