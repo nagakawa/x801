@@ -7,3 +7,6 @@
 [submodule "tdr"]
 	path = tdr
 	url = https://github.com/nagakawa/tdr
+[submodule "imgui"]
+	path = imgui
+	url = https://github.com/nagakawa/imgui
