@@ -67,9 +67,14 @@ namespace x801 {
     };
     class Credentials {
     public:
+      Credentials() : username(""), hash(nullptr) {}
       Credentials(const std::string& username, const std::string& password) :
         username(username), hash(new uint8_t[RAW_HASH_LENGTH]) {
         fillHash(password);
+      }
+      Credentials(const std::string& username, const uint8_t* h) :
+        username(username), hash(new uint8_t[RAW_HASH_LENGTH]) {
+        memcpy(hash, h, RAW_HASH_LENGTH);
       }
       Credentials(const Credentials& other) :
         username(other.username), hash(new uint8_t[RAW_HASH_LENGTH]) {

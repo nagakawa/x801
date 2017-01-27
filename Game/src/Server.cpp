@@ -63,6 +63,15 @@ void x801::game::Server::initialise() {
       }, -1
   };
   callbacks.insert({PACKET_MOTD, motdCallback});
+  PacketCallback loginCallback = {
+    [this](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        this->processLogin(packetType, body, length, p);
+      }, -1
+  };
+  callbacks.insert({PACKET_LOGIN, loginCallback});
   listen();
 }
 
@@ -80,6 +89,10 @@ void x801::game::Server::handlePacket(
   std::cerr << "It's a packet! ID = " << (int) packetType << "\n";
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
+    if (iterator->first != packetType) {
+      ++iterator;
+      continue;
+    }
     (iterator->second.call)(packetType, body, length, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
@@ -99,6 +112,10 @@ void x801::game::Server::handleLPacket(
   (void) playerID;
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
+    if (iterator->first != lPacketType) {
+      ++iterator;
+      continue;
+    }
     (iterator->second.call)(lPacketType, nullptr, lbody, llength, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
@@ -219,5 +236,41 @@ void x801::game::Server::sendMOTD(
     HIGH_PRIORITY, RELIABLE_ORDERED,
     0, p->systemAddress,
     false
+  );
+}
+
+LoginStatus x801::game::Server::login(
+    Credentials& cred, uint32_t& playerID, uint8_t* cookie) {
+  LoginStatus stat = g.login(cred, playerID);
+  if (stat != LOGIN_OK) return stat;
+  x801::base::writeRandomBytes(cookie, COOKIE_LEN);
+  std::array<uint8_t, COOKIE_LEN> cookieAsArray;
+  for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
+  playersByCookie[cookieAsArray] = playerID;
+  cookiesByPlayer[playerID] = cookieAsArray;
+  return stat;
+}
+
+void x801::game::Server::processLogin(
+    uint8_t packetType,
+    uint8_t* body, size_t length,
+    RakNet::Packet* p) {
+  (void) packetType;
+  RakNet::BitStream stream(body, length, false);
+  std::string string = readStringFromBitstream16(stream);
+  uint8_t hash[RAW_HASH_LENGTH];
+  stream.Read((char*) hash, RAW_HASH_LENGTH);
+  Credentials cred(string, hash);
+  uint8_t output[2 + COOKIE_LEN];
+  output[0] = PACKET_LOGIN;
+  uint32_t playerID;
+  LoginStatus status = login(cred, playerID, output + 2);
+  if (status == LOGIN_OK)
+    playersByAddress[p->systemAddress] = playerID;
+  output[1] = (uint8_t) status;
+  std::cerr << "Login status was " << status << '\n';
+  peer->Send(
+    (const char*) output, 2 + COOKIE_LEN, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    p->systemAddress, false
   );
 }

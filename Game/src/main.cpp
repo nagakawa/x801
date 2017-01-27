@@ -22,15 +22,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <string>
 #include <portable_endian.h>
 #include "Client.h"
+#include "Credentials.h"
 #include "Server.h"
 
 int lmain(int argc, char** argv) {
+  setlocale(LC_ALL, "");
   try {
     CLineConfig c;
     int res = readSettings(c, argc, argv);
@@ -38,7 +42,15 @@ int lmain(int argc, char** argv) {
     std::cout << "Hello from Athena V.\n";
     if (c.mode == CLIENT) {
       std::cout << "You intend to connect to a server.\n";
+      std::string username, password; 
+      std::cout << "Username: ";
+      std::cin >> username;
+      std::cout << "Password: ";
+      std::cin >> password;
+      Credentials cred(username, password);
       Client client(c.ip, c.port, c.useIPV6);
+      client.login(cred);
+      client.getListenThread().join();
     } else {
       std::cout << "You intend to start a server.\n";
       Server server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);
