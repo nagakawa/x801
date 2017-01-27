@@ -24,6 +24,7 @@ using namespace x801::game;
 
 #include <algorithm>
 #include <iostream>
+#include <GLFW/glfw3.h>
 #include <BitStream.h>
 #include <SecureHandshake.h>
 
@@ -64,6 +65,7 @@ void x801::game::Client::initialise() {
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
+  openWindowConcurrent();
   listen();
 }
 
@@ -135,6 +137,7 @@ void x801::game::Client::listen() {
       }
     }
   }
+  if (cw != nullptr) glfwSetWindowShouldClose(cw->underlying(), true);
 }
 
 void x801::game::Client::requestMOTD(PacketCallback motdCallback) {
@@ -163,7 +166,18 @@ void x801::game::Client::requestMOTD() {
   requestMOTD(motdCallback);
 }
 
+void x801::game::Client::openWindow() {
+  cw = new ClientWindow(1024, 768, 0, 0, "Experiment801", 3, 3, false);
+  cw->c = this;
+  cw->start();
+}
+
+void x801::game::Client::openWindowConcurrent() {
+  windowThread = std::thread([this]() { this->openWindow(); });
+}
+
 x801::game::Client::~Client() {
+  done = true;
   RakNet::RakPeerInterface::DestroyInstance(peer);
   delete[] publicKey;
 }

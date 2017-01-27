@@ -23,11 +23,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <MessageIdentifiers.h>
 #include <RakPeerInterface.h>
 #include <RakNetTypes.h>
 #include <SecureHandshake.h>
+namespace x801 {
+  namespace game {
+    class Client;
+  }
+}
+#include "ClientWindow.h"
+#include "GameState.h"
 #include "packet.h"
 
 namespace x801 {
@@ -48,6 +56,7 @@ namespace x801 {
       void operator=(const Client& s) = delete;
       const uint16_t port;
       std::string getIPAddress() const { return ipAddress; }
+      bool isDone() { return done; }
     private:
       void initialise();
       bool handlePacket(
@@ -63,12 +72,18 @@ namespace x801 {
       void listen();
       void requestMOTD();
       void requestMOTD(PacketCallback motdCallback);
+      void openWindow();
+      void openWindowConcurrent();
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;
       std::unordered_multimap<uint8_t, PacketCallback> callbacks;
       std::unordered_multimap<uint16_t, LPacketCallback> lCallbacks;
       char* publicKey = nullptr;
+      GameState g;
+      ClientWindow* cw = nullptr;
+      volatile bool done = false;
+      std::thread windowThread;
     };
   }
 }

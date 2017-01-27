@@ -147,9 +147,7 @@ Temporary Items
 .apdisk
 
 # exe output
-build/Test
-build/x801
-build/MapC
+build/
 
 # public and private keys
 build/keys/
