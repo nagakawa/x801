@@ -30,13 +30,13 @@ x801::game::AreaWithPlayers::~AreaWithPlayers() {
   delete area;
 }
 
-LoginStatus x801::game::GameState::login(Credentials& c) {
+LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
   StoredCredentials sc;
   bool succeeded = db.getUserByName(c.getUsername(), sc);
   if (!succeeded) return LOGIN_INVALID_CREDENTIALS;
   assert(strcmp(c.getUsername(), sc.getUsername()) == 0);
   if (!c.matches(sc)) return LOGIN_INVALID_CREDENTIALS;
-  uint32_t id = sc.getUserID();
+  id = sc.getUserID();
   if (usernamesByID.count(id) != 0) return LOGIN_ALREADY_LOGGED_IN;
   usernamesByID[id] = sc.getUsernameS();
   idsByUsername[sc.getUsernameS()] = id;

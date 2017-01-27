@@ -43,7 +43,8 @@ void x801::game::Credentials::fillHash(const std::string& password) {
 
 Credentials& x801::game::Credentials::operator=(const Credentials& other) {
   username = other.username;
-  memcpy(hash, other.hash, RAW_HASH_LENGTH);
+  if (hash == nullptr) hash = new uint8_t[RAW_HASH_LENGTH];
+  if (other.hash != nullptr) memcpy(hash, other.hash, RAW_HASH_LENGTH);
   return *this;
 }
 

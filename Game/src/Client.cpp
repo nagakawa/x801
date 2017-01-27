@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <stdlib.h>
 #include <algorithm>
 #include <iostream>
 #include <GLFW/glfw3.h>
@@ -49,7 +50,7 @@ void x801::game::Client::initialise() {
       uint8_t* body, size_t length,
       RakNet::Packet* p) {
         (void) packetType; (void) body; (void) length; (void) p;
-        std::cout << "You have been disconnected.";
+        std::cout << "You have been disconnected.\n";
       }, -1
   };
   callbacks.insert({ID_CONNECTION_LOST, logoutCallback});
@@ -60,13 +61,11 @@ void x801::game::Client::initialise() {
       uint8_t* body, size_t length,
       RakNet::Packet* p) {
         (void) packetType; (void) body; (void) length; (void) p;
-        std::cout << "MOTD:\n";
         this->requestMOTD();
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
-  openWindowConcurrent();
-  listen();
+  listenConcurrent();
 }
 
 bool x801::game::Client::handlePacket(
@@ -89,6 +88,10 @@ bool x801::game::Client::handlePacket(
   }
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
+    if (iterator->first != packetType) {
+      ++iterator;
+      continue;
+    }
     (iterator->second.call)(packetType, body, length, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
@@ -108,6 +111,10 @@ bool x801::game::Client::handleLPacket(
   }
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
+    if (iterator->first != lPacketType) {
+      ++iterator;
+      continue;
+    }
     (iterator->second.call)(lPacketType, nullptr, lbody, llength, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
@@ -117,6 +124,7 @@ bool x801::game::Client::handleLPacket(
 }
 
 void x801::game::Client::listen() {
+  std::cerr << "Listening...\n";
   bool shouldContinue = true;
   while (shouldContinue) {
     for (
@@ -140,6 +148,10 @@ void x801::game::Client::listen() {
   if (cw != nullptr) glfwSetWindowShouldClose(cw->underlying(), true);
 }
 
+void x801::game::Client::listenConcurrent() {
+  listenThread = std::thread([this]() { this->listen(); });
+}
+
 void x801::game::Client::requestMOTD(PacketCallback motdCallback) {
   RakNet::BitStream stream;
   stream.Write(static_cast<uint8_t>(PACKET_MOTD));
@@ -159,11 +171,71 @@ void x801::game::Client::requestMOTD() {
         (void) packetType; (void) p;
         RakNet::BitStream stream(body, length, false);
         const char* s = readStringFromBitstream32(stream);
+        std::cout << "MOTD:\n";
         std::cout << s << '\n';
         delete[] s;
       }, 1
   };
   requestMOTD(motdCallback);
+}
+
+void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(PACKET_LOGIN));
+  writeStringToBitstream16(stream, cred.getUsername());
+  stream.Write((char*) cred.getHash(), RAW_HASH_LENGTH);
+  callbacks.insert({PACKET_LOGIN, loginCallback});
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+}
+
+static const char* loginStatusMessages[] = {
+  "Login was OK, why the fuck are you complaining?",
+  "Username or password was wrong.",
+  "Server is full.",
+  "You are banned from this server.",
+  "This user is already logged in.",
+  "Unknown login error.",
+  "The server did not send enough bytes for a cookie.",
+};
+
+void x801::game::Client::login(Credentials& c) {
+  PacketCallback loginCallback = {
+    [this](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        (void) p; (void) packetType;
+        uint8_t stat = body[0];
+        if (length < 17) stat = LOGIN_NOT_ENOUGH_DATA;
+        if (stat == LOGIN_OK) {
+          this->cookie = new uint8_t[RAW_HASH_LENGTH];
+          openWindowConcurrent();
+          memcpy(this->cookie, body + 1, 16);
+        } else {
+          std::cerr << "Login failed!\n";
+          std::cerr << loginStatusMessages[stat] << '\n';
+          exit(-1);
+        }
+      }, 1
+  };
+  login(c, loginCallback);
+}
+
+void x801::game::Client::login(Credentials& c, PacketCallback loginCallback) {
+  cred = c;
+  PacketCallback connectCallback = {
+    [this, loginCallback](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        (void) packetType; (void) body; (void) length; (void) p;
+        this->sendLoginPacket(loginCallback);
+      }, -1
+  };
+  callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
 }
 
 void x801::game::Client::openWindow() {

@@ -35,6 +35,7 @@ namespace x801 {
   }
 }
 #include "ClientWindow.h"
+#include "Credentials.h"
 #include "GameState.h"
 #include "packet.h"
 
@@ -57,6 +58,11 @@ namespace x801 {
       const uint16_t port;
       std::string getIPAddress() const { return ipAddress; }
       bool isDone() { return done; }
+      void login(Credentials& c, PacketCallback loginCallback);
+      void login(Credentials& c);
+      void listen();
+      void listenConcurrent();
+      std::thread& getListenThread() { return listenThread; }
     private:
       void initialise();
       bool handlePacket(
@@ -69,21 +75,24 @@ namespace x801 {
         uint8_t* lbody, size_t llength,
         RakNet::Packet* p
       );
-      void listen();
       void requestMOTD();
       void requestMOTD(PacketCallback motdCallback);
       void openWindow();
       void openWindowConcurrent();
+      void sendLoginPacket(PacketCallback loginCallback);
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;
-      std::unordered_multimap<uint8_t, PacketCallback> callbacks;
-      std::unordered_multimap<uint16_t, LPacketCallback> lCallbacks;
+      std::multimap<uint8_t, PacketCallback> callbacks;
+      std::multimap<uint16_t, LPacketCallback> lCallbacks;
       char* publicKey = nullptr;
-      GameState g;
+      // GameState g;
       ClientWindow* cw = nullptr;
       volatile bool done = false;
+      uint8_t* cookie = nullptr;
+      Credentials cred;
       std::thread windowThread;
+      std::thread listenThread;
     };
   }
 }

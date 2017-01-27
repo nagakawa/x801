@@ -39,6 +39,7 @@ namespace x801 {
       LOGIN_BANNED = 3,
       LOGIN_ALREADY_LOGGED_IN = 4,
       LOGIN_FAILED = 5,
+      LOGIN_NOT_ENOUGH_DATA = 6,
     };
     class GameState;
     class AreaWithPlayers {
@@ -55,7 +56,7 @@ namespace x801 {
     };
     class GameState {
     public:
-      LoginStatus login(Credentials& c);
+      LoginStatus login(Credentials& c, uint32_t& id);
       void logout(uint32_t id);
       Player& getPlayer(uint32_t id) {
         return allPlayers[id];

@@ -70,6 +70,7 @@ namespace x801 {
         RakNet::Packet* p
       );
       void listen();
+      LoginStatus login(Credentials& cred, uint32_t& playerID, uint8_t* cookie);
       void logout(uint32_t playerID);
       void logoutByPacket(
         uint8_t packetType,
@@ -77,6 +78,11 @@ namespace x801 {
         RakNet::Packet* p
       );
       void sendMOTD(
+        uint8_t packetType,
+        uint8_t* body, size_t length,
+        RakNet::Packet* p
+      );
+      void processLogin(
         uint8_t packetType,
         uint8_t* body, size_t length,
         RakNet::Packet* p
@@ -95,8 +101,8 @@ namespace x801 {
       std::unordered_map<
         uint32_t, std::array<uint8_t, COOKIE_LEN>
       > cookiesByPlayer;
-      std::unordered_multimap<uint8_t, PacketCallback> callbacks;
-      std::unordered_multimap<uint16_t, LPacketCallback> lCallbacks;
+      std::multimap<uint8_t, PacketCallback> callbacks;
+      std::multimap<uint16_t, LPacketCallback> lCallbacks;
       GameState g;
     };
   }
