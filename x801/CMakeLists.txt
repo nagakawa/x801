@@ -24,6 +24,7 @@ TARGET_LINK_LIBRARIES(x801
   ${PROJECT_SOURCE_DIR}/../build/libBase.a
   ${PROJECT_SOURCE_DIR}/../build/libRakNetLibStatic.a
   ${PROJECT_SOURCE_DIR}/../build/libAGL.a
+  ${PROJECT_SOURCE_DIR}/../build/libImgui.a
   ${PROJECT_SOURCE_DIR}/../argon2/libargon2.a
   ${ZLIB_LIBRARIES}
   ${LIBPTHREAD_LIBRARIES}

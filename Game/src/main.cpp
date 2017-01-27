@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,7 @@ using namespace x801::game;
 #include "Server.h"
 
 int lmain(int argc, char** argv) {
+  setlocale(LC_ALL, "");
   try {
     CLineConfig c;
     int res = readSettings(c, argc, argv);
