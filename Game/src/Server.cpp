@@ -40,9 +40,30 @@ void x801::game::Server::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
   updateKeyFiles();
   RakNet::SocketDescriptor socket(port, 0);
-  socket.socketFamily = AF_INET;
+  socket.socketFamily = useIPV6 ? AF_INET6 : AF_INET;
   peer->Startup(maxConnections, &socket, 1);
   peer->SetMaximumIncomingConnections(maxConnections);
+  // set packet callbacks
+  PacketCallback logoutCallback = {
+    [this](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        this->logoutByPacket(packetType, body, length, p);
+      }, -1
+  };
+  callbacks.insert({ID_CONNECTION_LOST, logoutCallback});
+  callbacks.insert({ID_DISCONNECTION_NOTIFICATION, logoutCallback});
+  PacketCallback motdCallback = {
+    [this](
+      uint8_t packetType,
+      uint8_t* body, size_t length,
+      RakNet::Packet* p) {
+        this->sendMOTD(packetType, body, length, p);
+      }, -1
+  };
+  callbacks.insert({PACKET_MOTD, motdCallback});
+  listen();
 }
 
 void x801::game::Server::logout(uint32_t playerID) {
@@ -56,30 +77,10 @@ void x801::game::Server::handlePacket(
     uint8_t packetType,
     uint8_t* body, size_t length,
     RakNet::Packet* p) {
-  (void) body; (void) length;
-  switch (packetType) {
-  case ID_CONNECTION_LOST:
-  case ID_DISCONNECTION_NOTIFICATION: {
-      // gracefully log out player
-      uint32_t playerID = playersByAddress[p->systemAddress];
-      logout(playerID);
-      playersByAddress.erase(p->systemAddress);
-    }
-  case PACKET_MOTD: {
-      RakNet::BitStream stream;
-      stream.Write(static_cast<RakNet::MessageID>(PACKET_MOTD));
-      writeStringToBitstream32(stream, SERVER_MOTD);
-      peer->Send(
-        &stream,
-        HIGH_PRIORITY, RELIABLE_ORDERED,
-        0, p->systemAddress,
-        false
-      );
-    }
-  }
+  std::cerr << "It's a packet! ID = " << (int) packetType << "\n";
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
-    iterator->second.call(packetType, body, length, p);
+    (iterator->second.call)(packetType, body, length, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
     else ++iterator;
@@ -91,16 +92,14 @@ void x801::game::Server::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
+  std::cerr << "It's an lpacket!\n";
   std::array<uint8_t, COOKIE_LEN> cookieAsArray;
   for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
   uint32_t playerID = playersByCookie[cookieAsArray];
   (void) playerID;
-  switch (lPacketType) {
-    //
-  }
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
-    iterator->second.call(lPacketType, nullptr, lbody, llength, p);
+    (iterator->second.call)(lPacketType, nullptr, lbody, llength, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
@@ -195,4 +194,30 @@ void x801::game::Server::updateKeyFiles() {
     output2.write(privateKey, privSize);
   }
   peer->InitializeSecurity(publicKey, privateKey, false);
+}
+
+void x801::game::Server::logoutByPacket(
+    uint8_t packetType,
+    uint8_t* body, size_t length,
+    RakNet::Packet* p) {
+  (void) packetType; (void) body; (void) length;
+  uint32_t playerID = playersByAddress[p->systemAddress];
+  logout(playerID);
+  playersByAddress.erase(p->systemAddress);
+}
+
+void x801::game::Server::sendMOTD(
+    uint8_t packetType,
+    uint8_t* body, size_t length,
+    RakNet::Packet* p) {
+  (void) packetType; (void) body; (void) length;
+  RakNet::BitStream stream;
+  stream.Write(static_cast<RakNet::MessageID>(PACKET_MOTD));
+  writeStringToBitstream32(stream, SERVER_MOTD);
+  peer->Send(
+    &stream,
+    HIGH_PRIORITY, RELIABLE_ORDERED,
+    0, p->systemAddress,
+    false
+  );
 }

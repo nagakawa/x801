@@ -31,6 +31,7 @@ namespace x801 {
       ClientOrServer mode = HUH;
       std::string ip = "localhost";
       uint16_t port = 0;
+      bool useIPV6 = false;
     };
   }
 }

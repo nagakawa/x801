@@ -71,14 +71,14 @@ void x801::game::Database::open(sqlite3*& handle, const char* path) {
 
 static const char* CREATE_AUTH_TABLE_QUERY =
   "CREATE TABLE IF NOT EXISTS "
-  "logins("
+  "Logins("
   "  userID INTEGER PRIMARY KEY ASC,"
   "  username STRING UNIQUE NOT NULL,"
   "  hash BLOB NOT NULL,"
   "  salt BLOB NOT NULL"
   ");"
   "CREATE INDEX IF NOT EXISTS "
-  "  loginsByUsername ON logins (username);"
+  "  loginsByUsername ON Logins (username);"
   ;
 
 void x801::game::Database::createAuthTable() {
@@ -93,7 +93,7 @@ void x801::game::Database::createAuthTable() {
 }
 
 static const char* CREATE_USER_QUERY =
-  "INSERT INTO logins (username, hash, salt) VALUES (?, ?, ?);"
+  "INSERT INTO Logins (username, hash, salt) VALUES (?, ?, ?);"
   ;
 
 void x801::game::Database::createUser(
@@ -159,7 +159,7 @@ void x801::game::Database::userRowToSC(sqlite3_stmt* statement, StoredCredential
 }
 
 static const char* GET_USER_BY_ID_QUERY =
-  "SELECT * FROM logins"
+  "SELECT * FROM Logins"
   "  WHERE userID = ?;"
   ;
 
@@ -186,7 +186,7 @@ bool x801::game::Database::getUserByID(uint32_t id, StoredCredentials& sc) {
 }
 
 static const char* GET_USER_BY_NAME_QUERY =
-  "SELECT * FROM logins"
+  "SELECT * FROM Logins"
   "  WHERE username = ?;"
   ;
 
@@ -213,7 +213,7 @@ bool x801::game::Database::getUserByName(const char* username, StoredCredentials
 }
 
 static const char* GET_USER_ID_BY_NAME_QUERY =
-  "SELECT userID FROM logins"
+  "SELECT userID FROM Logins"
   "  WHERE username = ?;"
   ;
 
@@ -240,7 +240,7 @@ uint32_t x801::game::Database::getUserIDByName(const char* username) {
 
 static const char* CREATE_PLAYER_LOCATION_TABLE_QUERY =
   "CREATE TABLE IF NOT EXISTS "
-  "playerLocations("
+  "PlayerLocations("
   "  userID INTEGER UNIQUE NOT NULL,"
   "  worldID INTEGER NOT NULL,"
   "  areaID INTEGER NOT NULL,"
@@ -263,7 +263,7 @@ void x801::game::Database::createPlayerLocationTable() {
 }
 
 static const char* SAVE_PLAYER_LOCATION_QUERY =
-  "INSERT OR REPLACE INTO playerLocations"
+  "INSERT OR REPLACE INTO PlayerLocations"
   "  (userID, worldID, areaID, layer, x, y, rot)"
   "  VALUES (?, ?, ?, ?, ?, ?, ?);"
   ;
@@ -312,7 +312,7 @@ uint32_t x801::game::Database::locationRowToStruct(
 }
 
 static const char* LOAD_PLAYER_LOCATION_QUERY =
-  "SELECT * FROM playerLocations"
+  "SELECT * FROM PlayerLocations"
   "  WHERE userID = ?;"
   ;
 

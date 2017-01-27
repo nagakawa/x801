@@ -48,6 +48,8 @@ namespace x801 {
     void writeStringToBitstream16(RakNet::BitStream& stream, const char* string);
     void writeStringToBitstream32(RakNet::BitStream& stream, const std::string& string);
     void writeStringToBitstream16(RakNet::BitStream& stream, const std::string& string);
+    char* readStringFromBitstream32(RakNet::BitStream& stream);
+    char* readStringFromBitstream16(RakNet::BitStream& stream);
     struct PacketCallback {
       std::function<
         void(

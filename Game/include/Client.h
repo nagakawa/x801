@@ -36,9 +36,11 @@ namespace x801 {
     public:
       Client(
           std::string ipAddress,
-          uint16_t port
+          uint16_t port,
+          bool useIPV6 = false
       ) : port(port),
-          ipAddress(ipAddress) {
+          ipAddress(ipAddress),
+          useIPV6(useIPV6) {
         initialise();
       }
       ~Client();
@@ -48,22 +50,25 @@ namespace x801 {
       std::string getIPAddress() const { return ipAddress; }
     private:
       void initialise();
-      void handlePacket(
+      bool handlePacket(
         uint8_t packetType,
         uint8_t* body, size_t length,
         RakNet::Packet* p
       );
-      void handleLPacket(
+      bool handleLPacket(
         uint16_t lPacketType,
         uint8_t* lbody, size_t llength,
         RakNet::Packet* p
       );
       void listen();
+      void requestMOTD();
+      void requestMOTD(PacketCallback motdCallback);
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
+      bool useIPV6;
       std::unordered_multimap<uint8_t, PacketCallback> callbacks;
       std::unordered_multimap<uint16_t, LPacketCallback> lCallbacks;
-      // char* publicKey;
+      char* publicKey = nullptr;
     };
   }
 }
