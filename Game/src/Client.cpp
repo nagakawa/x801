@@ -143,11 +143,11 @@ void x801::game::Client::listen() {
 void x801::game::Client::requestMOTD(PacketCallback motdCallback) {
   RakNet::BitStream stream;
   stream.Write(static_cast<uint8_t>(PACKET_MOTD));
+  callbacks.insert({PACKET_MOTD, motdCallback});
   peer->Send(
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
-  callbacks.insert({PACKET_MOTD, motdCallback});
 }
 
 void x801::game::Client::requestMOTD() {
