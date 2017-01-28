@@ -42,9 +42,12 @@ namespace x801 {
       LOGIN_NOT_ENOUGH_DATA = 6,
     };
     class GameState;
+    class ClientGameState;
     class AreaWithPlayers {
     public:
-      AreaWithPlayers();
+      AreaWithPlayers() {}
+      AreaWithPlayers(ClientGameState* g, std::istream& fh) :
+          cg(g), area(new x801::map::Area(fh)) {}
       AreaWithPlayers(GameState* g, std::istream& fh) :
           g(g), area(new x801::map::Area(fh)) {}
       AreaWithPlayers(const AreaWithPlayers& other) = delete;
@@ -52,6 +55,9 @@ namespace x801 {
       ~AreaWithPlayers();
     private:
       GameState* g = nullptr;
+      // Unsure whether this is needed, since ClientGameState can hold
+      // only one AreaWithPlayers.
+      ClientGameState* cg = nullptr;
       x801::map::Area* area = nullptr;
     };
     class GameState {
@@ -76,6 +82,11 @@ namespace x801 {
         x801::map::QualifiedAreaID, std::unique_ptr<AreaWithPlayers>,
         x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
       > areas;
+    };
+    class ClientGameState {
+      AreaWithPlayers currentArea;
+      std::unordered_map<uint32_t, std::string> usernamesByID;
+      std::unordered_map<std::string, uint32_t> idsByUsername;
     };
   }
 }

@@ -25,7 +25,8 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/sha1.cpp
   ${PROJECT_SOURCE_DIR}/Credentials.cpp
   ${PROJECT_SOURCE_DIR}/packet.cpp
-  ${PROJECT_SOURCE_DIR}/ClientWindow.cpp
+  ${PROJECT_SOURCE_DIR}/window/ClientWindow.cpp
+  ${PROJECT_SOURCE_DIR}/window/ChatWindow.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

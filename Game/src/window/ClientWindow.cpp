@@ -1,4 +1,4 @@
-#include "ClientWindow.h"
+#include "window/ClientWindow.h"
 
 /*
 Copyright (C) 2016 AGC.
@@ -47,6 +47,7 @@ void x801::game::ClientWindow::initialise() {
   ImGui_ImplGlfwGL3_Init(underlying(), false);
   ImGuiIO& io = ImGui::GetIO();
   io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/vlgothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+  chat.setParent(this);
 }
 
 void x801::game::ClientWindow::tick() {
@@ -56,6 +57,7 @@ void x801::game::ClientWindow::tick() {
   ImGui_ImplGlfwGL3_NewFrame();
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+  chat.render();
   ImGui::Render();
 }
 

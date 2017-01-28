@@ -21,29 +21,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
-#include <iostream>
-#include <GLFWApplication.h>
-namespace x801 {
-  namespace game {
-    class ClientWindow;
-  }
-}
-#include "Client.h"
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 namespace x801 {
   namespace game {
-    class ClientWindow : public agl::GLFWApplication {
+    class ClientWindow;
+    struct ChatEntry {
+      uint32_t playerID;
+      std::string message;
+      ChatEntry(uint32_t playerID, const std::string& message) :
+          playerID(playerID), message(message) {}
+    };
+    class ChatWindow {
     public:
-      using agl::GLFWApplication::GLFWApplication;
-      void initialise();
-      void tick();
-      void readKeys();
-      void onMouse(double xpos, double ypos);
-      void start() {
-        GLFWApplication::start();
+      void setParent(ClientWindow* window) {
+        this->window = window;
       }
-      ~ClientWindow();
-      Client* c;
+      void pushMessage(uint32_t playerID, const std::string& message);
+      void render();
+    private:
+      std::vector<ChatEntry> entries;
+      char yourMessage[256];
+      bool shouldScrollToBottom = false;
+      ClientWindow* window = nullptr;
     };
   }
 }

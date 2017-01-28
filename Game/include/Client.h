@@ -34,7 +34,7 @@ namespace x801 {
     class Client;
   }
 }
-#include "ClientWindow.h"
+#include "window/ClientWindow.h"
 #include "Credentials.h"
 #include "GameState.h"
 #include "packet.h"
@@ -88,6 +88,7 @@ namespace x801 {
       char* publicKey = nullptr;
       // GameState g;
       ClientWindow* cw = nullptr;
+      ClientGameState g;
       volatile bool done = false;
       uint8_t* cookie = nullptr;
       Credentials cred;

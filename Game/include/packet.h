@@ -39,6 +39,8 @@ namespace x801 {
       LPACKET_CHAT = 0,
       LPACKET_RECEIVED_CHAT,
       LPACKET_MOVE,
+      LPACKET_FILE,
+      LPACKET_IDENTIFY,
     };
     static_assert((RakNet::MessageID) PACKET_MOTD > ID_USER_PACKET_ENUM,
         "RakNet defined too many pre-defined packet types!");
@@ -63,7 +65,7 @@ namespace x801 {
     struct LPacketCallback {
       std::function<
         void(
-          uint16_t lPacketType, uint8_t* cookie,
+          uint16_t lPacketType, uint32_t userID,
           uint8_t* lbody, size_t llength,
           RakNet::Packet* p
         )

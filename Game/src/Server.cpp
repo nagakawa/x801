@@ -72,6 +72,15 @@ void x801::game::Server::initialise() {
       }, -1
   };
   callbacks.insert({PACKET_LOGIN, loginCallback});
+  LPacketCallback usernameCallback = {
+    [this](
+      uint16_t lPacketType, uint32_t userID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        this->processUsernameRequest(lPacketType, userID, lbody, llength, p);
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_IDENTIFY, usernameCallback});
   listen();
 }
 
@@ -108,15 +117,19 @@ void x801::game::Server::handleLPacket(
   std::cerr << "It's an lpacket!\n";
   std::array<uint8_t, COOKIE_LEN> cookieAsArray;
   for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
-  uint32_t playerID = playersByCookie[cookieAsArray];
-  (void) playerID;
+  auto location = playersByCookie.find(cookieAsArray);
+  if (location == playersByCookie.end()) {
+    // invalid cookie
+    sendUnrecognisedCookiePacket(p);
+  }
+  uint32_t playerID = location->second;
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != lPacketType) {
       ++iterator;
       continue;
     }
-    (iterator->second.call)(lPacketType, nullptr, lbody, llength, p);
+    (iterator->second.call)(lPacketType, playerID, lbody, llength, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
@@ -271,6 +284,37 @@ void x801::game::Server::processLogin(
   std::cerr << "Login status was " << status << '\n';
   peer->Send(
     (const char*) output, 2 + COOKIE_LEN, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    p->systemAddress, false
+  );
+}
+
+void x801::game::Server::processUsernameRequest(
+    uint16_t lPacketType, uint32_t userID,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p) {
+  (void) lPacketType; (void) userID;
+  RakNet::BitStream stream(lbody, llength, false);
+  RakNet::BitStream output;
+  uint16_t idCount;
+  stream.Read(idCount);
+  output.Write(idCount);
+  for (size_t i = 0; i < idCount; ++i) {
+    uint32_t userID;
+    stream.Read(userID);
+    output.Write(userID);
+    std::string username = g.getUsernameByID(userID);
+    writeStringToBitstream16(output, username);
+  }
+  peer->Send(
+    &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    p->systemAddress, false
+  );
+}
+
+void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {
+  uint8_t message = PACKET_UNRECOGNISED_COOKIE;
+  peer->Send(
+    (const char*) &message, 1, MEDIUM_PRIORITY, RELIABLE_ORDERED, 9,
     p->systemAddress, false
   );
 }

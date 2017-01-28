@@ -115,7 +115,7 @@ bool x801::game::Client::handleLPacket(
       ++iterator;
       continue;
     }
-    (iterator->second.call)(lPacketType, nullptr, lbody, llength, p);
+    (iterator->second.call)(lPacketType, 0, lbody, llength, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
@@ -239,7 +239,7 @@ void x801::game::Client::login(Credentials& c, PacketCallback loginCallback) {
 }
 
 void x801::game::Client::openWindow() {
-  cw = new ClientWindow(1024, 768, 0, 0, "Experiment801", 3, 3, false);
+  cw = new ClientWindow(1280, 960, 0, 0, "Experiment801", 3, 3, false);
   cw->c = this;
   cw->start();
 }
