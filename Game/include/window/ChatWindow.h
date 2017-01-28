@@ -24,6 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <string>
 #include <vector>
+namespace x801 {
+  namespace game {
+    class ChatWindow;
+  }
+}
+#include "ClientWindow.h"
 
 namespace x801 {
   namespace game {
@@ -31,18 +37,30 @@ namespace x801 {
     struct ChatEntry {
       uint32_t playerID;
       std::string message;
+      ChatEntry() : playerID(0), message("") {}
       ChatEntry(uint32_t playerID, const std::string& message) :
           playerID(playerID), message(message) {}
+      ChatEntry(const ChatEntry& that) :
+          playerID(that.playerID), message(that.message) {}
+      ChatEntry operator=(const ChatEntry& that) {
+        playerID = that.playerID;
+        message = that.message;
+        return *this;
+      }
     };
+    const size_t ringSize = 512;
     class ChatWindow {
     public:
+      ChatWindow(ClientWindow* cw) : window(cw) {}
       void setParent(ClientWindow* window) {
         this->window = window;
       }
       void pushMessage(uint32_t playerID, const std::string& message);
       void render();
     private:
-      std::vector<ChatEntry> entries;
+      ChatEntry entries[ringSize];
+      size_t start = 0;
+      size_t messageCount = 0;
       char yourMessage[256];
       bool shouldScrollToBottom = false;
       ClientWindow* window = nullptr;

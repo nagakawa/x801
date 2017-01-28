@@ -46,7 +46,7 @@ namespace x801 {
       ~ClientWindow();
       Client* c;
     private:
-      ChatWindow chat;
+      ChatWindow* chat = nullptr;
     };
   }
 }

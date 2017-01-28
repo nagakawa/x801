@@ -27,12 +27,19 @@ using namespace x801::game;
 #include <imgui.h>
 
 void x801::game::ChatWindow::pushMessage(uint32_t playerID, const std::string& message) {
-  entries.emplace_back(playerID, message);
+  entries[(start + messageCount) % ringSize] = ChatEntry(playerID, message);
+  ++messageCount;
+  if (messageCount > ringSize) {
+    start += messageCount - ringSize;
+    messageCount = ringSize;
+  }
   shouldScrollToBottom = true;
 }
 
 // Use technique in imgui_demo.cpp
 void x801::game::ChatWindow::render() {
+  pushMessage(1, "I will shank your fucking mom");
+  pushMessage(2, "E-I-E-I-O");
   ImGui::SetNextWindowSize(ImVec2(300, 800), ImGuiSetCond_FirstUseEver);
   bool isChatWindowOpen = ImGui::Begin("Chat");
   if (isChatWindowOpen) {
@@ -42,10 +49,12 @@ void x801::game::ChatWindow::render() {
       false,
       ImGuiWindowFlags_HorizontalScrollbar
     );
-    for (size_t i = 0; i < entries.size(); ++i) {
-      ChatEntry entry = entries[i];
+    for (size_t i = 0; i < messageCount; ++i) {
+      ChatEntry entry = entries[(start + i) % ringSize];
       std::stringstream output;
-      output << "[#" << entry.playerID << "] " << entry.message;
+      output << "[" <<
+        window->c->getUsername(entry.playerID) <<
+        "] " << entry.message;
       std::string str = output.str();
       ImGui::TextUnformatted(str.c_str());
     }

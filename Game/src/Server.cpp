@@ -114,7 +114,7 @@ void x801::game::Server::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
-  std::cerr << "It's an lpacket!\n";
+  std::cerr << "It's an lpacket! ID = " << lPacketType << "\n";
   std::array<uint8_t, COOKIE_LEN> cookieAsArray;
   for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
   auto location = playersByCookie.find(cookieAsArray);
@@ -149,9 +149,12 @@ void x801::game::Server::listen() {
       if (packetType == PACKET_IM_LOGGED_IN) {
         uint16_t lpacketType = (body[0] << 8) | body[1];
         uint8_t* cookie = body + 2;
-        uint8_t* lbody = body + 10;
-        size_t llength = length - 10;
-        handleLPacket(lpacketType, cookie, lbody, llength, p);
+        uint8_t* lbody = body + 2 + COOKIE_LEN;
+        size_t llength = length - 2 - COOKIE_LEN;
+        if ((ssize_t) llength < 0)
+          sendUnrecognisedCookiePacket(p);
+        else
+          handleLPacket(lpacketType, cookie, lbody, llength, p);
       } else {
         handlePacket(packetType, body, length, p);
       }
@@ -295,16 +298,26 @@ void x801::game::Server::processUsernameRequest(
   (void) lPacketType; (void) userID;
   RakNet::BitStream stream(lbody, llength, false);
   RakNet::BitStream output;
+  RakNet::BitStream toutput;
+  output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  output.Write(static_cast<uint16_t>(LPACKET_IDENTIFY));
   uint16_t idCount;
   stream.Read(idCount);
-  output.Write(idCount);
+  uint16_t netIDCount = idCount;
   for (size_t i = 0; i < idCount; ++i) {
     uint32_t userID;
     stream.Read(userID);
-    output.Write(userID);
-    std::string username = g.getUsernameByID(userID);
-    writeStringToBitstream16(output, username);
+    auto iterator = g.findUsernameByID(userID);
+    if (iterator == g.endOfUsernameMap()) {
+      --netIDCount;
+      continue;
+    }
+    std::cerr << i << ") " << iterator->first << ": " << iterator->second << '\n';
+    toutput.Write(userID);
+    writeStringToBitstream16(toutput, iterator->second);
   }
+  output.Write(netIDCount);
+  output.Write(&toutput);
   peer->Send(
     &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     p->systemAddress, false

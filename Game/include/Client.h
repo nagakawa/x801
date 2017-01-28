@@ -63,6 +63,7 @@ namespace x801 {
       void listen();
       void listenConcurrent();
       std::thread& getListenThread() { return listenThread; }
+      std::string getUsername(uint32_t id);
     private:
       void initialise();
       bool handlePacket(

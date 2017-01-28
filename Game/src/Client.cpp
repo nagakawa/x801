@@ -25,9 +25,11 @@ using namespace x801::game;
 #include <stdlib.h>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <GLFW/glfw3.h>
 #include <BitStream.h>
 #include <SecureHandshake.h>
+#include "Server.h"
 
 void x801::game::Client::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
@@ -117,7 +119,7 @@ bool x801::game::Client::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
-  std::cerr << "It's an lpacket!\n";
+  std::cerr << "It's an lpacket! ID = " << lPacketType << "\n";
   switch (lPacketType) {
     //
   }
@@ -193,16 +195,30 @@ void x801::game::Client::requestMOTD() {
 
 void x801::game::Client::requestUsernames(
     size_t count, uint32_t* ids) {
+  size_t totalCount = count + g.totalRequested();
+  uint32_t* alreadyRequestedIDs = new uint32_t[totalCount - count];
+  g.populateRequested(alreadyRequestedIDs);
+  for (size_t i = 0; i < count; ++i)
+    g.addRequest(ids[i]);
   RakNet::BitStream stream;
   stream.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
   stream.Write(static_cast<uint16_t>(LPACKET_IDENTIFY));
-  stream.Write(static_cast<uint16_t>(count));
-  for (size_t i = 0; i < count; ++i)
+  stream.Write((const char*) cookie, COOKIE_LEN);
+  stream.Write(static_cast<uint16_t>(totalCount));
+  std::cerr << "Sending requests...\n";
+  for (size_t i = 0; i < count; ++i) {
+    std::cerr << "Requesting name of user #" << ids[i] << '\n';
     stream.Write(ids[i]);
+  }
+  for (size_t i = 0; i < totalCount - count; ++i) {
+    std::cerr << "Requesting name of user #" << ids[i] << '\n';
+    stream.Write(alreadyRequestedIDs[i]);
+  }
   peer->Send(
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
+  delete[] alreadyRequestedIDs;
 }
 
 void x801::game::Client::requestUsername(uint32_t id) {
@@ -222,9 +238,21 @@ void x801::game::Client::processUsernameResponse(
     uint32_t userID;
     stream.Read(userID);
     std::string username = readStringFromBitstream16S(stream);
+    std::cerr << i << ") " << userID << ": " << username << '\n';
     g.addUserUnsynchronised(userID, username);
   }
   g.lookupMutex.unlock();
+}
+
+std::string x801::game::Client::getUsername(uint32_t id) {
+  if (id == 0) return "Server";
+  auto it = g.findUsernameByID(id);
+  if (it != g.endOfUsernameMap()) return it->second;
+  else if (!g.isIDRequested(id)) requestUsername(id);
+  std::stringstream ss;
+  ss << "#" << id;
+  std::string s = ss.str();
+  return s;
 }
 
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {

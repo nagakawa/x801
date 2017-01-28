@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <Area.h>
 #include <QualifiedAreaID.h>
 #include "Database.h"
@@ -68,12 +69,20 @@ namespace x801 {
       Player& getPlayer(uint32_t id) {
         return allPlayers[id];
       }
-      const std::string& getUsernameByID(uint32_t id) {
+      /*const std::string& getUsernameByID(uint32_t id) {
         return usernamesByID[id];
       }
       uint32_t getIDByUsername(const std::string& name) {
         return idsByUsername[name];
+      }*/
+      auto findUsernameByID(uint32_t id) const {
+        return usernamesByID.find(id);
       }
+      auto findIDByUsername(const std::string& name) const {
+        return idsByUsername.find(name);
+      }
+      auto endOfUsernameMap() const { return usernamesByID.end(); }
+      auto endOfIDMap() const { return idsByUsername.end(); }
     private:
       Database db;
       std::unordered_map<uint32_t, Player> allPlayers;
@@ -86,19 +95,42 @@ namespace x801 {
     };
     class ClientGameState {
     public:
-      const std::string& getUsernameByID(uint32_t id) {
+      /*const std::string& getUsernameByID(uint32_t id) {
         return usernamesByID[id];
       }
       uint32_t getIDByUsername(const std::string& name) {
         return idsByUsername[name];
+      }*/
+      auto findUsernameByID(uint32_t id) {
+        std::lock_guard<std::mutex> guard(lookupMutex);
+        return usernamesByID.find(id);
+      }
+      auto findIDByUsername(const std::string& name) {
+        std::lock_guard<std::mutex> guard(lookupMutex);
+        return idsByUsername.find(name);
+      }
+      auto endOfUsernameMap() {
+        std::lock_guard<std::mutex> guard(lookupMutex);
+        return usernamesByID.end();
+      }
+      bool isIDRequested(uint32_t id) {
+        std::lock_guard<std::mutex> guard(lookupMutex);
+        return alreadyRequestedIDs.count(id) != 0;
       }
       void addUser(uint32_t id, const std::string& name);
       void addUserUnsynchronised(uint32_t id, const std::string& name);
+      void addRequest(uint32_t id);
+      size_t totalRequested() {
+        std::lock_guard<std::mutex> guard(lookupMutex);
+        return alreadyRequestedIDs.size();
+      }
+      void populateRequested(uint32_t* ids);
       std::mutex lookupMutex;
     private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;
       std::unordered_map<std::string, uint32_t> idsByUsername;
+      std::unordered_set<uint32_t> alreadyRequestedIDs;
     };
   }
 }
