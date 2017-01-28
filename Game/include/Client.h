@@ -80,6 +80,13 @@ namespace x801 {
       void openWindow();
       void openWindowConcurrent();
       void sendLoginPacket(PacketCallback loginCallback);
+      void requestUsernames(size_t count, uint32_t* ids);
+      void requestUsername(uint32_t id);
+      void processUsernameResponse(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;

@@ -65,6 +65,18 @@ void x801::game::Client::initialise() {
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
+  LPacketCallback idCallback = {
+    [this](
+      uint16_t lPacketType, uint32_t playerID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        (void) playerID;
+        this->processUsernameResponse(
+          lPacketType, lbody, llength, p
+        );
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_IDENTIFY, idCallback});
   listenConcurrent();
 }
 
@@ -177,6 +189,42 @@ void x801::game::Client::requestMOTD() {
       }, 1
   };
   requestMOTD(motdCallback);
+}
+
+void x801::game::Client::requestUsernames(
+    size_t count, uint32_t* ids) {
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  stream.Write(static_cast<uint16_t>(LPACKET_IDENTIFY));
+  stream.Write(static_cast<uint16_t>(count));
+  for (size_t i = 0; i < count; ++i)
+    stream.Write(ids[i]);
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+}
+
+void x801::game::Client::requestUsername(uint32_t id) {
+  requestUsernames(1, &id);
+}
+
+void x801::game::Client::processUsernameResponse(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p) {
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint16_t count;
+  stream.Read(count);
+  g.lookupMutex.lock();
+  for (size_t i = 0; i < count; ++i) {
+    uint32_t userID;
+    stream.Read(userID);
+    std::string username = readStringFromBitstream16S(stream);
+    g.addUserUnsynchronised(userID, username);
+  }
+  g.lookupMutex.unlock();
 }
 
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {

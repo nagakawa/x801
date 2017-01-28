@@ -54,3 +54,16 @@ void x801::game::GameState::logout(uint32_t id) {
   idsByUsername.erase(usernamesByID[id]);
   usernamesByID.erase(id);
 }
+
+void x801::game::ClientGameState::addUser(uint32_t id, const std::string& name) {
+  lookupMutex.lock();
+  usernamesByID[id] = name;
+  idsByUsername[name] = id;
+  lookupMutex.unlock();
+}
+
+void x801::game::ClientGameState::addUserUnsynchronised(
+    uint32_t id, const std::string& name) {
+  usernamesByID[id] = name;
+  idsByUsername[name] = id;
+}

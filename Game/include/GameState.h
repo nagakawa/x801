@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <Area.h>
@@ -70,7 +71,7 @@ namespace x801 {
       const std::string& getUsernameByID(uint32_t id) {
         return usernamesByID[id];
       }
-      uint32_t getIDByUsername(std::string& name) {
+      uint32_t getIDByUsername(const std::string& name) {
         return idsByUsername[name];
       }
     private:
@@ -84,6 +85,17 @@ namespace x801 {
       > areas;
     };
     class ClientGameState {
+    public:
+      const std::string& getUsernameByID(uint32_t id) {
+        return usernamesByID[id];
+      }
+      uint32_t getIDByUsername(const std::string& name) {
+        return idsByUsername[name];
+      }
+      void addUser(uint32_t id, const std::string& name);
+      void addUserUnsynchronised(uint32_t id, const std::string& name);
+      std::mutex lookupMutex;
+    private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;
       std::unordered_map<std::string, uint32_t> idsByUsername;
