@@ -265,6 +265,7 @@ void x801::game::Server::logoutByPacket(
   uint32_t playerID = playersByAddress[p->systemAddress];
   logout(playerID);
   playersByAddress.erase(p->systemAddress);
+  addressesByPlayer.erase(playerID);
 }
 
 void x801::game::Server::sendMOTD(
@@ -284,7 +285,8 @@ void x801::game::Server::sendMOTD(
 }
 
 LoginStatus x801::game::Server::login(
-    Credentials& cred, uint32_t& playerID, uint8_t* cookie) {
+    Credentials& cred, uint32_t& playerID,
+    uint8_t* cookie, RakNet::SystemAddress address) {
   LoginStatus stat = g.login(cred, playerID);
   if (stat != LOGIN_OK) return stat;
   x801::base::writeRandomBytes(cookie, COOKIE_LEN);
@@ -292,6 +294,8 @@ LoginStatus x801::game::Server::login(
   for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
   playersByCookie[cookieAsArray] = playerID;
   cookiesByPlayer[playerID] = cookieAsArray;
+  playersByAddress[address] = playerID;
+  addressesByPlayer[playerID] = address;
   return stat;
 }
 
@@ -308,9 +312,7 @@ void x801::game::Server::processLogin(
   uint8_t output[2 + COOKIE_LEN];
   output[0] = PACKET_LOGIN;
   uint32_t playerID;
-  LoginStatus status = login(cred, playerID, output + 2);
-  if (status == LOGIN_OK)
-    playersByAddress[p->systemAddress] = playerID;
+  LoginStatus status = login(cred, playerID, output + 2, p->systemAddress);
   output[1] = (uint8_t) status;
   std::cerr << "Login status was " << status << '\n';
   peer->Send(

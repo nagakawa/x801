@@ -72,7 +72,10 @@ namespace x801 {
         RakNet::Packet* p
       );
       void listen();
-      LoginStatus login(Credentials& cred, uint32_t& playerID, uint8_t* cookie);
+      LoginStatus login(
+        Credentials& cred, uint32_t& playerID,
+        uint8_t* cookie, RakNet::SystemAddress address
+      );
       void logout(uint32_t playerID);
       void logoutByPacket(
         uint8_t packetType,
@@ -107,6 +110,7 @@ namespace x801 {
       // When the client disconnects without sending a proper logout message,
       // all we have will be their address.
       std::map<RakNet::SystemAddress, uint32_t> playersByAddress;
+      std::map<uint32_t, RakNet::SystemAddress> addressesByPlayer;
       std::unordered_map<
         std::array<uint8_t, COOKIE_LEN>, uint32_t,
         x801::base::STDArrayHash<uint8_t, COOKIE_LEN>
