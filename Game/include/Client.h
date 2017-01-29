@@ -70,11 +70,13 @@ namespace x801 {
       bool handlePacket(
         uint8_t packetType,
         uint8_t* body, size_t length,
+        RakNet::Time t,
         RakNet::Packet* p
       );
       bool handleLPacket(
         uint16_t lPacketType,
         uint8_t* lbody, size_t llength,
+        RakNet::Time t,
         RakNet::Packet* p
       );
       void requestMOTD();

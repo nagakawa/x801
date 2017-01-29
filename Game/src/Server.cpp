@@ -48,7 +48,9 @@ void x801::game::Server::initialise() {
     [this](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
+        (void) t;
         this->logoutByPacket(packetType, body, length, p);
       }, -1
   };
@@ -58,7 +60,9 @@ void x801::game::Server::initialise() {
     [this](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
+        (void) t;
         this->sendMOTD(packetType, body, length, p);
       }, -1
   };
@@ -67,7 +71,9 @@ void x801::game::Server::initialise() {
     [this](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
+        (void) t;
         this->processLogin(packetType, body, length, p);
       }, -1
   };
@@ -76,7 +82,9 @@ void x801::game::Server::initialise() {
     [this](
       uint16_t lPacketType, uint32_t userID,
       uint8_t* lbody, size_t llength,
+      RakNet::Time t,
       RakNet::Packet* p) {
+        (void) t;
         this->processUsernameRequest(lPacketType, userID, lbody, llength, p);
       }, -1
   };
@@ -85,7 +93,9 @@ void x801::game::Server::initialise() {
     [this](
       uint16_t lPacketType, uint32_t userID,
       uint8_t* lbody, size_t llength,
+      RakNet::Time t,
       RakNet::Packet* p) {
+        (void) t;
         this->processChatRequest(lPacketType, userID, lbody, llength, p);
       }, -1
   };
@@ -103,6 +113,7 @@ void x801::game::Server::logout(uint32_t playerID) {
 void x801::game::Server::handlePacket(
     uint8_t packetType,
     uint8_t* body, size_t length,
+    RakNet::Time t,
     RakNet::Packet* p) {
   std::cerr << "It's a packet! ID = " << (int) packetType << "\n";
   auto range = callbacks.equal_range(packetType);
@@ -111,7 +122,7 @@ void x801::game::Server::handlePacket(
       ++iterator;
       continue;
     }
-    (iterator->second.call)(packetType, body, length, p);
+    (iterator->second.call)(packetType, body, length, t, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
     else ++iterator;
@@ -120,6 +131,7 @@ void x801::game::Server::handlePacket(
 void x801::game::Server::handleLPacket(
     uint16_t lPacketType, uint8_t* cookie,
     uint8_t* lbody, size_t llength,
+    RakNet::Time t,
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
@@ -140,7 +152,7 @@ void x801::game::Server::handleLPacket(
       ++iterator;
       continue;
     }
-    (iterator->second.call)(lPacketType, playerID, lbody, llength, p);
+    (iterator->second.call)(lPacketType, playerID, lbody, llength, t, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
@@ -153,6 +165,11 @@ void x801::game::Server::listen() {
         RakNet::Packet* p = peer->Receive();
         p != nullptr;
         peer->DeallocatePacket(p), p = peer->Receive()) {
+      RakNet::Time t = 0;
+      if (p->data[0] == ID_TIMESTAMP) {
+        RakNet::BitStream s(p->data, 1, sizeof(RakNet::Time));
+        s.Read(t);
+      }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
       uint8_t* body = p->data + offset;
@@ -165,9 +182,9 @@ void x801::game::Server::listen() {
         if ((ssize_t) llength < 0)
           sendUnrecognisedCookiePacket(p);
         else
-          handleLPacket(lpacketType, cookie, lbody, llength, p);
+          handleLPacket(lpacketType, cookie, lbody, llength, t, p);
       } else {
-        handlePacket(packetType, body, length, p);
+        handlePacket(packetType, body, length, t, p);
       }
     }
   }

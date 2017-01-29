@@ -39,7 +39,7 @@ void x801::test::assertPrivate(
     ++TestDiag::current.passedTests;
   } else {
     // \u2013 is the en-dash
-    std::cout << "  \033[31;1mTEST FAILED!!! \u2013 \n";
+    std::cout << "\033[31;1m* TEST FAILED!!! \u2013 \n";
     std::cout << "    \033[0m" << what << '\n';
     if (extra != nullptr) {
       std::cout << "    \033[33m" << extra << '\n';

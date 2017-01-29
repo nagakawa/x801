@@ -62,11 +62,13 @@ namespace x801 {
       void handlePacket(
         uint8_t packetType,
         uint8_t* body, size_t length,
+        RakNet::Time t,
         RakNet::Packet* p
       );
       void handleLPacket(
         uint16_t lPacketType, uint8_t* cookie,
         uint8_t* lbody, size_t llength,
+        RakNet::Time t,
         RakNet::Packet* p
       );
       void listen();
