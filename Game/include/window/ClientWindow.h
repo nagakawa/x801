@@ -43,6 +43,8 @@ namespace x801 {
       void start() {
         GLFWApplication::start();
       }
+      ChatWindow* getChatWindow() { return chat; }
+      Client* getParentClient() { return c; }
       ~ClientWindow();
       Client* c;
     private:

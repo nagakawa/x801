@@ -81,6 +81,15 @@ void x801::game::Server::initialise() {
       }, -1
   };
   lCallbacks.insert({LPACKET_IDENTIFY, usernameCallback});
+  LPacketCallback chatCallback = {
+    [this](
+      uint16_t lPacketType, uint32_t userID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        this->processChatRequest(lPacketType, userID, lbody, llength, p);
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_CHAT, chatCallback});
   listen();
 }
 
@@ -117,12 +126,14 @@ void x801::game::Server::handleLPacket(
   std::cerr << "It's an lpacket! ID = " << lPacketType << "\n";
   std::array<uint8_t, COOKIE_LEN> cookieAsArray;
   for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
-  auto location = playersByCookie.find(cookieAsArray);
-  if (location == playersByCookie.end()) {
+  // Not sure why playersByCookie.find(cookieAsArray) returns a
+  // garbage iterator when it doesn't find the cookie. Might be
+  // a bug with the STL on my computer.
+  if (playersByCookie.count(cookieAsArray) == 0) {
     // invalid cookie
     sendUnrecognisedCookiePacket(p);
   }
-  uint32_t playerID = location->second;
+  uint32_t playerID = playersByCookie[cookieAsArray];
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != lPacketType) {
@@ -322,6 +333,32 @@ void x801::game::Server::processUsernameRequest(
     &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     p->systemAddress, false
   );
+}
+
+void x801::game::Server::processChatRequest(
+    uint16_t lPacketType, uint32_t userID,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p) {
+  (void) lPacketType;
+  RakNet::BitStream stream(lbody, llength, false);
+  RakNet::BitStream output, output2;
+  const char* message = readStringFromBitstream16(stream);
+  output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  output.Write(static_cast<uint16_t>(LPACKET_CHAT));
+  output.Write(static_cast<uint8_t>(CHAT_OK));
+  peer->Send(
+    &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    p->systemAddress, false
+  );
+  output2.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  output2.Write(static_cast<uint16_t>(LPACKET_RECEIVE_CHAT));
+  output2.Write(userID);
+  writeStringToBitstream16(output2, message);
+  peer->Send(
+    &output2, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+  delete[] message;
 }
 
 void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {

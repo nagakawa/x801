@@ -60,6 +60,7 @@ namespace x801 {
       bool isDone() { return done; }
       void login(Credentials& c, PacketCallback loginCallback);
       void login(Credentials& c);
+      void sendChatMessage(const char* message);
       void listen();
       void listenConcurrent();
       std::thread& getListenThread() { return listenThread; }
@@ -84,6 +85,16 @@ namespace x801 {
       void requestUsernames(size_t count, uint32_t* ids);
       void requestUsername(uint32_t id);
       void processUsernameResponse(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
+      void processChatMessageCode(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
+      void processChatMessage(
         uint16_t lPacketType,
         uint8_t* lbody, size_t llength,
         RakNet::Packet* p

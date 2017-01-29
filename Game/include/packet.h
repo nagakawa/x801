@@ -37,10 +37,15 @@ namespace x801 {
     };
     enum LoggedPacketIDs {
       LPACKET_CHAT = 0,
-      LPACKET_RECEIVED_CHAT,
+      LPACKET_RECEIVE_CHAT,
       LPACKET_MOVE,
       LPACKET_FILE,
       LPACKET_IDENTIFY,
+    };
+    enum ChatStatus {
+      CHAT_OK = 0,
+      CHAT_NO_PERMISSION,
+      CHAT_MUTED,
     };
     static_assert((RakNet::MessageID) PACKET_MOTD > ID_USER_PACKET_ENUM,
         "RakNet defined too many pre-defined packet types!");

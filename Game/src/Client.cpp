@@ -79,6 +79,30 @@ void x801::game::Client::initialise() {
       }, -1
   };
   lCallbacks.insert({LPACKET_IDENTIFY, idCallback});
+  LPacketCallback chatCallback1 = {
+    [this](
+      uint16_t lPacketType, uint32_t playerID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        (void) playerID;
+        this->processChatMessageCode(
+          lPacketType, lbody, llength, p
+        );
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_CHAT, chatCallback1});
+  LPacketCallback chatCallback2 = {
+    [this](
+      uint16_t lPacketType, uint32_t playerID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        (void) playerID;
+        this->processChatMessage(
+          lPacketType, lbody, llength, p
+        );
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_RECEIVE_CHAT, chatCallback2});
   listenConcurrent();
 }
 
@@ -253,6 +277,51 @@ std::string x801::game::Client::getUsername(uint32_t id) {
   ss << "#" << id;
   std::string s = ss.str();
   return s;
+}
+
+void x801::game::Client::sendChatMessage(const char* message) {
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  stream.Write(static_cast<uint16_t>(LPACKET_CHAT));
+  stream.Write((const char*) cookie, COOKIE_LEN);
+  writeStringToBitstream16(stream, message);
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+}
+
+static const char* statusMessages[] = {
+  "Why the fuck are you complaining?",
+  "You don't have perimission to execute this command.",
+  "You are muted.",
+};
+
+void x801::game::Client::processChatMessageCode(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p)  {
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint8_t status;
+  stream.Read(status);
+  std::string details = readStringFromBitstream16S(stream);
+  if (details.length() != 0)
+    cw->getChatWindow()->pushMessage(0, details);
+  else if (status != CHAT_OK)
+    cw->getChatWindow()->pushMessage(0, statusMessages[status]);
+}
+
+void x801::game::Client::processChatMessage(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p)  {
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint32_t playerID;
+  stream.Read(playerID);
+  std::string message = readStringFromBitstream16S(stream);
+  cw->getChatWindow()->pushMessage(playerID, message);
 }
 
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {

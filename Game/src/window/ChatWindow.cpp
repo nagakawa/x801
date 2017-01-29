@@ -38,8 +38,6 @@ void x801::game::ChatWindow::pushMessage(uint32_t playerID, const std::string& m
 
 // Use technique in imgui_demo.cpp
 void x801::game::ChatWindow::render() {
-  pushMessage(1, "I will shank your fucking mom");
-  pushMessage(2, "E-I-E-I-O");
   ImGui::SetNextWindowSize(ImVec2(300, 800), ImGuiSetCond_FirstUseEver);
   bool isChatWindowOpen = ImGui::Begin("Chat");
   if (isChatWindowOpen) {
@@ -69,7 +67,7 @@ void x801::game::ChatWindow::render() {
       ImGuiInputTextFlags_EnterReturnsTrue
     );
     if (hasDone) {
-      std::cout << "Typed message: " << yourMessage << '\n';
+      window->getParentClient()->sendChatMessage(yourMessage);
       yourMessage[0] = '\0';
     }
     if (ImGui::IsItemHovered() || (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
