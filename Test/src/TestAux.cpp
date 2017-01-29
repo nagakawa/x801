@@ -35,17 +35,17 @@ void x801::test::assertPrivate(
     const char* extra) {
   ++TestDiag::current.totalTests;
   if (c) {
-    std::cout << "\033[32mTest passed: " << what << '\n';
+    std::cout << "\033[0;32m* Test passed: " << what << '\n';
     ++TestDiag::current.passedTests;
   } else {
     // \u2013 is the en-dash
-    std::cout << "\033[31;1mTEST FAILED!!! \u2013 \n";
-    std::cout << "  \033[0m" << what << '\n';
+    std::cout << "  \033[31;1mTEST FAILED!!! \u2013 \n";
+    std::cout << "    \033[0m" << what << '\n';
     if (extra != nullptr) {
-      std::cout << "  \033[33m" << extra << '\n';
+      std::cout << "    \033[33m" << extra << '\n';
     }
-    std::cout << "  \033[0mat \033[35m" << file << ":\033[36m" << line;
-    std::cout << " \033[34m(" << func << ")\n\n";
+    std::cout << "    \033[0mat \033[35m" << file << ":\033[36m" << line;
+    std::cout << "   \033[34m(" << func << ")\n\n";
   }
 }
 

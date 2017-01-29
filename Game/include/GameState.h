@@ -69,12 +69,6 @@ namespace x801 {
       Player& getPlayer(uint32_t id) {
         return allPlayers[id];
       }
-      /*const std::string& getUsernameByID(uint32_t id) {
-        return usernamesByID[id];
-      }
-      uint32_t getIDByUsername(const std::string& name) {
-        return idsByUsername[name];
-      }*/
       auto findUsernameByID(uint32_t id) const {
         return usernamesByID.find(id);
       }
@@ -95,12 +89,6 @@ namespace x801 {
     };
     class ClientGameState {
     public:
-      /*const std::string& getUsernameByID(uint32_t id) {
-        return usernamesByID[id];
-      }
-      uint32_t getIDByUsername(const std::string& name) {
-        return idsByUsername[name];
-      }*/
       auto findUsernameByID(uint32_t id) {
         std::lock_guard<std::mutex> guard(lookupMutex);
         return usernamesByID.find(id);
