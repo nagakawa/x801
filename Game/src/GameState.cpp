@@ -54,3 +54,32 @@ void x801::game::GameState::logout(uint32_t id) {
   idsByUsername.erase(usernamesByID[id]);
   usernamesByID.erase(id);
 }
+
+void x801::game::ClientGameState::addUser(uint32_t id, const std::string& name) {
+  lookupMutex.lock();
+  addUserUnsynchronised(id, name);
+  lookupMutex.unlock();
+}
+
+void x801::game::ClientGameState::addUserUnsynchronised(
+    uint32_t id, const std::string& name) {
+  usernamesByID[id] = name;
+  idsByUsername[name] = id;
+  alreadyRequestedIDs.erase(id);
+}
+
+void x801::game::ClientGameState::addRequest(uint32_t id) {
+  lookupMutex.lock();
+  alreadyRequestedIDs.insert(id);
+  lookupMutex.unlock();
+}
+
+void x801::game::ClientGameState::populateRequested(uint32_t* ids) {
+  lookupMutex.lock();
+  size_t i = 0;
+  for (uint32_t id : alreadyRequestedIDs) {
+    ids[i] = id;
+    ++i;
+  }
+  lookupMutex.unlock();
+}

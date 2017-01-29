@@ -81,3 +81,19 @@ char* x801::game::readStringFromBitstream16(RakNet::BitStream& stream) {
   c[length] = '\0';
   return c;
 }
+
+std::string x801::game::readStringFromBitstream32S(RakNet::BitStream& stream) {
+  uint32_t length;
+  stream.Read(length);
+  std::string s(length, '\0');
+  stream.Read(&s[0], length);
+  return s;
+}
+
+std::string x801::game::readStringFromBitstream16S(RakNet::BitStream& stream) {
+  uint16_t length;
+  stream.Read(length);
+  std::string s(length, '\0');
+  stream.Read(&s[0], length);
+  return s;
+}

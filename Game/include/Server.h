@@ -87,6 +87,17 @@ namespace x801 {
         uint8_t* body, size_t length,
         RakNet::Packet* p
       );
+      void processUsernameRequest(
+        uint16_t lPacketType, uint32_t playerID,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
+      void processChatRequest(
+        uint16_t lPacketType, uint32_t playerID,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
+      void sendUnrecognisedCookiePacket(RakNet::Packet* p);
       RakNet::RakPeerInterface* peer = nullptr;
       char* publicKey = nullptr;
       char* privateKey = nullptr;

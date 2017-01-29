@@ -29,6 +29,7 @@ namespace x801 {
   }
 }
 #include "Client.h"
+#include "window/ChatWindow.h"
 
 namespace x801 {
   namespace game {
@@ -42,8 +43,12 @@ namespace x801 {
       void start() {
         GLFWApplication::start();
       }
+      ChatWindow* getChatWindow() { return chat; }
+      Client* getParentClient() { return c; }
       ~ClientWindow();
       Client* c;
+    private:
+      ChatWindow* chat = nullptr;
     };
   }
 }

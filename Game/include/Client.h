@@ -34,7 +34,7 @@ namespace x801 {
     class Client;
   }
 }
-#include "ClientWindow.h"
+#include "window/ClientWindow.h"
 #include "Credentials.h"
 #include "GameState.h"
 #include "packet.h"
@@ -60,9 +60,11 @@ namespace x801 {
       bool isDone() { return done; }
       void login(Credentials& c, PacketCallback loginCallback);
       void login(Credentials& c);
+      void sendChatMessage(const char* message);
       void listen();
       void listenConcurrent();
       std::thread& getListenThread() { return listenThread; }
+      std::string getUsername(uint32_t id);
     private:
       void initialise();
       bool handlePacket(
@@ -80,6 +82,23 @@ namespace x801 {
       void openWindow();
       void openWindowConcurrent();
       void sendLoginPacket(PacketCallback loginCallback);
+      void requestUsernames(size_t count, uint32_t* ids);
+      void requestUsername(uint32_t id);
+      void processUsernameResponse(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
+      void processChatMessageCode(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
+      void processChatMessage(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;
@@ -88,6 +107,7 @@ namespace x801 {
       char* publicKey = nullptr;
       // GameState g;
       ClientWindow* cw = nullptr;
+      ClientGameState g;
       volatile bool done = false;
       uint8_t* cookie = nullptr;
       Credentials cred;

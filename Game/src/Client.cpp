@@ -25,9 +25,11 @@ using namespace x801::game;
 #include <stdlib.h>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <GLFW/glfw3.h>
 #include <BitStream.h>
 #include <SecureHandshake.h>
+#include "Server.h"
 
 void x801::game::Client::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
@@ -65,6 +67,42 @@ void x801::game::Client::initialise() {
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
+  LPacketCallback idCallback = {
+    [this](
+      uint16_t lPacketType, uint32_t playerID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        (void) playerID;
+        this->processUsernameResponse(
+          lPacketType, lbody, llength, p
+        );
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_IDENTIFY, idCallback});
+  LPacketCallback chatCallback1 = {
+    [this](
+      uint16_t lPacketType, uint32_t playerID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        (void) playerID;
+        this->processChatMessageCode(
+          lPacketType, lbody, llength, p
+        );
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_CHAT, chatCallback1});
+  LPacketCallback chatCallback2 = {
+    [this](
+      uint16_t lPacketType, uint32_t playerID,
+      uint8_t* lbody, size_t llength,
+      RakNet::Packet* p) {
+        (void) playerID;
+        this->processChatMessage(
+          lPacketType, lbody, llength, p
+        );
+      }, -1
+  };
+  lCallbacks.insert({LPACKET_RECEIVE_CHAT, chatCallback2});
   listenConcurrent();
 }
 
@@ -105,7 +143,7 @@ bool x801::game::Client::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
-  std::cerr << "It's an lpacket!\n";
+  std::cerr << "It's an lpacket! ID = " << lPacketType << "\n";
   switch (lPacketType) {
     //
   }
@@ -115,7 +153,7 @@ bool x801::game::Client::handleLPacket(
       ++iterator;
       continue;
     }
-    (iterator->second.call)(lPacketType, nullptr, lbody, llength, p);
+    (iterator->second.call)(lPacketType, 0, lbody, llength, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
@@ -179,6 +217,113 @@ void x801::game::Client::requestMOTD() {
   requestMOTD(motdCallback);
 }
 
+void x801::game::Client::requestUsernames(
+    size_t count, uint32_t* ids) {
+  size_t totalCount = count + g.totalRequested();
+  uint32_t* alreadyRequestedIDs = new uint32_t[totalCount - count];
+  g.populateRequested(alreadyRequestedIDs);
+  for (size_t i = 0; i < count; ++i)
+    g.addRequest(ids[i]);
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  stream.Write(static_cast<uint16_t>(LPACKET_IDENTIFY));
+  stream.Write((const char*) cookie, COOKIE_LEN);
+  stream.Write(static_cast<uint16_t>(totalCount));
+  std::cerr << "Sending requests...\n";
+  for (size_t i = 0; i < count; ++i) {
+    std::cerr << "Requesting name of user #" << ids[i] << '\n';
+    stream.Write(ids[i]);
+  }
+  for (size_t i = 0; i < totalCount - count; ++i) {
+    std::cerr << "Requesting name of user #" << ids[i] << '\n';
+    stream.Write(alreadyRequestedIDs[i]);
+  }
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+  delete[] alreadyRequestedIDs;
+}
+
+void x801::game::Client::requestUsername(uint32_t id) {
+  requestUsernames(1, &id);
+}
+
+void x801::game::Client::processUsernameResponse(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p) {
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint16_t count;
+  stream.Read(count);
+  g.lookupMutex.lock();
+  for (size_t i = 0; i < count; ++i) {
+    uint32_t userID;
+    stream.Read(userID);
+    std::string username = readStringFromBitstream16S(stream);
+    std::cerr << i << ") " << userID << ": " << username << '\n';
+    g.addUserUnsynchronised(userID, username);
+  }
+  g.lookupMutex.unlock();
+}
+
+std::string x801::game::Client::getUsername(uint32_t id) {
+  if (id == 0) return "Server";
+  auto it = g.findUsernameByID(id);
+  if (it != g.endOfUsernameMap()) return it->second;
+  else if (!g.isIDRequested(id)) requestUsername(id);
+  std::stringstream ss;
+  ss << "#" << id;
+  std::string s = ss.str();
+  return s;
+}
+
+void x801::game::Client::sendChatMessage(const char* message) {
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  stream.Write(static_cast<uint16_t>(LPACKET_CHAT));
+  stream.Write((const char*) cookie, COOKIE_LEN);
+  writeStringToBitstream16(stream, message);
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+}
+
+static const char* statusMessages[] = {
+  "Why the fuck are you complaining?",
+  "You don't have perimission to execute this command.",
+  "You are muted.",
+};
+
+void x801::game::Client::processChatMessageCode(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p)  {
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint8_t status;
+  stream.Read(status);
+  std::string details = readStringFromBitstream16S(stream);
+  if (details.length() != 0)
+    cw->getChatWindow()->pushMessage(0, details);
+  else if (status != CHAT_OK)
+    cw->getChatWindow()->pushMessage(0, statusMessages[status]);
+}
+
+void x801::game::Client::processChatMessage(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p)  {
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint32_t playerID;
+  stream.Read(playerID);
+  std::string message = readStringFromBitstream16S(stream);
+  cw->getChatWindow()->pushMessage(playerID, message);
+}
+
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {
   RakNet::BitStream stream;
   stream.Write(static_cast<uint8_t>(PACKET_LOGIN));
@@ -239,7 +384,7 @@ void x801::game::Client::login(Credentials& c, PacketCallback loginCallback) {
 }
 
 void x801::game::Client::openWindow() {
-  cw = new ClientWindow(1024, 768, 0, 0, "Experiment801", 3, 3, false);
+  cw = new ClientWindow(1280, 960, 0, 0, "Experiment801", 3, 3, false);
   cw->c = this;
   cw->start();
 }
