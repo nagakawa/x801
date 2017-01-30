@@ -46,6 +46,7 @@ void x801::game::ClientWindow::initialise() {
   glfwSetCharCallback(underlying(), ImGui_ImplGlfwGL3_CharCallback);
   ImGui_ImplGlfwGL3_Init(underlying(), false);
   ImGuiIO& io = ImGui::GetIO();
+  //io.Fonts->AddFontFromFileTTF("/home/uruwi/kiloji/kiloji_p.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
   io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/vlgothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
   chat = new ChatWindow(this);
 }

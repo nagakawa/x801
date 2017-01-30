@@ -45,7 +45,7 @@ void x801::game::ChatWindow::render() {
       "ScrollingRegion",
       ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()),
       false,
-      ImGuiWindowFlags_HorizontalScrollbar
+      0 // ImGuiWindowFlags_HorizontalScrollbar
     );
     for (size_t i = 0; i < messageCount; ++i) {
       ChatEntry entry = entries[(start + i) % ringSize];
@@ -54,7 +54,7 @@ void x801::game::ChatWindow::render() {
         window->c->getUsername(entry.playerID) <<
         "] " << entry.message;
       std::string str = output.str();
-      ImGui::TextUnformatted(str.c_str());
+      ImGui::TextWrapped("%s", str.c_str());
     }
     if (shouldScrollToBottom) {
       ImGui::SetScrollHere();
@@ -66,7 +66,7 @@ void x801::game::ChatWindow::render() {
       "Input", yourMessage, 256,
       ImGuiInputTextFlags_EnterReturnsTrue
     );
-    if (hasDone) {
+    if (hasDone && yourMessage[0] != '\0') {
       window->getParentClient()->sendChatMessage(yourMessage);
       yourMessage[0] = '\0';
     }

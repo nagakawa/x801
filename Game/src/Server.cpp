@@ -361,22 +361,25 @@ void x801::game::Server::processChatRequest(
   (void) lPacketType;
   RakNet::BitStream stream(lbody, llength, false);
   RakNet::BitStream output, output2;
+  int stat = CHAT_OK;
   const char* message = readStringFromBitstream16(stream);
   output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
   output.Write(static_cast<uint16_t>(LPACKET_CHAT));
-  output.Write(static_cast<uint8_t>(CHAT_OK));
+  output.Write(static_cast<uint8_t>(stat));
   peer->Send(
     &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     p->systemAddress, false
   );
-  output2.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
-  output2.Write(static_cast<uint16_t>(LPACKET_RECEIVE_CHAT));
-  output2.Write(userID);
-  writeStringToBitstream16(output2, message);
-  peer->Send(
-    &output2, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
-    RakNet::UNASSIGNED_RAKNET_GUID, true
-  );
+  if (stat == CHAT_OK && message[0] != '\0') {
+    output2.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+    output2.Write(static_cast<uint16_t>(LPACKET_RECEIVE_CHAT));
+    output2.Write(userID);
+    writeStringToBitstream16(output2, message);
+    peer->Send(
+      &output2, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+      RakNet::UNASSIGNED_RAKNET_GUID, true
+    );
+  }
   delete[] message;
 }
 

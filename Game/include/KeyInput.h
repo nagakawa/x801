@@ -21,11 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <stdint.h>
+#include <RakNetTypes.h>
+
 namespace x801 {
   namespace game {
-    struct Timestamp {
-      uint16_t ms;
-      //
-    }
+    struct KeyInput {
+      RakNet::Time time;
+      uint32_t inputs;
+    };
   }
 }
