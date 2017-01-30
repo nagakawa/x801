@@ -62,6 +62,7 @@ namespace x801 {
       ClientGameState* cg = nullptr;
       x801::map::Area* area = nullptr;
     };
+    
     class GameState {
     public:
       LoginStatus login(Credentials& c, uint32_t& id);
@@ -87,6 +88,7 @@ namespace x801 {
         x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
       > areas;
     };
+
     class ClientGameState {
     public:
       auto findUsernameByID(uint32_t id) {
