@@ -23,9 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <RakNetTypes.h>
+#include <utils.h>
 
 namespace x801 {
   namespace game {
+    enum KeyInputValues {
+      K_OFFSET_FORWARD = 0,
+      K_OFFSET_BACK,
+      K_OFFSET_LEFT,
+      K_OFFSET_RIGHT,
+    };
     struct KeyInput {
       RakNet::Time time;
       uint32_t inputs;
