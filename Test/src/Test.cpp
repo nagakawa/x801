@@ -263,7 +263,13 @@ void testAreaIO() {
 
 void testDBAuth() {
   boost::filesystem::path p = boost::filesystem::system_complete(currentEXE);
-  boost::filesystem::remove_all(p);
+  // Fun fact:
+  // The original code said
+  // boost::filesystem::remove_all(p);
+  // Which, instead of deleting the directory with the saves, destroyed the
+  // executable itself, causing hashes to not be updated when we decided to
+  // use SHA-256 over SHA-1.
+  boost::filesystem::remove_all(p.parent_path() / "saves");
   x801::game::Database db;
   // createAuthTable implicit
   db.createUserDebug("Uruwi", "GGLuisLifeHaven");

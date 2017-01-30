@@ -23,11 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::game;
 
 #include <argon2.h>
-#include "sha1.h"
+#define SHA2_USE_INTTYPES_H
+#include "sha2.h"
 
 // Don't change the salt, or else logins will stop working.
-static const char SALT[] = "This is not the real salt";
-static const int SALT_LENGTH = sizeof(SALT) / sizeof(*SALT) - 1;
+static const char CSALT[] = "This is not the real salt";
+static const int CSALT_LENGTH = sizeof(CSALT) / sizeof(*CSALT) - 1;
 static const int TIME_COST = 40;
 static const int MEMORY_COST = 12;
 static const int PARALLELISM = 1;
@@ -36,7 +37,7 @@ void x801::game::Credentials::fillHash(const std::string& password) {
   argon2i_hash_raw(
     TIME_COST, MEMORY_COST, PARALLELISM,
     password.c_str(), password.length(),
-    SALT, SALT_LENGTH,
+    CSALT, CSALT_LENGTH,
     hash, RAW_HASH_LENGTH
   );
 }
@@ -51,15 +52,15 @@ Credentials& x801::game::Credentials::operator=(const Credentials& other) {
 x801::game::Credentials::~Credentials() {
   delete[] hash;
 }
-
+#include <stdio.h>
 bool x801::game::Credentials::matches(StoredCredentials& sc) const {
-  // Generate SHA-1 hash
-  SHA1_CTX sha1;
-  sha1_init(&sha1);
-  sha1_update(&sha1, hash, RAW_HASH_LENGTH);
-  sha1_update(&sha1, sc.getSalt(), SALT_LENGTH);
+  // Generate SHA-256 hash
+  SHA256_CTX sha2;
+  SHA256_Init(&sha2);
+  SHA256_Update(&sha2, hash, RAW_HASH_LENGTH);
+  SHA256_Update(&sha2, sc.getSalt(), SALT_LENGTH);
   uint8_t cooked[COOKED_HASH_LENGTH];
-  sha1_final(&sha1, cooked);
+  SHA256_Final(cooked, &sha2);
   // Below code is the same as
   // return memcmp(cooked, sc.getCookedHash(), COOKED_HASH_LENGTH) == 0;
   // but not subject to timing attacks

@@ -30,6 +30,8 @@ TARGET_LINK_LIBRARIES(Test
   ${PROJECT_SOURCE_DIR}/../../build/libGame.a
   ${PROJECT_SOURCE_DIR}/../../build/libMap.a
   ${PROJECT_SOURCE_DIR}/../../build/libBase.a
+  # For some reason this is needed. *sigh*
+  ${PROJECT_SOURCE_DIR}/../../build/libRakNetLibStatic.a
   ${PROJECT_SOURCE_DIR}/../../argon2/libargon2.a
   ${ZLIB_LIBRARIES}
   ${SQLITE_LIBRARIES}
