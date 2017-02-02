@@ -49,14 +49,18 @@ namespace x801 {
     class ClientGameState;
     class AreaWithPlayers {
     public:
+      // dummy
       AreaWithPlayers() {}
+      // linkback to ClientGameState and read map data
       AreaWithPlayers(ClientGameState* g, std::istream& fh) :
           cg(g), area(new x801::map::Area(fh)) {}
+      // linkback to GameState and read map data
       AreaWithPlayers(GameState* g, std::istream& fh) :
           g(g), area(new x801::map::Area(fh)) {}
       AreaWithPlayers(const AreaWithPlayers& other) = delete;
       AreaWithPlayers& operator=(const AreaWithPlayers& other) = delete;
       ~AreaWithPlayers();
+      // return (players.cbegin(), players.cend())
       auto playerMapEndpoints() const {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return std::pair<decltype(players.cbegin()), decltype(players.cend())>(
@@ -76,8 +80,12 @@ namespace x801 {
       }
       void addPlayer(uint32_t id);
       void removePlayer(uint32_t id);
-    private:
+      // Mutex to make sure multiple threads aren't mutating
+      // the set of players in this area simultaneously.
+      // This is public so users of the class can use the mutex to
+      // safely iterate over all elements of a map.
       mutable boost::shared_mutex playerMutex;
+    private:
       std::unordered_set<uint32_t> players;
       GameState* g = nullptr;
       // Unsure whether this is needed, since ClientGameState can hold
@@ -131,13 +139,24 @@ namespace x801 {
         return alreadyRequestedIDs.count(id) != 0;
       }
       void addUser(uint32_t id, const std::string& name);
+      // does not lock the mutex, so if you use this manually lock the mutex
       void addUserUnsynchronised(uint32_t id, const std::string& name);
       void addRequest(uint32_t id);
       size_t totalRequested() const {
         boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return alreadyRequestedIDs.size();
       }
-      void populateRequested(uint32_t* ids);
+      // Write all of the elements of alreadyRequestedIDs into
+      // a buffer. It should be big enough to fit the total
+      // number of elements in the set; use totalRequested()
+      // to get the count.
+      void populateRequested(uint32_t* ids, size_t n);
+      // Mutex to make sure multiple threads aren't changing
+      // player maps simultaneously.
+      // This is public so the client can add multiple ID-username
+      // mapping with only one lock and unlock.
+      // In addition, users of the class can use the mutex to
+      // safely iterate over all elements of a map.
       mutable boost::shared_mutex lookupMutex;
     private:
       AreaWithPlayers currentArea;

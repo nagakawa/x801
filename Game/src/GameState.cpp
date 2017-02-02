@@ -87,10 +87,11 @@ void x801::game::ClientGameState::addRequest(uint32_t id) {
   lookupMutex.unlock();
 }
 
-void x801::game::ClientGameState::populateRequested(uint32_t* ids) {
+void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
   lookupMutex.lock();
   size_t i = 0;
   for (uint32_t id : alreadyRequestedIDs) {
+    if (i >= n) break;
     ids[i] = id;
     ++i;
   }

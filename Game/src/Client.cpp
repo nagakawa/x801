@@ -234,7 +234,7 @@ void x801::game::Client::requestUsernames(
     size_t count, uint32_t* ids) {
   size_t totalCount = count + g.totalRequested();
   uint32_t* alreadyRequestedIDs = new uint32_t[totalCount - count];
-  g.populateRequested(alreadyRequestedIDs);
+  g.populateRequested(alreadyRequestedIDs, totalCount - count);
   for (size_t i = 0; i < count; ++i)
     g.addRequest(ids[i]);
   RakNet::BitStream stream;
