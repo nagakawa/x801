@@ -31,6 +31,7 @@ using namespace x801::test;
 #include <vector>
 #include <boost/filesystem.hpp>
 #include <Area.h>
+#include <CircularQueue.h>
 #include <Database.h>
 #include <Layer.h>
 #include <Location.h>
@@ -262,7 +263,13 @@ void testAreaIO() {
 
 void testDBAuth() {
   boost::filesystem::path p = boost::filesystem::system_complete(currentEXE);
-  boost::filesystem::remove_all(p);
+  // Fun fact:
+  // The original code said
+  // boost::filesystem::remove_all(p);
+  // Which, instead of deleting the directory with the saves, destroyed the
+  // executable itself, causing hashes to not be updated when we decided to
+  // use SHA-256 over SHA-1.
+  boost::filesystem::remove_all(p.parent_path() / "saves");
   x801::game::Database db;
   // createAuthTable implicit
   db.createUserDebug("Uruwi", "GGLuisLifeHaven");
@@ -298,6 +305,48 @@ void testDBAuth() {
   assertThat(!attempt2.matches(sc), "Wrong password input");
 }
 
+// Toy class to test CircularQueue
+struct Cup {
+  std::string drink;
+  int volumeInML;
+  Cup() : drink("water"), volumeInML(500)  {}
+  Cup(const std::string& drink, int volumeInML) :
+    drink(std::move(drink)), volumeInML(volumeInML) {}
+  bool operator==(const Cup& other) {
+    return drink == other.drink && volumeInML == volumeInML;
+  }
+};
+
+std::ostream& operator<<(std::ostream& stream, const Cup& cup) {
+  stream << "Cup(" << cup.drink << ", " << cup.volumeInML << ")";
+  return stream;
+}
+
+void testCircularQueue() {
+  x801::base::CircularQueue<Cup> cups;
+  cups.pushBack(Cup("Sprite", 450));
+  cups.emplaceBack("Fanta", 400);
+  assertEqual(cups[0], Cup("Sprite", 450), "CircularQueue::pushBack works");
+  assertEqual(cups[1], Cup("Fanta", 400), "CircularQueue::emplaceBack works");
+  cups.emplaceFront("orange juice", 250);
+  assertEqual(cups[0], Cup("orange juice", 250), "CircularQueue::emplaceBack works");
+  assertEqual(cups[1], Cup("Sprite", 450), "CircularQueue::emplaceFront shifts elements");
+  for (int i = 0; i < 100; ++i) {
+    cups.emplaceFront("Mountain Dew", 1000 + i);
+    cups.emplaceBack("milk", 2000 + i);
+  }
+  assertEqual(cups.size(), 203U, "Container has correct number of elements");
+  assertEqual(cups[37].volumeInML, 1062,
+    "Arbitrary element selected near front");
+  assertEqual(cups[cups.size() - 1 - 69].volumeInML, 2030,
+    "Arbitrary element selected near back");
+  cups.popFront();
+  cups.popBack();
+  assertEqual(cups.size(), 201U, "Container has correct number of elements");
+  assertEqual(cups[36].volumeInML, 1062,
+    "Same element has index that is one less than before front was popped");
+}
+
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
@@ -310,12 +359,16 @@ const Test x801::test::parts[] = {
   {"tileSec", testTileSecIO, true},
   {"area", testAreaIO, true},
   {"dbAuth", testDBAuth, true},
+  {"circularQueue", testCircularQueue, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 
 void x801::test::Test::run(const char* arg, bool isDefault) const {
   try {
-    if ((isDefault && runByDefault) || !strcmp(arg, name)) test();
+    if ((isDefault && runByDefault) || !strcmp(arg, name)) {
+      std::cout << "\033[0;36mRunning the test \033[1m" << name << '\n';
+      test();
+    }
   } catch (std::exception& x) {
     std::cerr << "\033[31;1mTEST FAILED!!! \u2013 \n";
     std::cerr << "Exception thrown: \n  ";

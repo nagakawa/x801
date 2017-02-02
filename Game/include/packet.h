@@ -41,6 +41,7 @@ namespace x801 {
       LPACKET_MOVE,
       LPACKET_FILE,
       LPACKET_IDENTIFY,
+      LPACKET_CHANGE_AREA,
     };
     enum ChatStatus {
       CHAT_OK = 0,
@@ -64,6 +65,7 @@ namespace x801 {
         void(
           uint8_t packetType,
           uint8_t* body, size_t length,
+          RakNet::Time t,
           RakNet::Packet* p
         )
       > call;
@@ -74,6 +76,7 @@ namespace x801 {
         void(
           uint16_t lPacketType, uint32_t userID,
           uint8_t* lbody, size_t llength,
+          RakNet::Time t,
           RakNet::Packet* p
         )
       > call;

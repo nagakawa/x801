@@ -34,10 +34,11 @@ namespace x801 {
     class Client;
   }
 }
-#include "window/ClientWindow.h"
 #include "Credentials.h"
 #include "GameState.h"
+#include "KeyInput.h"
 #include "packet.h"
+#include "window/ClientWindow.h"
 
 namespace x801 {
   namespace game {
@@ -70,11 +71,13 @@ namespace x801 {
       bool handlePacket(
         uint8_t packetType,
         uint8_t* body, size_t length,
+        RakNet::Time t,
         RakNet::Packet* p
       );
       bool handleLPacket(
         uint16_t lPacketType,
         uint8_t* lbody, size_t llength,
+        RakNet::Time t,
         RakNet::Packet* p
       );
       void requestMOTD();

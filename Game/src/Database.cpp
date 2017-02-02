@@ -26,7 +26,8 @@ using namespace x801::game;
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <utils.h>
-#include "sha1.h"
+#define SHA2_USE_INTTYPES_H
+#include "sha2.h"
 
 int x801::game::stepBlock(sqlite3_stmt* statement, sqlite3* conn) {
   volatile int stat;
@@ -119,13 +120,13 @@ void x801::game::Database::createUser(
     SQLITE_STATIC
   );
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  // Generate SHA-1 hash
-  SHA1_CTX sha1;
-  sha1_init(&sha1);
-  sha1_update(&sha1, hash, RAW_HASH_LENGTH);
-  sha1_update(&sha1, salt, SALT_LENGTH);
+  // Generate SHA-256 hash
+  SHA256_CTX sha2;
+  SHA256_Init(&sha2);
+  SHA256_Update(&sha2, hash, RAW_HASH_LENGTH);
+  SHA256_Update(&sha2, salt, SALT_LENGTH);
   uint8_t cooked[COOKED_HASH_LENGTH];
-  sha1_final(&sha1, cooked);
+  SHA256_Final(cooked, &sha2);
   stat = sqlite3_bind_blob(
     statement, 2, static_cast<const void*>(cooked), COOKED_HASH_LENGTH,
     SQLITE_STATIC

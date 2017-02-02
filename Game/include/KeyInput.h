@@ -23,22 +23,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <RakNetTypes.h>
-#include <QualifiedAreaID.h>
-#include "KeyInput.h"
+#include <utils.h>
 
 namespace x801 {
   namespace game {
-    // blocks per second
-    const float PLAYER_SPEED = 2.5f;
-    // radians per second
-    const float PLAYER_ANGULAR_VELOCITY = 1.73f;
-    struct Location {
-      x801::map::QualifiedAreaID areaID;
-      int layer;
-      float x, y, rot;
-      // Used by both the client (for position prediction) and
-      // the server.
-      void applyKeyInput(KeyInput input, RakNet::Time last);
+    enum KeyInputValues {
+      K_OFFSET_FORWARD = 0,
+      K_OFFSET_BACK,
+      K_OFFSET_LEFT,
+      K_OFFSET_RIGHT,
+    };
+    struct KeyInput {
+      RakNet::Time time;
+      uint32_t inputs;
     };
   }
 }

@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace game {
     const int RAW_HASH_LENGTH = 256;
-    const int COOKED_HASH_LENGTH = 20; // SHA-1 digest is 160 bits long
+    const int COOKED_HASH_LENGTH = 32; // SHA-256 digest is 256 bits long
     const int SALT_LENGTH = 16;
     class StoredCredentials {
     public:

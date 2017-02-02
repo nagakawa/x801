@@ -50,8 +50,9 @@ void x801::game::Client::initialise() {
     [](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) packetType; (void) body; (void) length; (void) p;
+        (void) packetType; (void) body; (void) length; (void) t; (void) p;
         std::cout << "You have been disconnected.\n";
       }, -1
   };
@@ -61,8 +62,9 @@ void x801::game::Client::initialise() {
     [this](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) packetType; (void) body; (void) length; (void) p;
+        (void) packetType; (void) body; (void) length; (void) t; (void) p;
         this->requestMOTD();
       }, -1
   };
@@ -71,8 +73,9 @@ void x801::game::Client::initialise() {
     [this](
       uint16_t lPacketType, uint32_t playerID,
       uint8_t* lbody, size_t llength,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) playerID;
+        (void) playerID; (void) t;
         this->processUsernameResponse(
           lPacketType, lbody, llength, p
         );
@@ -83,8 +86,9 @@ void x801::game::Client::initialise() {
     [this](
       uint16_t lPacketType, uint32_t playerID,
       uint8_t* lbody, size_t llength,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) playerID;
+        (void) playerID; (void) t;
         this->processChatMessageCode(
           lPacketType, lbody, llength, p
         );
@@ -95,8 +99,9 @@ void x801::game::Client::initialise() {
     [this](
       uint16_t lPacketType, uint32_t playerID,
       uint8_t* lbody, size_t llength,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) playerID;
+        (void) playerID; (void) t;
         this->processChatMessage(
           lPacketType, lbody, llength, p
         );
@@ -109,6 +114,7 @@ void x801::game::Client::initialise() {
 bool x801::game::Client::handlePacket(
     uint8_t packetType,
     uint8_t* body, size_t length,
+    RakNet::Time t,
     RakNet::Packet* p) {
   (void) body; (void) length; (void) p;
   std::cerr << "It's a packet! ID = " << (int) packetType << "\n";
@@ -130,7 +136,7 @@ bool x801::game::Client::handlePacket(
       ++iterator;
       continue;
     }
-    (iterator->second.call)(packetType, body, length, p);
+    (iterator->second.call)(packetType, body, length, t, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
     else ++iterator;
@@ -140,6 +146,7 @@ bool x801::game::Client::handlePacket(
 bool x801::game::Client::handleLPacket(
     uint16_t lPacketType,
     uint8_t* lbody, size_t llength,
+    RakNet::Time t,
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
@@ -153,7 +160,7 @@ bool x801::game::Client::handleLPacket(
       ++iterator;
       continue;
     }
-    (iterator->second.call)(lPacketType, 0, lbody, llength, p);
+    (iterator->second.call)(lPacketType, 0, lbody, llength, t, p);
     if (iterator->second.timesLeft != -1) --iterator->second.timesLeft;
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
@@ -169,6 +176,11 @@ void x801::game::Client::listen() {
         RakNet::Packet* p = peer->Receive();
         p != nullptr;
         peer->DeallocatePacket(p), p = peer->Receive()) {
+      RakNet::Time t = 0;
+      if (p->data[0] == ID_TIMESTAMP) {
+        RakNet::BitStream s(p->data, 1, sizeof(RakNet::Time));
+        s.Read(t);
+      }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
       uint8_t* body = p->data + offset;
@@ -177,9 +189,9 @@ void x801::game::Client::listen() {
         uint16_t lpacketType = (body[0] << 8) | body[1];
         uint8_t* lbody = body + 2;
         size_t llength = length - 2;
-        shouldContinue = handleLPacket(lpacketType, lbody, llength, p);
+        shouldContinue = handleLPacket(lpacketType, lbody, llength, t, p);
       } else {
-        shouldContinue = handlePacket(packetType, body, length, p);
+        shouldContinue = handlePacket(packetType, body, length, t, p);
       }
     }
   }
@@ -205,8 +217,9 @@ void x801::game::Client::requestMOTD() {
     [this](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) packetType; (void) p;
+        (void) packetType; (void) p; (void) t;
         RakNet::BitStream stream(body, length, false);
         const char* s = readStringFromBitstream32(stream);
         std::cout << "MOTD:\n";
@@ -221,7 +234,7 @@ void x801::game::Client::requestUsernames(
     size_t count, uint32_t* ids) {
   size_t totalCount = count + g.totalRequested();
   uint32_t* alreadyRequestedIDs = new uint32_t[totalCount - count];
-  g.populateRequested(alreadyRequestedIDs);
+  g.populateRequested(alreadyRequestedIDs, totalCount - count);
   for (size_t i = 0; i < count; ++i)
     g.addRequest(ids[i]);
   RakNet::BitStream stream;
@@ -351,8 +364,9 @@ void x801::game::Client::login(Credentials& c) {
     [this](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) p; (void) packetType;
+        (void) p; (void) packetType; (void) t;
         uint8_t stat = body[0];
         if (length < 17) stat = LOGIN_NOT_ENOUGH_DATA;
         if (stat == LOGIN_OK) {
@@ -375,8 +389,9 @@ void x801::game::Client::login(Credentials& c, PacketCallback loginCallback) {
     [this, loginCallback](
       uint8_t packetType,
       uint8_t* body, size_t length,
+      RakNet::Time t,
       RakNet::Packet* p) {
-        (void) packetType; (void) body; (void) length; (void) p;
+        (void) packetType; (void) body; (void) length; (void) t; (void) p;
         this->sendLoginPacket(loginCallback);
       }, -1
   };

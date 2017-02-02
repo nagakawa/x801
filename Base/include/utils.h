@@ -34,6 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef int_fast32_t Int;
 typedef uint_fast32_t UInt;
 
+#define DEFINE_OFFSETS_AND_FLAGS(type, name, offsetValue) \
+  const type OFFSET#name = offsetValue; \
+  const type FLAG#name = 1 << offsetValue;
+
 namespace x801 {
   namespace base {
     // Thanks http://stackoverflow.com/a/33414109/3130218

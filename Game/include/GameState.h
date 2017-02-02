@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <boost/thread/shared_mutex.hpp>
 #include <Area.h>
 #include <QualifiedAreaID.h>
 #include "Database.h"
@@ -47,42 +49,66 @@ namespace x801 {
     class ClientGameState;
     class AreaWithPlayers {
     public:
+      // dummy
       AreaWithPlayers() {}
+      // linkback to ClientGameState and read map data
       AreaWithPlayers(ClientGameState* g, std::istream& fh) :
           cg(g), area(new x801::map::Area(fh)) {}
+      // linkback to GameState and read map data
       AreaWithPlayers(GameState* g, std::istream& fh) :
           g(g), area(new x801::map::Area(fh)) {}
       AreaWithPlayers(const AreaWithPlayers& other) = delete;
       AreaWithPlayers& operator=(const AreaWithPlayers& other) = delete;
       ~AreaWithPlayers();
+      // return (players.cbegin(), players.cend())
+      auto playerMapEndpoints() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return std::pair<decltype(players.cbegin()), decltype(players.cend())>(
+            players.cbegin(), players.cend());
+      }
+      auto playerBegin() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return players.cbegin();
+      }
+      auto playerEnd() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return players.cend();
+      }
+      auto findPlayer(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return players.find(id);
+      }
+      void addPlayer(uint32_t id);
+      void removePlayer(uint32_t id);
+      // Mutex to make sure multiple threads aren't mutating
+      // the set of players in this area simultaneously.
+      // This is public so users of the class can use the mutex to
+      // safely iterate over all elements of a map.
+      mutable boost::shared_mutex playerMutex;
     private:
+      std::unordered_set<uint32_t> players;
       GameState* g = nullptr;
       // Unsure whether this is needed, since ClientGameState can hold
       // only one AreaWithPlayers.
       ClientGameState* cg = nullptr;
       x801::map::Area* area = nullptr;
     };
+    
     class GameState {
     public:
       LoginStatus login(Credentials& c, uint32_t& id);
       void logout(uint32_t id);
-      Player& getPlayer(uint32_t id) {
-        return allPlayers[id];
+      auto findPlayer(uint32_t id) const {
+        return allPlayers.find(id);
       }
-      /*const std::string& getUsernameByID(uint32_t id) {
-        return usernamesByID[id];
-      }
-      uint32_t getIDByUsername(const std::string& name) {
-        return idsByUsername[name];
-      }*/
       auto findUsernameByID(uint32_t id) const {
         return usernamesByID.find(id);
       }
       auto findIDByUsername(const std::string& name) const {
         return idsByUsername.find(name);
       }
-      auto endOfUsernameMap() const { return usernamesByID.end(); }
-      auto endOfIDMap() const { return idsByUsername.end(); }
+      auto endOfUsernameMap() const { return usernamesByID.cend(); }
+      auto endOfIDMap() const { return idsByUsername.cend(); }
     private:
       Database db;
       std::unordered_map<uint32_t, Player> allPlayers;
@@ -93,39 +119,45 @@ namespace x801 {
         x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
       > areas;
     };
+
     class ClientGameState {
     public:
-      /*const std::string& getUsernameByID(uint32_t id) {
-        return usernamesByID[id];
-      }
-      uint32_t getIDByUsername(const std::string& name) {
-        return idsByUsername[name];
-      }*/
-      auto findUsernameByID(uint32_t id) {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      auto findUsernameByID(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return usernamesByID.find(id);
       }
-      auto findIDByUsername(const std::string& name) {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      auto findIDByUsername(const std::string& name) const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return idsByUsername.find(name);
       }
-      auto endOfUsernameMap() {
-        std::lock_guard<std::mutex> guard(lookupMutex);
-        return usernamesByID.end();
+      auto endOfUsernameMap() const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
+        return usernamesByID.cend();
       }
-      bool isIDRequested(uint32_t id) {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      bool isIDRequested(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return alreadyRequestedIDs.count(id) != 0;
       }
       void addUser(uint32_t id, const std::string& name);
+      // does not lock the mutex, so if you use this manually lock the mutex
       void addUserUnsynchronised(uint32_t id, const std::string& name);
       void addRequest(uint32_t id);
-      size_t totalRequested() {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      size_t totalRequested() const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return alreadyRequestedIDs.size();
       }
-      void populateRequested(uint32_t* ids);
-      std::mutex lookupMutex;
+      // Write all of the elements of alreadyRequestedIDs into
+      // a buffer. It should be big enough to fit the total
+      // number of elements in the set; use totalRequested()
+      // to get the count.
+      void populateRequested(uint32_t* ids, size_t n);
+      // Mutex to make sure multiple threads aren't changing
+      // player maps simultaneously.
+      // This is public so the client can add multiple ID-username
+      // mapping with only one lock and unlock.
+      // In addition, users of the class can use the mutex to
+      // safely iterate over all elements of a map.
+      mutable boost::shared_mutex lookupMutex;
     private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;

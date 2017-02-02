@@ -26,6 +26,18 @@ using namespace x801::game;
 #include <string.h>
 #include "Credentials.h"
 
+void x801::game::AreaWithPlayers::addPlayer(uint32_t id) {
+  playerMutex.lock();
+  players.insert(id);
+  playerMutex.unlock();
+}
+
+void x801::game::AreaWithPlayers::removePlayer(uint32_t id) {
+  playerMutex.lock();
+  players.erase(id);
+  playerMutex.unlock();
+}
+
 x801::game::AreaWithPlayers::~AreaWithPlayers() {
   delete area;
 }
@@ -50,6 +62,7 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
 }
 
 void x801::game::GameState::logout(uint32_t id) {
+  db.savePlayerLocation(id, allPlayers[id].getLocation());
   allPlayers.erase(id);
   idsByUsername.erase(usernamesByID[id]);
   usernamesByID.erase(id);
@@ -74,10 +87,11 @@ void x801::game::ClientGameState::addRequest(uint32_t id) {
   lookupMutex.unlock();
 }
 
-void x801::game::ClientGameState::populateRequested(uint32_t* ids) {
+void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
   lookupMutex.lock();
   size_t i = 0;
   for (uint32_t id : alreadyRequestedIDs) {
+    if (i >= n) break;
     ids[i] = id;
     ++i;
   }
