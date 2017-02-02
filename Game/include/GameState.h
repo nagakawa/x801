@@ -68,9 +68,6 @@ namespace x801 {
     public:
       LoginStatus login(Credentials& c, uint32_t& id);
       void logout(uint32_t id);
-      Player& getPlayer(uint32_t id) {
-        return allPlayers[id];
-      }
       auto findUsernameByID(uint32_t id) const {
         return usernamesByID.find(id);
       }
