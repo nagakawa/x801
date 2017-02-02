@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <boost/thread/shared_mutex.hpp>
 #include <Area.h>
 #include <QualifiedAreaID.h>
@@ -56,7 +57,26 @@ namespace x801 {
       AreaWithPlayers(const AreaWithPlayers& other) = delete;
       AreaWithPlayers& operator=(const AreaWithPlayers& other) = delete;
       ~AreaWithPlayers();
+      auto playerMapEndpoints() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return std::pair<decltype(players.cbegin()), decltype(players.cend())>(
+            players.cbegin(), players.cend());
+      }
+      auto playerBegin() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return players.cbegin();
+      }
+      auto playerEnd() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return players.cend();
+      }
+      auto findPlayer(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return players.find(id);
+      }
     private:
+      mutable boost::shared_mutex playerMutex;
+      std::unordered_set<uint32_t> players;
       GameState* g = nullptr;
       // Unsure whether this is needed, since ClientGameState can hold
       // only one AreaWithPlayers.
@@ -77,8 +97,8 @@ namespace x801 {
       auto findIDByUsername(const std::string& name) const {
         return idsByUsername.find(name);
       }
-      auto endOfUsernameMap() const { return usernamesByID.end(); }
-      auto endOfIDMap() const { return idsByUsername.end(); }
+      auto endOfUsernameMap() const { return usernamesByID.cend(); }
+      auto endOfIDMap() const { return idsByUsername.cend(); }
     private:
       Database db;
       std::unordered_map<uint32_t, Player> allPlayers;
@@ -102,7 +122,7 @@ namespace x801 {
       }
       auto endOfUsernameMap() const {
         boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
-        return usernamesByID.end();
+        return usernamesByID.cend();
       }
       bool isIDRequested(uint32_t id) const {
         boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
