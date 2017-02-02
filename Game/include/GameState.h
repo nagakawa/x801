@@ -74,6 +74,8 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return players.find(id);
       }
+      void addPlayer(uint32_t id);
+      void removePlayer(uint32_t id);
     private:
       mutable boost::shared_mutex playerMutex;
       std::unordered_set<uint32_t> players;

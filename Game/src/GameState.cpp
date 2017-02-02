@@ -26,6 +26,18 @@ using namespace x801::game;
 #include <string.h>
 #include "Credentials.h"
 
+void x801::game::AreaWithPlayers::addPlayer(uint32_t id) {
+  playerMutex.lock();
+  players.insert(id);
+  playerMutex.unlock();
+}
+
+void x801::game::AreaWithPlayers::removePlayer(uint32_t id) {
+  playerMutex.lock();
+  players.erase(id);
+  playerMutex.unlock();
+}
+
 x801::game::AreaWithPlayers::~AreaWithPlayers() {
   delete area;
 }
