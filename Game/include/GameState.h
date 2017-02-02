@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <boost/thread/shared_mutex.hpp>
 #include <Area.h>
 #include <QualifiedAreaID.h>
 #include "Database.h"
@@ -91,31 +92,31 @@ namespace x801 {
 
     class ClientGameState {
     public:
-      auto findUsernameByID(uint32_t id) {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      auto findUsernameByID(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return usernamesByID.find(id);
       }
-      auto findIDByUsername(const std::string& name) {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      auto findIDByUsername(const std::string& name) const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return idsByUsername.find(name);
       }
-      auto endOfUsernameMap() {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      auto endOfUsernameMap() const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return usernamesByID.end();
       }
-      bool isIDRequested(uint32_t id) {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      bool isIDRequested(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return alreadyRequestedIDs.count(id) != 0;
       }
       void addUser(uint32_t id, const std::string& name);
       void addUserUnsynchronised(uint32_t id, const std::string& name);
       void addRequest(uint32_t id);
-      size_t totalRequested() {
-        std::lock_guard<std::mutex> guard(lookupMutex);
+      size_t totalRequested() const {
+        boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return alreadyRequestedIDs.size();
       }
       void populateRequested(uint32_t* ids);
-      std::mutex lookupMutex;
+      mutable boost::shared_mutex lookupMutex;
     private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;

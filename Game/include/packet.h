@@ -41,6 +41,7 @@ namespace x801 {
       LPACKET_MOVE,
       LPACKET_FILE,
       LPACKET_IDENTIFY,
+      LPACKET_CHANGE_AREA,
     };
     enum ChatStatus {
       CHAT_OK = 0,
