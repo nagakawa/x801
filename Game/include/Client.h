@@ -102,6 +102,12 @@ namespace x801 {
         uint8_t* lbody, size_t llength,
         RakNet::Packet* p
       );
+      void processMovement(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Time t,
+        RakNet::Packet* p
+      );
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;

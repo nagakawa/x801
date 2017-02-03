@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <utility>
 #include <boost/thread/shared_mutex.hpp>
 #include <Area.h>
+#include <CircularQueue.h>
 #include <QualifiedAreaID.h>
 #include "Database.h"
 #include "Player.h"
@@ -160,11 +161,21 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return alreadyRequestedIDs.size();
       }
+      AreaWithPlayers& getCurrentArea() {
+        return currentArea;
+      }
+      Player& getPlayer(uint32_t id) {
+        boost::unique_lock<boost::shared_mutex> guard(locationMutex);
+        return playersByID[id];
+      }
       // Write all of the elements of alreadyRequestedIDs into
       // a buffer. It should be big enough to fit the total
       // number of elements in the set; use totalRequested()
       // to get the count.
       void populateRequested(uint32_t* ids, size_t n);
+      void setID(uint32_t id) {
+        myID = id;
+      }
       // Mutex to make sure multiple threads aren't changing
       // player maps simultaneously.
       // This is public so the client can add multiple ID-username
@@ -172,11 +183,16 @@ namespace x801 {
       // In addition, users of the class can use the mutex to
       // safely iterate over all elements of a map.
       mutable boost::shared_mutex lookupMutex;
+      mutable boost::shared_mutex locationMutex;
     private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;
       std::unordered_map<std::string, uint32_t> idsByUsername;
       std::unordered_set<uint32_t> alreadyRequestedIDs;
+      std::unordered_map<uint32_t, Player> playersByID;
+      x801::base::CircularQueue<KeyInput> history;
+      Location selfPosition;
+      uint32_t myID = 0;
     };
   }
 }

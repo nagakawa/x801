@@ -273,14 +273,19 @@ void x801::game::Server::processLogin(
   uint8_t hash[RAW_HASH_LENGTH];
   stream.Read((char*) hash, RAW_HASH_LENGTH);
   Credentials cred(string, hash);
-  uint8_t output[2 + COOKIE_LEN];
-  output[0] = PACKET_LOGIN;
+  RakNet::BitStream output;
+  output.Write(static_cast<uint8_t>(PACKET_LOGIN));
+  uint8_t cookie[COOKIE_LEN];
   uint32_t playerID;
-  LoginStatus status = login(cred, playerID, output + 2, p->systemAddress);
-  output[1] = (uint8_t) status;
+  LoginStatus status = login(cred, playerID, cookie, p->systemAddress);
+  output.Write(static_cast<uint8_t>(status));
+  if (status == LOGIN_OK) {
+    output.Write((const char*) cookie, COOKIE_LEN);
+    output.Write(playerID);
+  }
   std::cerr << "Login status was " << status << '\n';
   peer->Send(
-    (const char*) output, 2 + COOKIE_LEN, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    &output, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
     p->systemAddress, false
   );
 }

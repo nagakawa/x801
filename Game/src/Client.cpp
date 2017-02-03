@@ -78,6 +78,9 @@ void x801::game::Client::initialise() {
   LPacketCallback chatCallback2 =
     MAKE_LPACKET_CALLBACK_CLIENT(processChatMessage, -1);
   lCallbacks.insert({LPACKET_RECEIVE_CHAT, chatCallback2});
+  LPacketCallback moveCallback =
+    MAKE_LPACKET_CALLBACK_CLIENT_TIMED(processMovement, -1);
+  lCallbacks.insert({LPACKET_MOVE, moveCallback});
   listenConcurrent();
 }
 
@@ -307,6 +310,30 @@ void x801::game::Client::processChatMessage(
   cw->getChatWindow()->pushMessage(playerID, message);
 }
 
+void x801::game::Client::processMovement(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Time t,
+    RakNet::Packet* p) {
+  (void) lPacketType; (void) p;
+  if (t == 0) return;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint16_t playerCount;
+  stream.Read(playerCount);
+  for (size_t i = 0; i < playerCount; ++i) {
+    uint32_t playerID, xfix, yfix, tfix;
+    stream.Read(playerID);
+    stream.Read(xfix);
+    stream.Read(yfix);
+    stream.Read(tfix);
+    Player& p = g.getPlayer(playerID);
+    Location& l = p.getLocation();
+    l.x = xfix / 65536.0f;
+    l.y = yfix / 65536.0f;
+    l.rot = 2 * 3.1415926535 * tfix / (65536.0f * 65536.0f);
+  }
+}
+
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {
   RakNet::BitStream stream;
   stream.Write(static_cast<uint8_t>(PACKET_LOGIN));
@@ -337,10 +364,18 @@ void x801::game::Client::login(Credentials& c) {
       RakNet::Time t,
       RakNet::Packet* p) {
         (void) p; (void) packetType; (void) t;
-        uint8_t stat = body[0];
-        if (length < 17) stat = LOGIN_NOT_ENOUGH_DATA;
+        RakNet::BitStream stream(body, length, false);
+        uint8_t stat;
+        stream.Read(stat);
+        if (length < (1 + COOKIE_LEN + sizeof(uint32_t))
+            && stat == LOGIN_OK)
+          stat = LOGIN_NOT_ENOUGH_DATA;
         if (stat == LOGIN_OK) {
           this->cookie = new uint8_t[RAW_HASH_LENGTH];
+          stream.Read((char*) this->cookie, COOKIE_LEN);
+          uint32_t id;
+          stream.Read(id);
+          this->g.setID(id);
           openWindowConcurrent();
           memcpy(this->cookie, body + 1, 16);
         } else {
