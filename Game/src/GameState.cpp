@@ -49,7 +49,11 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
   assert(strcmp(c.getUsername(), sc.getUsername()) == 0);
   if (!c.matches(sc)) return LOGIN_INVALID_CREDENTIALS;
   id = sc.getUserID();
-  if (usernamesByID.count(id) != 0) return LOGIN_ALREADY_LOGGED_IN;
+  playerMutex.lock_shared();
+  int count = usernamesByID.count(id);
+  playerMutex.unlock_shared();
+  if (count != 0) return LOGIN_ALREADY_LOGGED_IN;
+  playerMutex.lock();
   usernamesByID[id] = sc.getUsernameS();
   idsByUsername[sc.getUsernameS()] = id;
   // allPlayers[id] = Player(id, db);
@@ -58,14 +62,17 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
     std::forward_as_tuple(id),
     std::forward_as_tuple(id, db)  
   );
+  playerMutex.unlock();
   return LOGIN_OK;
 }
 
 void x801::game::GameState::logout(uint32_t id) {
+  playerMutex.lock();
   db.savePlayerLocation(id, allPlayers[id].getLocation());
   allPlayers.erase(id);
   idsByUsername.erase(usernamesByID[id]);
   usernamesByID.erase(id);
+  playerMutex.unlock();
 }
 
 void x801::game::ClientGameState::addUser(uint32_t id, const std::string& name) {

@@ -99,16 +99,26 @@ namespace x801 {
       LoginStatus login(Credentials& c, uint32_t& id);
       void logout(uint32_t id);
       auto findPlayer(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return allPlayers.find(id);
       }
       auto findUsernameByID(uint32_t id) const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return usernamesByID.find(id);
       }
       auto findIDByUsername(const std::string& name) const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return idsByUsername.find(name);
       }
-      auto endOfUsernameMap() const { return usernamesByID.cend(); }
-      auto endOfIDMap() const { return idsByUsername.cend(); }
+      auto endOfUsernameMap() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return usernamesByID.cend();
+      }
+      auto endOfIDMap() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return idsByUsername.cend();
+      }
+      mutable boost::shared_mutex playerMutex;
     private:
       Database db;
       std::unordered_map<uint32_t, Player> allPlayers;
