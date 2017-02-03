@@ -69,44 +69,14 @@ void x801::game::Client::initialise() {
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
-  LPacketCallback idCallback = {
-    [this](
-      uint16_t lPacketType, uint32_t playerID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) playerID; (void) t;
-        this->processUsernameResponse(
-          lPacketType, lbody, llength, p
-        );
-      }, -1
-  };
+  LPacketCallback idCallback =
+    MAKE_LPACKET_CALLBACK_CLIENT(processUsernameResponse, -1);
   lCallbacks.insert({LPACKET_IDENTIFY, idCallback});
-  LPacketCallback chatCallback1 = {
-    [this](
-      uint16_t lPacketType, uint32_t playerID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) playerID; (void) t;
-        this->processChatMessageCode(
-          lPacketType, lbody, llength, p
-        );
-      }, -1
-  };
+  LPacketCallback chatCallback1 =
+    MAKE_LPACKET_CALLBACK_CLIENT(processChatMessageCode, -1);
   lCallbacks.insert({LPACKET_CHAT, chatCallback1});
-  LPacketCallback chatCallback2 = {
-    [this](
-      uint16_t lPacketType, uint32_t playerID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) playerID; (void) t;
-        this->processChatMessage(
-          lPacketType, lbody, llength, p
-        );
-      }, -1
-  };
+  LPacketCallback chatCallback2 =
+    MAKE_LPACKET_CALLBACK_CLIENT(processChatMessage, -1);
   lCallbacks.insert({LPACKET_RECEIVE_CHAT, chatCallback2});
   listenConcurrent();
 }
