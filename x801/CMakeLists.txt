@@ -38,11 +38,11 @@ TARGET_LINK_LIBRARIES(x801
   # ${GLIB_LIBRARIES}
 )
 
-#ADD_CUSTOM_COMMAND(
-#  TARGET AGLTest
-#  POST_BUILD
-#  COMMAND cp -r shader textures ../build
-#)
+ADD_CUSTOM_COMMAND(
+  TARGET x801
+  POST_BUILD
+  COMMAND cp -r ../intrinsic-assets ../build
+)
 
 # add install target:
 INSTALL(TARGETS x801 DESTINATION bin)
