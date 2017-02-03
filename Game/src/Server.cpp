@@ -28,6 +28,7 @@ using namespace x801::game;
 #include <boost/filesystem/fstream.hpp>
 #include <BitStream.h>
 #include <RakNetTypes.h>
+#include "KeyInput.h"
 #include "packet.h"
 
 static const char* SERVER_MOTD =
@@ -381,6 +382,22 @@ void x801::game::Server::processChatRequest(
     );
   }
   delete[] message;
+}
+void x801::game::Server::processMoveRequest(
+    uint16_t lPacketType, uint32_t playerID,
+    uint8_t* lbody, size_t llength,
+    RakNet::Time t,
+    RakNet::Packet* p) {
+  if (t == 0) return;
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  KeyInput input;
+  input.time = t;
+  stream.Read(input.inputs);
+  boost::shared_lock<boost::shared_mutex> guard(g.playerMutex);
+  auto player = g.findPlayer(playerID);
+  if (player == g.endOfPlayerMap()) return;
+  ((Player& )player->second).applyKeyInput(input);
 }
 
 void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {

@@ -118,6 +118,10 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return idsByUsername.cend();
       }
+      auto endOfPlayerMap() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return allPlayers.cend();
+      }
       mutable boost::shared_mutex playerMutex;
     private:
       Database db;
