@@ -122,6 +122,7 @@ namespace x801 {
       Credentials cred;
       std::thread windowThread;
       std::thread listenThread;
+      friend class ClientWindow;
     };
   }
 }

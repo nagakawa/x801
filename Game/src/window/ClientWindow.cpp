@@ -25,6 +25,7 @@ using namespace x801::game;
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
+#include "Server.h"
 
 extern agl::GLFWApplication* agl::currentApp;
 
@@ -59,6 +60,20 @@ void x801::game::ClientWindow::tick() {
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   chat->render();
+  ImGui::Begin("Basic info");
+  std::stringstream s;
+  s << "User ID: ";
+  s << c->g.getID();
+  s << "\nCookie: ";
+  for (int i = 0; i < COOKIE_LEN; ++i) {
+    uint8_t byte = c->cookie[i];
+    s << "0123456789abcdef"[byte >> 4];
+    s << "0123456789abcdef"[byte & 15];
+    s << ' ';
+  }
+  std::string str(s.str());
+  ImGui::TextWrapped("%s", str.c_str());
+  ImGui::End();
   ImGui::Render();
 }
 

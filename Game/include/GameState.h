@@ -173,6 +173,7 @@ namespace x801 {
       // number of elements in the set; use totalRequested()
       // to get the count.
       void populateRequested(uint32_t* ids, size_t n);
+      uint32_t getID() const { return myID; }
       void setID(uint32_t id) {
         myID = id;
       }
