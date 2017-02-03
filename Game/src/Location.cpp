@@ -27,7 +27,7 @@ using namespace x801::game;
 // TODO: support passing a reference to a map and use collision detection.
 void x801::game::Location::applyKeyInput(KeyInput input, RakNet::Time last) {
   uint32_t inputs = input.inputs;
-  float delta = (inputs.time - last) / 1000.0f;
+  float delta = (input.time - last) / 1000.0f;
   bool isMovingForward = (inputs & (1 << K_OFFSET_FORWARD)) != 0;
   bool isMovingBack = (inputs & (1 << K_OFFSET_BACK)) != 0;
   bool isTurningLeft = (inputs & (1 << K_OFFSET_LEFT)) != 0;

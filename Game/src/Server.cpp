@@ -45,62 +45,25 @@ void x801::game::Server::initialise() {
   peer->Startup(maxConnections, &socket, 1);
   peer->SetMaximumIncomingConnections(maxConnections);
   // set packet callbacks
-  PacketCallback logoutCallback = {
-    [this](
-      uint8_t packetType,
-      uint8_t* body, size_t length,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->logoutByPacket(packetType, body, length, p);
-      }, -1
-  };
+  PacketCallback logoutCallback =
+    MAKE_PACKET_CALLBACK(logoutByPacket, -1);
   callbacks.insert({ID_CONNECTION_LOST, logoutCallback});
   callbacks.insert({ID_DISCONNECTION_NOTIFICATION, logoutCallback});
-  PacketCallback motdCallback = {
-    [this](
-      uint8_t packetType,
-      uint8_t* body, size_t length,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->sendMOTD(packetType, body, length, p);
-      }, -1
-  };
+  PacketCallback motdCallback =
+    MAKE_PACKET_CALLBACK(sendMOTD, -1);
   callbacks.insert({PACKET_MOTD, motdCallback});
-  PacketCallback loginCallback = {
-    [this](
-      uint8_t packetType,
-      uint8_t* body, size_t length,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->processLogin(packetType, body, length, p);
-      }, -1
-  };
+  PacketCallback loginCallback =
+    MAKE_PACKET_CALLBACK(processLogin, -1);
   callbacks.insert({PACKET_LOGIN, loginCallback});
-  LPacketCallback usernameCallback = {
-    [this](
-      uint16_t lPacketType, uint32_t userID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->processUsernameRequest(lPacketType, userID, lbody, llength, p);
-      }, -1
-  };
+  LPacketCallback usernameCallback =
+    MAKE_LPACKET_CALLBACK(processUsernameRequest, -1);
   lCallbacks.insert({LPACKET_IDENTIFY, usernameCallback});
-  LPacketCallback chatCallback = {
-    [this](
-      uint16_t lPacketType, uint32_t userID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->processChatRequest(lPacketType, userID, lbody, llength, p);
-      }, -1
-  };
+  LPacketCallback chatCallback =
+    MAKE_LPACKET_CALLBACK(processChatRequest, -1);
   lCallbacks.insert({LPACKET_CHAT, chatCallback});
+  LPacketCallback moveCallback =
+    MAKE_LPACKET_CALLBACK_TIMED(processMoveRequest, -1);
+  lCallbacks.insert({LPACKET_MOVE, moveCallback});
   listen();
 }
 

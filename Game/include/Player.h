@@ -44,13 +44,8 @@ namespace x801 {
       }
       Location& getLocation() { return location; }
       const Location& getLocation() const { return location; }
-      void applyKeyInput(KeyInput input, RakNet::Time last) {
-        location.applyKeyInput(input, last);
-        lastMoved = input.time;
-      }
-      void applyKeyInput(KeyInput input) {
-        location.applyKeyInput(input, lastMoved);
-      }
+      void applyKeyInput(KeyInput input, RakNet::Time last);
+      void applyKeyInput(KeyInput input);
       ~Player();
     private:
       uint32_t playerID;
