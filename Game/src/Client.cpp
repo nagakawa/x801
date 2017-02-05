@@ -332,6 +332,7 @@ void x801::game::Client::processMovement(
     l.y = yfix / 65536.0f;
     l.rot = 2 * 3.1415926535 * tfix / (65536.0f * 65536.0f);
   }
+  g.fastForwardSelf(t);
 }
 
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {

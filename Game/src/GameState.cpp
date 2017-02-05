@@ -104,3 +104,31 @@ void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
   }
   lookupMutex.unlock();
 }
+
+/*
+  disclaimer: this below rant is clearly tongue-in-cheek, so don't hate me
+  Shit. Vanessa isn't even in one of the top PvP schools, and while I'm
+  here fapping with my 420 (SNOOP DOGG) rating on my life, she's already
+  at 660. I want revenge. And with this envy, I write this method in good
+  old C++! ~ Uruwi
+*/
+void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
+  // Find the first (backmost) element in the queue greater than or
+  // equal to t, using binary search.
+  size_t start = 0;
+  size_t end = history.size();
+  while (end - start > 1) {
+    size_t mid = (end - start) >> 1;
+    RakNet::Time midTime = history[mid].time;
+    if (t < midTime) end = mid;
+    else start = mid;
+  }
+  history.popFront(start);
+  size_t size = history.size();
+  RakNet::Time tp = t;
+  selfPosition = playersByID[myID].getLocation();
+  for (size_t i = 0; i < size; ++i) {
+    selfPosition.applyKeyInput(history[i], tp);
+    tp = history[i].time;
+  }
+}

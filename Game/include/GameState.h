@@ -133,6 +133,7 @@ namespace x801 {
         x801::map::QualifiedAreaID, std::unique_ptr<AreaWithPlayers>,
         x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
       > areas;
+      friend class Server;
     };
 
     class ClientGameState {
@@ -177,6 +178,10 @@ namespace x801 {
       void setID(uint32_t id) {
         myID = id;
       }
+      // Use previous key inputs to fast-forward the player position
+      // and compensate for latency. Discard all key inputs before
+      // the specified time.
+      void fastForwardSelf(RakNet::Time t);
       // Mutex to make sure multiple threads aren't changing
       // player maps simultaneously.
       // This is public so the client can add multiple ID-username
@@ -194,6 +199,7 @@ namespace x801 {
       x801::base::CircularQueue<KeyInput> history;
       Location selfPosition;
       uint32_t myID = 0;
+      friend class Client;
     };
   }
 }
