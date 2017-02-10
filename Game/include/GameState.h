@@ -99,6 +99,7 @@ namespace x801 {
       x801::map::Area* area = nullptr;
       friend class Client;
       friend class Server;
+      friend class GameState;
     };
     
     class GameState {

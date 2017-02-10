@@ -18,6 +18,7 @@ def unescape(line):
       d = line[i + 1]
       if d == 'n': out += '\n'
       elif d == 't': out += '\t'
+      elif d == '\\': out += '\\'
       else: error("Unrecognised escape sequence {} in {}".format("d", "line"))
       i += 1
   return out
@@ -33,8 +34,8 @@ def follow(tree, path):
   return current
 
 commentRE = re.compile(r"\s*#")
-fieldRE = re.compile(r"(\w+):(.*)")
-sectionRE = re.compile(r"(@|=+)(\w+)(?:\s.*)?")
+fieldRE = re.compile(r"\s*(\w+):(.*)")
+sectionRE = re.compile(r"\s*(@|=+)(\w+)(?:\s.*)?")
 valueID = re.compile(r'-?\d+|"((?:[^\\"]|\\[\\nt])*)"|to\s+(\w+)')
 
 def parse(source):

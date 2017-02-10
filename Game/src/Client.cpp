@@ -151,8 +151,9 @@ void x801::game::Client::listen() {
         peer->DeallocatePacket(p), p = peer->Receive()) {
       RakNet::Time t = 0;
       if (p->data[0] == ID_TIMESTAMP) {
-        RakNet::BitStream s(p->data, 1, sizeof(RakNet::Time));
+        RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
+        std::cout << t << '\n';
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -335,7 +336,12 @@ void x801::game::Client::processMovement(
     l.y = yfix / 65536.0f;
     l.rot = 2 * 3.1415926535 * tfix / (65536.0f * 65536.0f);
   }
-  g.selfPosition = g.playersByID.at(g.myID).getLocation();
+  g.locationMutex.lock_shared();
+  auto it = g.playersByID.find(g.myID);
+  if (it != g.playersByID.end()) {
+    g.selfPosition = g.playersByID[g.myID].getLocation();
+    g.locationMutex.unlock_shared();
+  }
   g.fastForwardSelf(t);
 }
 
@@ -376,7 +382,7 @@ void x801::game::Client::login(Credentials& c) {
             && stat == LOGIN_OK)
           stat = LOGIN_NOT_ENOUGH_DATA;
         if (stat == LOGIN_OK) {
-          this->cookie = new uint8_t[RAW_HASH_LENGTH];
+          this->cookie = new uint8_t[COOKIE_LEN];
           stream.Read((char*) this->cookie, COOKIE_LEN);
           uint32_t id;
           stream.Read(id);

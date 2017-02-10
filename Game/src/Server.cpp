@@ -132,7 +132,7 @@ void x801::game::Server::listen() {
         peer->DeallocatePacket(p), p = peer->Receive()) {
       RakNet::Time t = 0;
       if (p->data[0] == ID_TIMESTAMP) {
-        RakNet::BitStream s(p->data, 1, sizeof(RakNet::Time));
+        RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
       }
       uint8_t packetType = getPacketType(p);
@@ -250,7 +250,7 @@ void x801::game::Server::sendMOTD(
 }
 
 LoginStatus x801::game::Server::login(
-    Credentials& cred, uint32_t playerID,
+    Credentials& cred, uint32_t& playerID,
     uint8_t* cookie, RakNet::SystemAddress address) {
   LoginStatus stat = g.login(cred, playerID);
   if (stat != LOGIN_OK) return stat;
@@ -265,7 +265,14 @@ LoginStatus x801::game::Server::login(
   Player p;
   bool succeeded = g.findPlayer(playerID, p);
   assert(succeeded);
-  g.areas[p.getLocation().areaID]->addPlayer(playerID);
+  x801::map::QualifiedAreaID aid = p.getLocation().areaID;
+  if (g.areas.count(aid) == 0) {
+    std::ifstream mapInput("assets/map/map.0.0.map", std::ios::binary);
+    std::unique_ptr<AreaWithPlayers> area =
+      std::make_unique<AreaWithPlayers>(&g, mapInput);
+    g.areas[aid] = std::move(area);
+  }
+  g.areas[aid]->addPlayer(playerID);
   return stat;
 }
 

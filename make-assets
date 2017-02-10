@@ -1,0 +1,13 @@
+substDirList = $(foreach dir, $(1), \
+	$(patsubst %.$(2), %.$(3), \
+	$(patsubst asset-src/%, assets/%, $(wildcard $(dir)/*.$(2)))))
+
+all: maps
+
+maps: $(call substDirList,asset-src/maps,msf,map)
+
+assets/maps/%.map: asset-src/maps/%.msf
+	python3 tools/compile-map.py $< $@
+
+yukkuri:
+	@echo "ゆっくりしていってね！"

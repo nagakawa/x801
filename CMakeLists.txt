@@ -24,6 +24,13 @@ ADD_CUSTOM_TARGET(
   WORKING_DIRECTORY argon2
 )
 
+ADD_CUSTOM_TARGET(
+  Assets
+  COMMAND make -f make-assets
+  COMMAND cp -r assets build
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 # ######### General setup ##########
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 

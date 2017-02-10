@@ -68,7 +68,10 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
 
 void x801::game::GameState::logout(uint32_t id) {
   playerMutex.lock();
-  db.savePlayerLocation(id, allPlayers[id].getLocation());
+  Location& location = allPlayers[id].getLocation();
+  db.savePlayerLocation(id, location);
+  x801::map::QualifiedAreaID aid = location.areaID;
+  areas[aid]->players.erase(id);
   allPlayers.erase(id);
   idsByUsername.erase(usernamesByID[id]);
   usernamesByID.erase(id);
