@@ -78,7 +78,7 @@ namespace x801 {
       );
       void listen();
       LoginStatus login(
-        Credentials& cred, uint32_t& playerID,
+        Credentials& cred, uint32_t playerID,
         uint8_t* cookie, RakNet::SystemAddress address
       );
       void logout(uint32_t playerID);

@@ -250,7 +250,7 @@ void x801::game::Server::sendMOTD(
 }
 
 LoginStatus x801::game::Server::login(
-    Credentials& cred, uint32_t& playerID,
+    Credentials& cred, uint32_t playerID,
     uint8_t* cookie, RakNet::SystemAddress address) {
   LoginStatus stat = g.login(cred, playerID);
   if (stat != LOGIN_OK) return stat;
@@ -261,6 +261,11 @@ LoginStatus x801::game::Server::login(
   cookiesByPlayer[playerID] = cookieAsArray;
   playersByAddress[address] = playerID;
   addressesByPlayer[playerID] = address;
+  // Add player to the correct area
+  Player p;
+  bool succeeded = g.findPlayer(playerID, p);
+  assert(succeeded);
+  g.areas[p.getLocation().areaID]->addPlayer(playerID);
   return stat;
 }
 

@@ -109,6 +109,14 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return allPlayers.find(id);
       }
+      bool findPlayer(uint32_t id, Player& player) {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        auto it = allPlayers.find(id);
+        if (it != allPlayers.end()) {
+          player = it->second;
+          return true;
+        } else return false;
+      }
       auto findUsernameByID(uint32_t id) const {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return usernamesByID.find(id);
@@ -129,6 +137,7 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return allPlayers.cend();
       }
+      // void addArea(x801::map::QualifiedAreaID);
       mutable boost::shared_mutex playerMutex;
     private:
       Database db;
