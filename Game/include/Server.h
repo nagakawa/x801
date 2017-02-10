@@ -23,12 +23,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <array>
+#include <chrono>
 #include <map>
+#include <thread>
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
+#include <GetTime.h>
 #include <MessageIdentifiers.h>
+#include <PacketPriority.h>
 #include <RakPeerInterface.h>
 #include <RakNetTypes.h>
+#include <RakNetTime.h>
 #include <SecureHandshake.h>
 #include <utils.h>
 #include "GameState.h"
@@ -109,6 +114,8 @@ namespace x801 {
         RakNet::Packet* p
       );
       void sendUnrecognisedCookiePacket(RakNet::Packet* p);
+      void broadcastLocations();
+      void broadcastLocationsConcurrent();
       RakNet::RakPeerInterface* peer = nullptr;
       char* publicKey = nullptr;
       char* privateKey = nullptr;
@@ -126,6 +133,7 @@ namespace x801 {
       > cookiesByPlayer;
       std::multimap<uint8_t, PacketCallback> callbacks;
       std::multimap<uint16_t, LPacketCallback> lCallbacks;
+      std::thread broadcastLocationThread;
       GameState g;
     };
   }

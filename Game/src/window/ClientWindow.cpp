@@ -73,6 +73,13 @@ void x801::game::ClientWindow::tick() {
   }
   std::string str(s.str());
   ImGui::TextWrapped("%s", str.c_str());
+  for (const auto& pair : c->g.playersByID) {
+    uint32_t id = pair.first;
+    ImGui::TextWrapped(
+      "%s (#%d)",
+      c->getUsername(id).c_str(), id
+    );
+  }
   ImGui::End();
   ImGui::Render();
 }

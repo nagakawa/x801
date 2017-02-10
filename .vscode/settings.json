@@ -1,3 +1,31 @@
 {
-  "files.associations": {"shared_mutex":"cpp","*hctime":"cpp","new":"cpp","cstddef":"cpp","type_traits":"cpp","cctype":"cpp","cstdlib":"cpp","cstdio":"cpp","ctime":"cpp","cstring":"cpp","cmath":"cpp","*h*h*h*h*h*h*htypeinfo":"cpp","cstdint":"cpp","exception":"cpp","initializer_list":"cpp","*hpp*hpp*hpp*hpp*hpp*h*h*h*h*hpp*hpp*hpp*hpp*hpp*hpp*hppclocale":"cpp","clocale":"cpp","*hpp*hpp*hpp*hpp*hpp*h*hpp*h*hpp*hpp*hpp*h*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hppcwchar":"cpp","cwctype":"cpp","*h*hpp*hpp*hpp*h*h*h*c*c*c*c*cpp*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hppthread":"cpp","thread":"cpp","string":"cpp","*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*tcc*h*h*h*h*h*h*h*h*h*h*h*h*h*hunordered_map":"cpp","unordered_map":"cpp","*h*h*h*h*h*h*h*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hppunordered_set":"cpp","unordered_set":"cpp"}
+  "files.associations": {
+    "shared_mutex": "cpp",
+    "*hctime": "cpp",
+    "new": "cpp",
+    "cstddef": "cpp",
+    "type_traits": "cpp",
+    "cctype": "cpp",
+    "cstdlib": "cpp",
+    "cstdio": "cpp",
+    "ctime": "cpp",
+    "cstring": "cpp",
+    "cmath": "cpp",
+    "*h*h*h*h*h*h*htypeinfo": "cpp",
+    "cstdint": "cpp",
+    "exception": "cpp",
+    "initializer_list": "cpp",
+    "*hpp*hpp*hpp*hpp*hpp*h*h*h*h*hpp*hpp*hpp*hpp*hpp*hpp*hppclocale": "cpp",
+    "clocale": "cpp",
+    "*hpp*hpp*hpp*hpp*hpp*h*hpp*h*hpp*hpp*hpp*h*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hppcwchar": "cpp",
+    "cwctype": "cpp",
+    "*h*hpp*hpp*hpp*h*h*h*c*c*c*c*cpp*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hppthread": "cpp",
+    "thread": "cpp",
+    "string": "cpp",
+    "*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*tcc*h*h*h*h*h*h*h*h*h*h*h*h*h*hunordered_map": "cpp",
+    "unordered_map": "cpp",
+    "*h*h*h*h*h*h*h*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hpp*hppunordered_set": "cpp",
+    "unordered_set": "cpp",
+    "*hpp*hpp*hpp*hppshared_mutex": "cpp"
+  }
 }

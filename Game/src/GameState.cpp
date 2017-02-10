@@ -60,7 +60,7 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
   allPlayers.emplace(
     std::piecewise_construct,
     std::forward_as_tuple(id),
-    std::forward_as_tuple(id, db)  
+    std::forward_as_tuple(id, db)
   );
   playerMutex.unlock();
   return LOGIN_OK;
@@ -131,4 +131,5 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
     selfPosition.applyKeyInput(history[i], tp);
     tp = history[i].time;
   }
+  lastTime = t;
 }

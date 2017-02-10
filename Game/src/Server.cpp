@@ -64,6 +64,7 @@ void x801::game::Server::initialise() {
   LPacketCallback moveCallback =
     MAKE_LPACKET_CALLBACK_TIMED(processMoveRequest, -1);
   lCallbacks.insert({LPACKET_MOVE, moveCallback});
+  broadcastLocationsConcurrent();
   listen();
 }
 
@@ -374,4 +375,52 @@ void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {
     (const char*) &message, 1, MEDIUM_PRIORITY, RELIABLE_ORDERED, 9,
     p->systemAddress, false
   );
+}
+
+void x801::game::Server::broadcastLocations() {
+  using namespace std::chrono_literals;
+  while (true) {
+    std::cerr << "Sending location packets...\n";
+    g.playerMutex.lock_shared();
+    // Location packets should be sent only to those in the same area
+    for (const auto& pair : g.areas) {
+      const std::unique_ptr<AreaWithPlayers>& area = pair.second;
+      RakNet::BitStream output;
+      output.Write(static_cast<uint8_t>(ID_TIMESTAMP));
+      output.Write(RakNet::GetTime());
+      output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+      output.Write(static_cast<uint16_t>(LPACKET_MOVE));
+      auto begin = area->playerBegin();
+      auto end = area->playerEnd();
+      area->playerMutex.lock_shared();
+      uint32_t count = area->playerCount();
+      output.Write(count);
+      for (auto it = begin; it != end; ++it) {
+        uint32_t id = *it;
+        output.Write(id);
+        const Location& loc = g.allPlayers.at(id).getLocation();
+        int32_t xfix = (int32_t) (loc.x * 65536.0f);
+        int32_t yfix = (int32_t) (loc.y * 65536.0f);
+        int32_t tfix = (int32_t) (loc.rot * 65536.0f);
+        output.Write(xfix);
+        output.Write(yfix);
+        output.Write(tfix);
+      }
+      for (auto it = begin; it != end; ++it) {
+        peer->Send(
+          &output, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 2,
+          addressesByPlayer[*it], false
+        );
+      }
+      area->playerMutex.unlock_shared();
+    }
+    g.playerMutex.unlock_shared();
+    std::this_thread::sleep_for(50ms);
+  }
+}
+
+void x801::game::Server::broadcastLocationsConcurrent() {
+  broadcastLocationThread = std::thread([this]() {
+    this->broadcastLocations();
+  });
 }

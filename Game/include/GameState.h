@@ -75,6 +75,10 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return players.cend();
       }
+      size_t playerCount() const {
+        boost::shared_lock<boost::shared_mutex> guard(playerMutex);
+        return players.size();
+      }
       auto findPlayer(uint32_t id) const {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return players.find(id);
@@ -93,6 +97,8 @@ namespace x801 {
       // only one AreaWithPlayers.
       ClientGameState* cg = nullptr;
       x801::map::Area* area = nullptr;
+      friend class Client;
+      friend class Server;
     };
     
     class GameState {
@@ -198,8 +204,10 @@ namespace x801 {
       std::unordered_map<uint32_t, Player> playersByID;
       x801::base::CircularQueue<KeyInput> history;
       Location selfPosition;
+      RakNet::Time lastTime = 0;
       uint32_t myID = 0;
       friend class Client;
+      friend class ClientWindow;
     };
   }
 }
