@@ -32,6 +32,11 @@ files ask for the same libraries as TDR, plus a few other libraries. On Debian
 This project also depends on a custom version of RakNet, but this dependency
 is managed by the configuration files so no extra work for you.
 
+In addition, the Python scripts depend on NumPy.
+
+    sudo apt install python3-pip
+    pip3 install numpy
+
 In addition, there are programs used to build assets:
 
 * MuseScore 2.0.2 or later. You can get the package in the official repositories,

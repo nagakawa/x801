@@ -2,17 +2,16 @@
 WorldID: 0
 AreaID: 0
 @TILE
-Layers: 1
-=Layer
+=Layer 0
 Width: 80
 Height: 80
 StartX: -40
 StartY: -40
 ==Tiles
 Code: to END
-fill(1, 1, 78, 78, 0)
-fill(0, 0, 0, 79, 0x80000001)
-fill(0, 79, 79, 79, 0x80000001)
-fill(79, 79, 79, 0, 0x80000001)
-fill(79, 0, 0, 0, 0x80000001)
+fill(_, 1, 1, 78, 78, 0)
+fill(_, 0, 0, 0, 79, 0x80000001)
+fill(_, 0, 79, 79, 79, 0x80000001)
+fill(_, 79, 79, 79, 0, 0x80000001)
+fill(_, 79, 0, 0, 0, 0x80000001)
 END
