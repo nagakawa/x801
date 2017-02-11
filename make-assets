@@ -7,7 +7,7 @@ all: maps
 maps: $(call substDirList,asset-src/maps,msf,map)
 
 assets/maps/%.map: asset-src/maps/%.msf
-	python3 tools/compile-map.py $< $@
+	python3 tools/compile-map.py --level=9 $< $@
 
 yukkuri:
 	@echo "ゆっくりしていってね！"
