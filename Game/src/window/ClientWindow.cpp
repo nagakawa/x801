@@ -75,9 +75,13 @@ void x801::game::ClientWindow::tick() {
   ImGui::TextWrapped("%s", str.c_str());
   for (const auto& pair : c->g.playersByID) {
     uint32_t id = pair.first;
+    const Location& loc = pair.second.getLocation();
     ImGui::TextWrapped(
-      "%s (#%d)",
-      c->getUsername(id).c_str(), id
+      "%s (#%d) @ %d-%d-%d (%f, %f,) < %f radians",
+      c->getUsername(id).c_str(), id,
+      loc.areaID.worldID, loc.areaID.areaID,
+      loc.layer,
+      loc.x, loc.y, loc.rot
     );
   }
   ImGui::End();

@@ -413,7 +413,8 @@ void x801::game::Server::broadcastLocations() {
         const Location& loc = g.allPlayers.at(id).getLocation();
         int32_t xfix = (int32_t) (loc.x * 65536.0f);
         int32_t yfix = (int32_t) (loc.y * 65536.0f);
-        int32_t tfix = (int32_t) (loc.rot * 65536.0f);
+        int32_t tfix =
+          (int32_t) (loc.rot * 65536.0f * 65536.0f / (2 * 3.1415926535));
         output.Write(xfix);
         output.Write(yfix);
         output.Write(tfix);

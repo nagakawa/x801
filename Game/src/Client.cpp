@@ -322,10 +322,11 @@ void x801::game::Client::processMovement(
   (void) lPacketType; (void) p;
   if (t == 0) return;
   RakNet::BitStream stream(lbody, llength, false);
-  uint16_t playerCount;
+  uint32_t playerCount;
   stream.Read(playerCount);
   for (size_t i = 0; i < playerCount; ++i) {
-    uint32_t playerID, xfix, yfix, tfix;
+    uint32_t playerID;
+    int32_t xfix, yfix, tfix;
     stream.Read(playerID);
     stream.Read(xfix);
     stream.Read(yfix);
@@ -335,6 +336,7 @@ void x801::game::Client::processMovement(
     l.x = xfix / 65536.0f;
     l.y = yfix / 65536.0f;
     l.rot = 2 * 3.1415926535 * tfix / (65536.0f * 65536.0f);
+    std::cerr << xfix << " " << yfix << " " << tfix << '\n';
   }
   g.locationMutex.lock_shared();
   auto it = g.playersByID.find(g.myID);
