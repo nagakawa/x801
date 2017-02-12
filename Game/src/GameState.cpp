@@ -127,7 +127,7 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
   size_t start = 0;
   size_t end = history.size();
   while (end - start > 1) {
-    size_t mid = (end - start) >> 1;
+    size_t mid = (end + start) >> 1;
     RakNet::Time midTime = history[mid].time;
     if (t < midTime) end = mid;
     else start = mid;
