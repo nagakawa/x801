@@ -116,14 +116,9 @@ void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
   old C++! ~ Uruwi
 */
 void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
-  std::cerr << "Time = " << t << "\n";
   // Find the first (backmost) element in the queue greater than or
   // equal to t, using binary search.
   keyHistoryMutex.lock_shared();
-  for (size_t i = 0; i < history.size(); ++i) {
-    std::cerr << history[i].time << "-" << history[i].inputs << " ";
-  }
-  std::cerr << " B\n";
   size_t start = 0;
   size_t end = history.size();
   while (end - start > 1) {

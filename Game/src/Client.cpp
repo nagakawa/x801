@@ -155,14 +155,7 @@ void x801::game::Client::listen() {
       if (p->data[0] == ID_TIMESTAMP) {
         RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
-        // t = (RakNet::Time) be64toh(t);
-        //if (drift == 0) drift = RakNet::GetTime() - t;
-        //t += drift;
-        fprintf(stderr, "Time: %llx ~ %llx\n", t, RakNet::GetTime());
-        for (size_t i = 0; i < p->length; ++i) {
-          fprintf(stderr, "%02x ", p->data[i]);
-        }
-        fprintf(stderr, "\n");
+        // fprintf(stderr, "Time: %llx ~ %llx\n", t, RakNet::GetTime());
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -345,7 +338,7 @@ void x801::game::Client::processMovement(
     l.x = xfix / 65536.0f;
     l.y = yfix / 65536.0f;
     l.rot = 2 * M_PI * tfix / (65536.0f * 65536.0f);
-    std::cerr << playerID << " " <<  xfix << " " << yfix << " " << tfix << '\n';
+    // std::cerr << playerID << " " <<  xfix << " " << yfix << " " << tfix << '\n';
   }
   g.locationMutex.lock_shared();
   auto it = g.playersByID.find(g.myID);

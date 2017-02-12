@@ -137,10 +137,7 @@ void x801::game::Server::listen() {
       if (p->data[0] == ID_TIMESTAMP) {
         RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
-        // t = (RakNet::Time) be64toh(t);
-        // if (drift == 0) drift = RakNet::GetTime() - t;
-        // t += drift;
-        printf("Time: %llx ~ %llx\n", t, RakNet::GetTime());
+        // printf("Time: %llx ~ %llx\n", t, RakNet::GetTime());
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -427,7 +424,7 @@ void x801::game::Server::broadcastLocations() {
         output.Write(tfix);
       }
       for (auto it = begin; it != end; ++it) {
-        std::cerr << "* Sending to player #" << *it << "\n";
+        // std::cerr << "* Sending to player #" << *it << "\n";
         peer->Send(
           &output, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 2,
           addressesByPlayer[*it], false
