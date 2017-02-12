@@ -37,7 +37,7 @@ void x801::game::Player::applyKeyInput(KeyInput input, RakNet::Time last) {
 }
 
 void x801::game::Player::applyKeyInput(KeyInput input) {
-  location.applyKeyInput(input, lastMoved);
+  applyKeyInput(input, lastMoved);
 }
 
 x801::game::Player::~Player() {

@@ -108,6 +108,7 @@ namespace x801 {
         RakNet::Time t,
         RakNet::Packet* p
       );
+      void sendKeyInput(const KeyInput& input);
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;
@@ -122,6 +123,7 @@ namespace x801 {
       Credentials cred;
       std::thread windowThread;
       std::thread listenThread;
+      RakNet::Time drift = 0;
       friend class ClientWindow;
     };
   }

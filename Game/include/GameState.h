@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unordered_set>
 #include <utility>
 #include <boost/thread/shared_mutex.hpp>
+#include <GetTime.h>
 #include <Area.h>
 #include <CircularQueue.h>
 #include <QualifiedAreaID.h>
@@ -206,6 +207,7 @@ namespace x801 {
       // safely iterate over all elements of a map.
       mutable boost::shared_mutex lookupMutex;
       mutable boost::shared_mutex locationMutex;
+      mutable boost::shared_mutex keyHistoryMutex;
     private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;
@@ -214,7 +216,7 @@ namespace x801 {
       std::unordered_map<uint32_t, Player> playersByID;
       x801::base::CircularQueue<KeyInput> history;
       Location selfPosition;
-      RakNet::Time lastTime = 0;
+      RakNet::Time lastTime = RakNet::GetTime();
       uint32_t myID = 0;
       friend class Client;
       friend class ClientWindow;

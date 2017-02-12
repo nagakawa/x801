@@ -52,10 +52,38 @@ void x801::game::ClientWindow::initialise() {
   chat = new ChatWindow(this);
 }
 
+static const int keycodes[] = {
+  GLFW_KEY_UP,
+  GLFW_KEY_DOWN,
+  GLFW_KEY_LEFT,
+  GLFW_KEY_RIGHT,
+};
+
+static const int keycodeCount = sizeof(keycodes) / sizeof(keycodes[0]);
+
 void x801::game::ClientWindow::tick() {
   if (c->isDone() || glfwWindowShouldClose(underlying())) {
     glfwSetWindowShouldClose(underlying(), true);
   }
+  // Send key messages
+  uint32_t inputs = 0;
+  for (int i = 0; i < keycodeCount; ++i) {
+    if (testKey(keycodes[i])) inputs |= (1 << i);
+  }
+  RakNet::Time t = RakNet::GetTime();
+  KeyInput ki = { t, inputs };
+  c->sendKeyInput(ki);
+  c->g.keyHistoryMutex.lock();
+  /*for (size_t i = 0; i < c->g.history.size(); ++i) {
+    std::cerr << c->g.history[i].time << "-" << c->g.history[i].inputs << " ";
+  }
+  std::cerr << " B\n";*/
+  c->g.history.pushBack(ki);
+  /*for (size_t i = 0; i < c->g.history.size(); ++i) {
+    std::cerr << c->g.history[i].time << "-" << c->g.history[i].inputs << " ";
+  }
+  std::cerr << " A\n";*/
+  c->g.keyHistoryMutex.unlock();
   ImGui_ImplGlfwGL3_NewFrame();
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -75,15 +103,17 @@ void x801::game::ClientWindow::tick() {
   ImGui::TextWrapped("%s", str.c_str());
   for (const auto& pair : c->g.playersByID) {
     uint32_t id = pair.first;
-    const Location& loc = pair.second.getLocation();
+    const Location& loc =
+      /*(id == c->g.myID) ? */pair.second.getLocation()/* : c->g.selfPosition*/;
     ImGui::TextWrapped(
-      "%s (#%d) @ %d-%d-%d (%f, %f,) < %f radians",
+      "%s (#%d) @ %d-%d-%d (%f, %f) < %f radians",
       c->getUsername(id).c_str(), id,
       loc.areaID.worldID, loc.areaID.areaID,
       loc.layer,
       loc.x, loc.y, loc.rot
     );
   }
+  ImGui::TextWrapped("inputs = 0x%x", inputs);
   ImGui::End();
   ImGui::Render();
 }

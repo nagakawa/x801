@@ -107,7 +107,7 @@ void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
   }
   lookupMutex.unlock();
 }
-
+#include <iostream>
 /*
   disclaimer: this below rant is clearly tongue-in-cheek, so don't hate me
   Shit. Vanessa isn't even in one of the top PvP schools, and while I'm
@@ -116,8 +116,14 @@ void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
   old C++! ~ Uruwi
 */
 void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
+  std::cerr << "Time = " << t << "\n";
   // Find the first (backmost) element in the queue greater than or
   // equal to t, using binary search.
+  keyHistoryMutex.lock_shared();
+  for (size_t i = 0; i < history.size(); ++i) {
+    std::cerr << history[i].time << "-" << history[i].inputs << " ";
+  }
+  std::cerr << " B\n";
   size_t start = 0;
   size_t end = history.size();
   while (end - start > 1) {
@@ -126,7 +132,11 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
     if (t < midTime) end = mid;
     else start = mid;
   }
+  keyHistoryMutex.unlock_shared();
+  keyHistoryMutex.lock();
   history.popFront(start);
+  keyHistoryMutex.unlock();
+  keyHistoryMutex.lock_shared();
   size_t size = history.size();
   RakNet::Time tp = t;
   selfPosition = playersByID[myID].getLocation();
@@ -135,4 +145,5 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
     tp = history[i].time;
   }
   lastTime = t;
+  keyHistoryMutex.unlock_shared();
 }

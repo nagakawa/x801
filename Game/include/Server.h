@@ -134,6 +134,7 @@ namespace x801 {
       std::multimap<uint8_t, PacketCallback> callbacks;
       std::multimap<uint16_t, LPacketCallback> lCallbacks;
       std::thread broadcastLocationThread;
+      RakNet::Time drift = 0;
       GameState g;
     };
   }

@@ -23,11 +23,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::game;
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <BitStream.h>
 #include <RakNetTypes.h>
+#include <portable_endian.h>
 #include "KeyInput.h"
 #include "packet.h"
 
@@ -39,6 +41,7 @@ static const char* SERVER_MOTD =
 
 void x801::game::Server::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
+  peer->SetOccasionalPing(true);
   updateKeyFiles();
   RakNet::SocketDescriptor socket(port, 0);
   socket.socketFamily = useIPV6 ? AF_INET6 : AF_INET;
@@ -123,7 +126,7 @@ void x801::game::Server::handleLPacket(
     else ++iterator;
   }
 }
-
+#include <stdio.h>
 void x801::game::Server::listen() {
   while (true) {
     for (
@@ -134,6 +137,10 @@ void x801::game::Server::listen() {
       if (p->data[0] == ID_TIMESTAMP) {
         RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
+        // t = (RakNet::Time) be64toh(t);
+        // if (drift == 0) drift = RakNet::GetTime() - t;
+        // t += drift;
+        printf("Time: %llx ~ %llx\n", t, RakNet::GetTime());
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -413,13 +420,14 @@ void x801::game::Server::broadcastLocations() {
         const Location& loc = g.allPlayers.at(id).getLocation();
         int32_t xfix = (int32_t) (loc.x * 65536.0f);
         int32_t yfix = (int32_t) (loc.y * 65536.0f);
-        int32_t tfix =
-          (int32_t) (loc.rot * 65536.0f * 65536.0f / (2 * 3.1415926535));
+        uint32_t tfix =
+          (uint32_t) (fmod(loc.rot, 2 * M_PI) * 65536.0f * 65536.0f / (2 * M_PI));
         output.Write(xfix);
         output.Write(yfix);
         output.Write(tfix);
       }
       for (auto it = begin; it != end; ++it) {
+        std::cerr << "* Sending to player #" << *it << "\n";
         peer->Send(
           &output, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 2,
           addressesByPlayer[*it], false

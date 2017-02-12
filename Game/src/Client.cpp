@@ -24,19 +24,21 @@ using namespace x801::game;
 
 #include <stdlib.h>
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <GLFW/glfw3.h>
 #include <BitStream.h>
 #include <SecureHandshake.h>
+#include <portable_endian.h>
 #include "Server.h"
 
 void x801::game::Client::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
+  peer->SetOccasionalPing(true);
   RakNet::SocketDescriptor clientSocket(0, 0);
   clientSocket.socketFamily = useIPV6 ? AF_INET6 : AF_INET;
   peer->Startup(1, &clientSocket, 1);
-  peer->SetOccasionalPing(true);
   RakNet::PublicKey pk;
   pk.publicKeyMode = RakNet::PKM_ACCEPT_ANY_PUBLIC_KEY;
   publicKey = new char[cat::EasyHandshake::PUBLIC_KEY_BYTES];
@@ -153,7 +155,14 @@ void x801::game::Client::listen() {
       if (p->data[0] == ID_TIMESTAMP) {
         RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
-        std::cout << t << '\n';
+        // t = (RakNet::Time) be64toh(t);
+        //if (drift == 0) drift = RakNet::GetTime() - t;
+        //t += drift;
+        fprintf(stderr, "Time: %llx ~ %llx\n", t, RakNet::GetTime());
+        for (size_t i = 0; i < p->length; ++i) {
+          fprintf(stderr, "%02x ", p->data[i]);
+        }
+        fprintf(stderr, "\n");
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -313,7 +322,7 @@ void x801::game::Client::processChatMessage(
   std::string message = readStringFromBitstream16S(stream);
   cw->getChatWindow()->pushMessage(playerID, message);
 }
-
+#include <stdio.h>
 void x801::game::Client::processMovement(
     uint16_t lPacketType,
     uint8_t* lbody, size_t llength,
@@ -335,8 +344,8 @@ void x801::game::Client::processMovement(
     Location& l = p.getLocation();
     l.x = xfix / 65536.0f;
     l.y = yfix / 65536.0f;
-    l.rot = 2 * 3.1415926535 * tfix / (65536.0f * 65536.0f);
-    std::cerr << xfix << " " << yfix << " " << tfix << '\n';
+    l.rot = 2 * M_PI * tfix / (65536.0f * 65536.0f);
+    std::cerr << playerID << " " <<  xfix << " " << yfix << " " << tfix << '\n';
   }
   g.locationMutex.lock_shared();
   auto it = g.playersByID.find(g.myID);
@@ -414,6 +423,20 @@ void x801::game::Client::login(Credentials& c, PacketCallback loginCallback) {
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
+}
+
+void x801::game::Client::sendKeyInput(const KeyInput& input) {
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(ID_TIMESTAMP));
+  stream.Write(input.time);
+  stream.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  stream.Write(static_cast<uint16_t>(LPACKET_MOVE));
+  stream.Write((char*) cookie, COOKIE_LEN);
+  stream.Write(input.inputs);
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
 }
 
 void x801::game::Client::openWindow() {
