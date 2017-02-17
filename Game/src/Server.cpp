@@ -268,7 +268,7 @@ LoginStatus x801::game::Server::login(
   // Add player to the correct area
   Player p;
   bool succeeded = g.findPlayer(playerID, p);
-  assert(succeeded);
+  assert(succeeded); (void) succeeded;
   x801::map::QualifiedAreaID aid = p.getLocation().areaID;
   if (g.areas.count(aid) == 0) {
     std::ifstream mapInput("assets/map/map.0.0.map", std::ios::binary);

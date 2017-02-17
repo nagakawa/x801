@@ -27,6 +27,7 @@ using namespace x801::game;
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <ratio>
 #include <sstream>
 #include <GLFW/glfw3.h>
 #include <BitStream.h>
@@ -144,6 +145,9 @@ bool x801::game::Client::handleLPacket(
   return true;
 }
 
+static const double GAP = 10e-3;
+static const double THRESH = 2e-3;
+
 void x801::game::Client::listen() {
   std::cerr << "Listening...\n";
   bool shouldContinue = true;
@@ -172,15 +176,20 @@ void x801::game::Client::listen() {
         shouldContinue = handlePacket(packetType, body, length, t, p);
       }
     }
-    auto thisTime = std::chrono::steady_clock::now();
-    std::chrono::duration<double> diff = thisTime - lastTime;
-    if (diff.count() > 30e-3) {
-      if (cw != nullptr && (cw->underlying() == nullptr ||
-          glfwWindowShouldClose(cw->underlying()))) {
-        shouldContinue = false;
-      }
-      lastTime = thisTime;
+    std::chrono::time_point<std::chrono::steady_clock> thisTime;
+    double diff = 0;
+    while (diff < GAP) {
+      thisTime = std::chrono::steady_clock::now();
+      std::chrono::duration<double, std::ratio<1, 1>> diffd = (thisTime - lastTime);
+      diff = diffd.count();
+      if (diff < GAP && diff >= GAP - THRESH)
+        std::this_thread::sleep_for(diffd / 2);
     }
+    if (cw != nullptr && (cw->underlying() == nullptr ||
+        glfwWindowShouldClose(cw->underlying()))) {
+      shouldContinue = false;
+    }
+    lastTime = thisTime;
   }
   if (cw != nullptr && cw->underlying() != nullptr)
     glfwSetWindowShouldClose(cw->underlying(), true);

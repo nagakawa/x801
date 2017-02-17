@@ -79,7 +79,7 @@ void x801::game::ClientWindow::tick() {
   glClear(GL_COLOR_BUFFER_BIT);
   chat->render();
   ImGui::Begin("Basic info");
-  ImGui::TextWrapped("FPS: %.2f", getRollingFPS());
+  ImGui::TextWrapped("FPS: %.2f", getFPS());
   std::stringstream s;
   s << "User ID: ";
   s << c->g.getID();
@@ -95,7 +95,7 @@ void x801::game::ClientWindow::tick() {
   for (const auto& pair : c->g.playersByID) {
     uint32_t id = pair.first;
     const Location& loc =
-      /*(id == c->g.myID) ? */pair.second.getLocation()/* : c->g.selfPosition*/;
+      (id == c->g.myID) ? pair.second.getLocation() : c->g.selfPosition;
     ImGui::TextWrapped(
       "%s (#%d) @ %d-%d-%d (%f, %f) < %f radians",
       c->getUsername(id).c_str(), id,
