@@ -62,6 +62,7 @@ static const int keycodes[] = {
 static const int keycodeCount = sizeof(keycodes) / sizeof(keycodes[0]);
 
 void x801::game::ClientWindow::tick() {
+  RakNet::TimeUS t1 = RakNet::GetTimeUS();
   if (c->isDone() || glfwWindowShouldClose(underlying())) {
     glfwSetWindowShouldClose(underlying(), true);
   }
@@ -108,6 +109,8 @@ void x801::game::ClientWindow::tick() {
   ImGui::TextWrapped("Size of history is %zu", c->g.history.size());
   ImGui::End();
   ImGui::Render();
+  RakNet::TimeUS t2 = RakNet::GetTimeUS();
+  std::cout << "Time: " << (t2 - t1) << " FPS: " << getFPS() << " or " << ImGui::GetIO().Framerate << '\n';
 }
 
 void x801::game::ClientWindow::readKeys() {

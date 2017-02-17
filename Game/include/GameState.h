@@ -183,7 +183,7 @@ namespace x801 {
         return currentArea;
       }
       Player& getPlayer(uint32_t id) {
-        boost::unique_lock<boost::shared_mutex> guard(locationMutex);
+        boost::shared_lock<boost::shared_mutex> guard(locationMutex);
         return playersByID[id];
       }
       // Write all of the elements of alreadyRequestedIDs into

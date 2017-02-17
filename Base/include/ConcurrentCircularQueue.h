@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <atomic>
 #include <memory>
-#include <boost/thread/shared_mutex.hpp>
+#include <mutex>
 #include "CircularQueue.h"
 
 namespace x801 {
@@ -39,8 +39,8 @@ namespace x801 {
       ConcurrentCircularQueue(const ConcurrentCircularQueue& that) :
           capacity(that.capacity), elements(new T[1 << that.capacity]),
           start(that.start), totalElements(that.totalElements) {
-        boost::unique_lock<boost::shared_mutex> tguard(that.pointerMutex);
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> tguard(that.pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         for (size_t i = 0; i < totalElements; ++i) {
           (*this)[i] = that[i];
         }
@@ -53,8 +53,8 @@ namespace x801 {
           elements = new T[1 << capacity];
           pointerMutex.unlock();
         }
-        boost::unique_lock<boost::shared_mutex> tguard(that.pointerMutex);
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> tguard(that.pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         start = that.start;
         totalElements = that.totalElements;
         for (size_t i = 0; i < totalElements; ++i) {
@@ -64,21 +64,21 @@ namespace x801 {
       ~ConcurrentCircularQueue() { delete[] elements; }
       // ---------------------------------------------------------------------
       T& operator[](size_t i) {
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         return elements[(start + i) & ((1 << capacity) - 1)];
       }
       const T& operator[](size_t i) const {
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         return elements[(start + i) & ((1 << capacity) - 1)];
       }
       void pushFront(const T& t) {
         makeRoomForFront();
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         elements[start] = t;
       }
       void pushBack(const T& t) {
         makeRoomForBack();
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         elements[(start + totalElements - 1) & ((1 << capacity) - 1)] = t;
       }
       void popFront(size_t n = 1) {
@@ -93,14 +93,14 @@ namespace x801 {
       template<class... Args>
       void emplaceFront(Args&&... args) {
         makeRoomForFront();
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         std::allocator_traits<std::allocator<T>>::construct(
             allocator, &elements[start], args...);
       }
       template<class... Args>
       void emplaceBack(Args&&... args) {
         makeRoomForBack();
-        boost::unique_lock<boost::shared_mutex> guard(pointerMutex);
+        std::lock_guard<std::mutex> guard(pointerMutex);
         std::allocator_traits<std::allocator<T>>::construct(
           allocator,
           &elements[(start + totalElements - 1) & ((1 << capacity) - 1)],
@@ -132,7 +132,7 @@ namespace x801 {
         if (totalElements > (size_t) (1 << capacity)) grow();
       }
       std::atomic_size_t capacity = CIRCULAR_QUEUE_DEFAULT_CAPACITY;
-      mutable boost::shared_mutex pointerMutex;
+      mutable std::mutex pointerMutex;
       T* elements = nullptr;
       // The maximum number of elements is actually (1 << capacity),
       // as to use bitwise operations rather than modulus.
