@@ -24,6 +24,7 @@ using namespace x801::game;
 
 #include <stdlib.h>
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -146,6 +147,7 @@ bool x801::game::Client::handleLPacket(
 void x801::game::Client::listen() {
   std::cerr << "Listening...\n";
   bool shouldContinue = true;
+  auto lastTime = std::chrono::steady_clock::now();
   while (shouldContinue) {
     for (
         RakNet::Packet* p = peer->Receive();
@@ -170,11 +172,18 @@ void x801::game::Client::listen() {
         shouldContinue = handlePacket(packetType, body, length, t, p);
       }
     }
-    if (cw != nullptr && cw->underlying() != nullptr &&
-        glfwWindowShouldClose(cw->underlying()))
-      shouldContinue = false;
+    auto thisTime = std::chrono::steady_clock::now();
+    std::chrono::duration<double> diff = thisTime - lastTime;
+    if (diff.count() > 30e-3) {
+      if (cw != nullptr && (cw->underlying() == nullptr ||
+          glfwWindowShouldClose(cw->underlying()))) {
+        shouldContinue = false;
+      }
+      lastTime = thisTime;
+    }
   }
-  if (cw != nullptr) glfwSetWindowShouldClose(cw->underlying(), true);
+  if (cw != nullptr && cw->underlying() != nullptr)
+    glfwSetWindowShouldClose(cw->underlying(), true);
 }
 
 void x801::game::Client::listenConcurrent() {
@@ -433,9 +442,11 @@ void x801::game::Client::sendKeyInput(const KeyInput& input) {
 }
 
 void x801::game::Client::openWindow() {
+  glfwInit();
   cw = new ClientWindow(1280, 960, 0, 0, "Experiment801", 3, 3, false);
   cw->c = this;
   cw->start();
+  glfwTerminate();
 }
 
 void x801::game::Client::openWindowConcurrent() {
@@ -444,6 +455,8 @@ void x801::game::Client::openWindowConcurrent() {
 
 x801::game::Client::~Client() {
   done = true;
+  if (listenThread.joinable()) listenThread.join();
+  if (windowThread.joinable()) windowThread.join();
   RakNet::RakPeerInterface::DestroyInstance(peer);
   delete[] publicKey;
 }

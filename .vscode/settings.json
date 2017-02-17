@@ -31,5 +31,6 @@
     "array": "cpp",
     "*c*c*hpp*c*c*c*c*c*c*c*cpprandom": "cpp",
     "random": "cpp"
-  }
+  },
+  "python.linting.pylintEnabled": false
 }

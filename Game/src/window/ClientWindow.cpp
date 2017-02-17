@@ -73,22 +73,13 @@ void x801::game::ClientWindow::tick() {
   RakNet::Time t = RakNet::GetTime();
   KeyInput ki = { t, inputs };
   c->sendKeyInput(ki);
-  c->g.keyHistoryMutex.lock();
-  /*for (size_t i = 0; i < c->g.history.size(); ++i) {
-    std::cerr << c->g.history[i].time << "-" << c->g.history[i].inputs << " ";
-  }
-  std::cerr << " B\n";*/
   c->g.history.pushBack(ki);
-  /*for (size_t i = 0; i < c->g.history.size(); ++i) {
-    std::cerr << c->g.history[i].time << "-" << c->g.history[i].inputs << " ";
-  }
-  std::cerr << " A\n";*/
-  c->g.keyHistoryMutex.unlock();
   ImGui_ImplGlfwGL3_NewFrame();
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   chat->render();
   ImGui::Begin("Basic info");
+  ImGui::TextWrapped("FPS: %.2f", getRollingFPS());
   std::stringstream s;
   s << "User ID: ";
   s << c->g.getID();
@@ -114,6 +105,7 @@ void x801::game::ClientWindow::tick() {
     );
   }
   ImGui::TextWrapped("inputs = 0x%x", inputs);
+  ImGui::TextWrapped("Size of history is %zu", c->g.history.size());
   ImGui::End();
   ImGui::Render();
 }

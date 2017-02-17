@@ -58,7 +58,7 @@ namespace x801 {
       void operator=(const Client& s) = delete;
       const uint16_t port;
       std::string getIPAddress() const { return ipAddress; }
-      bool isDone() { return done; }
+      bool isDone() volatile { return done; }
       void login(Credentials& c, PacketCallback loginCallback);
       void login(Credentials& c);
       void sendChatMessage(const char* message);
