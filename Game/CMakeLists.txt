@@ -28,6 +28,7 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/Location.cpp
   ${PROJECT_SOURCE_DIR}/window/ClientWindow.cpp
   ${PROJECT_SOURCE_DIR}/window/ChatWindow.cpp
+  ${PROJECT_SOURCE_DIR}/window/Patcher.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

@@ -313,7 +313,7 @@ struct Cup {
   Cup(const std::string& drink, int volumeInML) :
     drink(std::move(drink)), volumeInML(volumeInML) {}
   bool operator==(const Cup& other) {
-    return drink == other.drink && volumeInML == volumeInML;
+    return drink == other.drink && volumeInML == other.volumeInML;
   }
 };
 

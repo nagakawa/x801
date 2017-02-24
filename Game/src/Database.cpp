@@ -131,6 +131,7 @@ void x801::game::Database::createUser(
     statement, 2, static_cast<const void*>(cooked), COOKED_HASH_LENGTH,
     SQLITE_STATIC
   );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   // All parameters bound.
   stepBlock(statement, auth);
   sqlite3_finalize(statement);

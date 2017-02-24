@@ -66,6 +66,7 @@ namespace x801 {
       void listenConcurrent();
       std::thread& getListenThread() { return listenThread; }
       std::string getUsername(uint32_t id);
+      bool getServerAddress(RakNet::SystemAddress& out) const;
     private:
       void initialise();
       bool handlePacket(

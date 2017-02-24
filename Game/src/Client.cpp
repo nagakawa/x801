@@ -199,6 +199,12 @@ void x801::game::Client::listenConcurrent() {
   listenThread = std::thread([this]() { this->listen(); });
 }
 
+bool x801::game::Client::getServerAddress(RakNet::SystemAddress& out) const {
+  uint16_t n = 1;
+  (void) peer->GetConnectionList(&out, &n);
+  return n >= 1;
+}
+
 void x801::game::Client::requestMOTD(PacketCallback motdCallback) {
   RakNet::BitStream stream;
   stream.Write(static_cast<uint8_t>(PACKET_MOTD));
