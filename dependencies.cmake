@@ -99,7 +99,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 # initialiser list, even when it's more readable to initialise it in the constructor
 # body.
 SET(COMMON_FLAGS "-std=c++14 -Wall -Wpedantic -Wextra -Werror -fno-builtin")
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${COMMON_FLAGS} -O2 -g")
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${COMMON_FLAGS} -O0 -g")
 #SET(CMAKE_C_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -ffat-lto-objects -flto")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${COMMON_FLAGS} -O3 -ffat-lto-objects -flto -fPIC")
 SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS}")

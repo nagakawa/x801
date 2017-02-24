@@ -39,6 +39,7 @@ namespace x801 {
 #include "KeyInput.h"
 #include "packet.h"
 #include "window/ClientWindow.h"
+#include "window/Patcher.h"
 
 namespace x801 {
   namespace game {
@@ -125,6 +126,7 @@ namespace x801 {
       std::thread windowThread;
       std::thread listenThread;
       RakNet::Time drift = 0;
+      Patcher* patcher = nullptr;
       friend class ClientWindow;
     };
   }

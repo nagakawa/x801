@@ -20,6 +20,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <assert.h>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/filesystem.hpp>
@@ -30,7 +32,7 @@ using namespace x801::game;
 
 const char* x801::game::PATCHER_DIR = "gamedat/";
 
-x801::game::Patcher::Patcher(Client& cli) {
+x801::game::Patcher::Patcher(Client* cli) {
   if (!boost::filesystem::is_directory(PATCHER_DIR)) {
     std::cout <<
       "Warning: overwriting " << PATCHER_DIR <<
@@ -39,7 +41,7 @@ x801::game::Patcher::Patcher(Client& cli) {
     boost::filesystem::create_directories(PATCHER_DIR);
   }
   RakNet::SystemAddress addr;
-  bool stat = cli.getServerAddress(addr);
+  bool stat = cli->getServerAddress(addr);
   char aname[64];
   addr.ToString(true, aname, '_');
   if (!stat) throw "Address of connected server unknown";
@@ -50,11 +52,14 @@ x801::game::Patcher::Patcher(Client& cli) {
   std::string dfname = dfnamein.str();
   open(conn, dfname.c_str());
   createFileTable();
-  c = &cli;
+  c = cli;
 }
 
 x801::game::Patcher::~Patcher() {
-  sqlite3_close(conn);
+  int stat = sqlite3_close(conn);
+  conn = nullptr;
+  (void) stat;
+  assert(stat == SQLITE_OK);
 }
 
 void x801::game::Patcher::open(sqlite3*& handle, const char* path) {
@@ -188,6 +193,7 @@ void x801::game::Patcher::updateEntry(
   if (fname == nullptr || contents == nullptr)
     throw "x801::game::Patcher::createFileEntry: "
       "fname and contents must not be null";
+  if (version > latestVersion) latestVersion = version;
   if (contentLength == 0) updateFileVersion(fname, version);
   else createFileEntry(fname, version, contentLength, contents);
 }

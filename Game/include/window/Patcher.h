@@ -23,6 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <sqlite3.h>
+namespace x801 {
+  namespace game {
+    class Patcher;
+  }
+}
 #include "Client.h"
 
 namespace x801 {
@@ -30,8 +35,10 @@ namespace x801 {
     extern const char* PATCHER_DIR;
     class Patcher {
     public:
-      Patcher(Client& cli);
+      Patcher(Client* cli);
       ~Patcher();
+      Patcher(const Patcher& other) = delete;
+      Patcher& operator=(const Patcher& other) = delete;
       void updateEntry(
         const char* fname,
         uint32_t version,

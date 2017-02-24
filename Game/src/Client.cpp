@@ -70,6 +70,7 @@ void x801::game::Client::initialise() {
       RakNet::Packet* p) {
         (void) packetType; (void) body; (void) length; (void) t; (void) p;
         this->requestMOTD();
+        this->patcher = new Patcher(this);
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
@@ -473,5 +474,8 @@ x801::game::Client::~Client() {
   if (listenThread.joinable()) listenThread.join();
   if (windowThread.joinable()) windowThread.join();
   RakNet::RakPeerInterface::DestroyInstance(peer);
+  delete cw;
   delete[] publicKey;
+  delete[] cookie;
+  delete patcher;
 }

@@ -45,7 +45,7 @@ namespace x801 {
       }
       ChatWindow* getChatWindow() { return chat; }
       Client* getParentClient() { return c; }
-      ~ClientWindow();
+      virtual ~ClientWindow() override;
       Client* c;
     private:
       ChatWindow* chat = nullptr;
