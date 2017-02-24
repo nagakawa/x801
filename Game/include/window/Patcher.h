@@ -30,14 +30,9 @@ namespace x801 {
     extern const char* PATCHER_DIR;
     class Patcher {
     public:
-      Patcher(const Client& c);
+      Patcher(Client& cli);
       ~Patcher();
-    private:
-      sqlite3* conn;
-      void open(sqlite3*& handle, const char* path);
-      void createFileTable();
-      uint32_t latestVersion = 0;
-      void createFileEntry(
+      void updateEntry(
         const char* fname,
         uint32_t version,
         uint32_t contentLength,
@@ -47,6 +42,20 @@ namespace x801 {
         uint32_t& version,
         uint32_t& contentLength,
         uint8_t*& contents);
+    private:
+      sqlite3* conn;
+      uint32_t latestVersion = 0;
+      Client* c;
+      void open(sqlite3*& handle, const char* path);
+      void createFileTable();
+      void createFileEntry(
+        const char* fname,
+        uint32_t version,
+        uint32_t contentLength,
+        const uint8_t* contents);
+      void updateFileVersion(
+        const char* fname,
+        uint32_t version);
     };
   }
 }

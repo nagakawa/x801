@@ -30,7 +30,7 @@ using namespace x801::game;
 
 const char* x801::game::PATCHER_DIR = "gamedat/";
 
-x801::game::Patcher::Patcher(const Client& c) {
+x801::game::Patcher::Patcher(Client& cli) {
   if (!boost::filesystem::is_directory(PATCHER_DIR)) {
     std::cout <<
       "Warning: overwriting " << PATCHER_DIR <<
@@ -39,7 +39,7 @@ x801::game::Patcher::Patcher(const Client& c) {
     boost::filesystem::create_directories(PATCHER_DIR);
   }
   RakNet::SystemAddress addr;
-  bool stat = c.getServerAddress(addr);
+  bool stat = cli.getServerAddress(addr);
   char aname[64];
   addr.ToString(true, aname, '_');
   if (!stat) throw "Address of connected server unknown";
@@ -50,6 +50,7 @@ x801::game::Patcher::Patcher(const Client& c) {
   std::string dfname = dfnamein.str();
   open(conn, dfname.c_str());
   createFileTable();
+  c = &cli;
 }
 
 x801::game::Patcher::~Patcher() {
@@ -86,7 +87,7 @@ void x801::game::Patcher::createFileTable() {
 }
 
 static const char* CREATE_FILE_ENTRY_QUERY =
-  "INSERT INTO Files (fname, version, contents) VALUES (?, ?, ?)"
+  "INSERT OR REPLACE INTO Files (fname, version, contents) VALUES (?, ?, ?)"
   ;
 
 void x801::game::Patcher::createFileEntry(
@@ -94,9 +95,6 @@ void x801::game::Patcher::createFileEntry(
     uint32_t version,
     uint32_t contentLength,
     const uint8_t* contents) {
-  if (fname == nullptr || contents == nullptr)
-    throw "x801::game::Patcher::createFileEntry: "
-      "fname and contents must not be null";
   sqlite3_stmt* statement;
   int stat = sqlite3_prepare_v2(
     conn,
@@ -113,6 +111,35 @@ void x801::game::Patcher::createFileEntry(
     statement, 3, static_cast<const void*>(contents), contentLength,
     SQLITE_STATIC
   );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(conn);
+  stepBlock(statement, conn);
+  sqlite3_finalize(statement);
+}
+
+static const char* UPDATE_FILE_VERSION_QUERY =
+  "BEGIN TRANSACTION;"
+  "INSERT OR IGNORE INTO Files"
+  "  (fname, version, contents) VALUES (?1, ?2, NULL);"
+  "UPDATE Files"
+  "  SET version = ?2"
+  "  WHERE fname = ?1;"
+  "COMMIT;"
+  ;
+
+void x801::game::Patcher::updateFileVersion(
+    const char* fname,
+    uint32_t version) {
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    conn,
+    UPDATE_FILE_VERSION_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(conn);
+  stat = sqlite3_bind_text(statement, 1, fname, -1, SQLITE_STATIC);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(conn);
+  stat = sqlite3_bind_int(statement, 2, version);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(conn);
   stepBlock(statement, conn);
   sqlite3_finalize(statement);
@@ -151,4 +178,16 @@ bool x801::game::Patcher::getFileEntry(
   contents = bytes;
   sqlite3_finalize(statement);
   return true;
+}
+
+void x801::game::Patcher::updateEntry(
+    const char* fname,
+    uint32_t version,
+    uint32_t contentLength,
+    const uint8_t* contents) {
+  if (fname == nullptr || contents == nullptr)
+    throw "x801::game::Patcher::createFileEntry: "
+      "fname and contents must not be null";
+  if (contentLength == 0) updateFileVersion(fname, version);
+  else createFileEntry(fname, version, contentLength, contents);
 }
