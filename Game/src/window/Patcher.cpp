@@ -41,10 +41,12 @@ x801::game::Patcher::Patcher(std::string u) {
     boost::filesystem::create_directories(PATCHER_DIR);
   }
   curl = curl_easy_init();
+  if (curl == nullptr) throw "Could not initialise CURL";
   std::string urishadow = uri;
-  urishadow[urishadow.find(':')] = '|';
+  size_t index = urishadow.find("://") + 3;
+  urishadow[urishadow.find(':', index)] = '|';
   RakNet::SystemAddress addr;
-  bool stat = addr.FromString(urishadow.c_str());
+  bool stat = addr.FromString(urishadow.c_str() + index);
   char aname[64];
   addr.ToString(true, aname, '_');
   if (!stat) throw "Address of connected server unknown";
@@ -200,4 +202,21 @@ void x801::game::Patcher::updateEntry(
   if (version > latestVersion) latestVersion = version;
   if (contentLength == 0) updateFileVersion(fname, version);
   else createFileEntry(fname, version, contentLength, contents);
+}
+
+static size_t patcherWriteFunction(char *ptr, size_t size, size_t nmemb, void *userdata) {
+  std::stringstream* output = (std::stringstream*) userdata;
+  output->write(ptr, size * nmemb);
+  return size * nmemb;
+}
+
+void x801::game::Patcher::refetchFile(const char* fname, uint32_t version) {
+  std::stringstream ss;
+  curl_easy_setopt(curl, CURLOPT_URL, (uri + "/content?fname=" + fname).c_str());
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &ss);
+  CURLcode res = curl_easy_perform(curl);
+  if (res != CURLE_OK) return;
+  std::string s = ss.str();
+  createFileEntry(fname, version, s.length(), (const uint8_t*) s.c_str());
 }

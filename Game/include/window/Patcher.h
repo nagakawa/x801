@@ -54,7 +54,7 @@ namespace x801 {
       sqlite3* conn;
       uint32_t latestVersion = 0;
       std::string uri;
-      CURL* curl;
+      CURL* curl; // TODO use multi interface
       void open(sqlite3*& handle, const char* path);
       void createFileTable();
       void createFileEntry(
@@ -65,6 +65,7 @@ namespace x801 {
       void updateFileVersion(
         const char* fname,
         uint32_t version);
+      void refetchFile(const char* fname, uint32_t version);
     };
   }
 }
