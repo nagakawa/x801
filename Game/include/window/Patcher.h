@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <thread>
 #include <curl/curl.h>
 #include <sqlite3.h>
 namespace x801 {
@@ -29,6 +30,7 @@ namespace x801 {
     class Patcher;
   }
 }
+#include "ext/blockingconcurrentqueue.h"
 #include "Client.h"
 
 namespace x801 {
@@ -50,12 +52,16 @@ namespace x801 {
         uint32_t& version,
         uint32_t& contentLength,
         uint8_t*& contents);
-      void fetchFile(const char* fname);
+      void requestFile(const char* fname);
+      void startFetchThread();
     private:
       sqlite3* conn;
       uint32_t latestVersion = 0;
       std::string uri;
       CURL* curl; // TODO use multi interface
+      std::thread fetchThread;
+      volatile bool done = false;
+      moodycamel::BlockingConcurrentQueue<std::string> files;
       void open(sqlite3*& handle, const char* path);
       void createFileTable();
       void createFileEntry(
@@ -68,6 +74,7 @@ namespace x801 {
         uint32_t version);
       void refetchFile(const char* fname, uint32_t version);
       uint32_t getVersionFromServer(const char* fname);
+      void fetchFile(const char* fname);
     };
   }
 }

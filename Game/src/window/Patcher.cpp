@@ -61,6 +61,8 @@ x801::game::Patcher::Patcher(std::string u) {
 }
 
 x801::game::Patcher::~Patcher() {
+  done = true;
+  fetchThread.join();
   int stat = sqlite3_close(conn);
   curl_easy_cleanup(curl);
   conn = nullptr;
@@ -235,8 +237,23 @@ uint32_t x801::game::Patcher::getVersionFromServer(const char* fname) {
 void x801::game::Patcher::fetchFile(const char* fname) {
   uint32_t lversion;
   uint32_t contentLength;
-  uint8_t contents;
+  uint8_t* contents;
   getFileEntry(fname, lversion, contentLength, contents);
   uint32_t sversion = getVersionFromServer(fname);
   if (sversion != lversion) refetchFile(fname, sversion);
+}
+
+void x801::game::Patcher::requestFile(const char* fname) {
+  files.enqueue(std::string(fname));
+}
+
+void x801::game::Patcher::startFetchThread() {
+  auto cback = [this]() {
+    while (!this->done) {
+      std::string fname;
+      files.wait_dequeue(fname);
+      fetchFile(fname.c_str());
+    }
+  };
+  fetchThread = std::thread(cback);
 }
