@@ -3,6 +3,7 @@ substDirList = $(foreach dir, $(1), \
 	$(patsubst asset-src/%, assets/%, $(wildcard $(dir)/*.$(2)))))
 
 all: maps
+	python3 tools/rebuild-index.py
 
 maps: $(call substDirList,asset-src/maps,msf,map)
 

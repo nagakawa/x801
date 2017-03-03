@@ -89,6 +89,11 @@ namespace x801 {
       void sendLoginPacket(PacketCallback loginCallback);
       void requestUsernames(size_t count, uint32_t* ids);
       void requestUsername(uint32_t id);
+      void processFilehostURIResponse(
+        uint8_t packetType,
+        uint8_t* body, size_t length,
+        RakNet::Packet* p
+      );
       void processUsernameResponse(
         uint16_t lPacketType,
         uint8_t* lbody, size_t llength,

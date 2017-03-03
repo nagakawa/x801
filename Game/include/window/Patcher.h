@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <curl/curl.h>
 #include <sqlite3.h>
 namespace x801 {
   namespace game {
@@ -35,7 +36,7 @@ namespace x801 {
     extern const char* PATCHER_DIR;
     class Patcher {
     public:
-      Patcher(Client* cli);
+      Patcher(std::string u);
       ~Patcher();
       Patcher(const Patcher& other) = delete;
       Patcher& operator=(const Patcher& other) = delete;
@@ -52,7 +53,8 @@ namespace x801 {
     private:
       sqlite3* conn;
       uint32_t latestVersion = 0;
-      Client* c;
+      std::string uri;
+      CURL* curl;
       void open(sqlite3*& handle, const char* path);
       void createFileTable();
       void createFileEntry(

@@ -301,6 +301,7 @@ void x801::game::Server::processLogin(
     output.Write(playerID);
   }
   std::cerr << "Login status was " << status << '\n';
+  sendFileLocationPacket(p);
   peer->Send(
     &output, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
     p->systemAddress, false
@@ -389,6 +390,18 @@ void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {
   uint8_t message = PACKET_UNRECOGNISED_COOKIE;
   peer->Send(
     (const char*) &message, 1, MEDIUM_PRIORITY, RELIABLE_ORDERED, 9,
+    p->systemAddress, false
+  );
+}
+
+static const char* FILEHOST_URI = "http://localhost:3000";
+
+void x801::game::Server::sendFileLocationPacket(RakNet::Packet* p) {
+  RakNet::BitStream packet;
+  packet.Write(static_cast<uint8_t>(PACKET_FILE));
+  writeStringToBitstream16(packet, FILEHOST_URI);
+  peer->Send(
+    &packet, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0,
     p->systemAddress, false
   );
 }

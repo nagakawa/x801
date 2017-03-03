@@ -32,7 +32,7 @@ using namespace x801::game;
 
 const char* x801::game::PATCHER_DIR = "gamedat/";
 
-x801::game::Patcher::Patcher(Client* cli) {
+x801::game::Patcher::Patcher(std::string u) {
   if (!boost::filesystem::is_directory(PATCHER_DIR)) {
     std::cout <<
       "Warning: overwriting " << PATCHER_DIR <<
@@ -40,8 +40,11 @@ x801::game::Patcher::Patcher(Client* cli) {
     boost::filesystem::remove(PATCHER_DIR);
     boost::filesystem::create_directories(PATCHER_DIR);
   }
+  curl = curl_easy_init();
+  std::string urishadow = uri;
+  urishadow[urishadow.find(':')] = '|';
   RakNet::SystemAddress addr;
-  bool stat = cli->getServerAddress(addr);
+  bool stat = addr.FromString(urishadow.c_str());
   char aname[64];
   addr.ToString(true, aname, '_');
   if (!stat) throw "Address of connected server unknown";
@@ -52,11 +55,12 @@ x801::game::Patcher::Patcher(Client* cli) {
   std::string dfname = dfnamein.str();
   open(conn, dfname.c_str());
   createFileTable();
-  c = cli;
+  uri = u;
 }
 
 x801::game::Patcher::~Patcher() {
   int stat = sqlite3_close(conn);
+  curl_easy_cleanup(curl);
   conn = nullptr;
   (void) stat;
   assert(stat == SQLITE_OK);

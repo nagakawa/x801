@@ -114,6 +114,7 @@ namespace x801 {
         RakNet::Packet* p
       );
       void sendUnrecognisedCookiePacket(RakNet::Packet* p);
+      void sendFileLocationPacket(RakNet::Packet* p);
       void broadcastLocations();
       void broadcastLocationsConcurrent();
       RakNet::RakPeerInterface* peer = nullptr;

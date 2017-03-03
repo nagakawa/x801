@@ -28,6 +28,7 @@ using namespace x801::game;
 #include <string.h>
 #include <iostream>
 #include <string>
+#include <curl/curl.h>
 #include <portable_endian.h>
 #include "Client.h"
 #include "Credentials.h"
@@ -41,6 +42,7 @@ int lmain(int argc, char** argv) {
     if (res != 0) return res;
     std::cout << "Hello from Athena V.\n";
     if (c.mode == CLIENT) {
+      curl_global_init(CURL_GLOBAL_ALL);
       std::cout << "You intend to connect to a server.\n";
       std::string username, password; 
       std::cout << "Username: ";
@@ -51,6 +53,7 @@ int lmain(int argc, char** argv) {
       Client client(c.ip, c.port, c.useIPV6);
       client.login(cred);
       client.getListenThread().join();
+      curl_global_cleanup();
     } else {
       std::cout << "You intend to start a server.\n";
       Server server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);

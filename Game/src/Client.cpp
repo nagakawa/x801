@@ -70,10 +70,12 @@ void x801::game::Client::initialise() {
       RakNet::Packet* p) {
         (void) packetType; (void) body; (void) length; (void) t; (void) p;
         this->requestMOTD();
-        this->patcher = new Patcher(this);
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
+  PacketCallback filehostCallback =
+    MAKE_PACKET_CALLBACK(processFilehostURIResponse, -1);
+  callbacks.insert({PACKET_FILE, filehostCallback});
   LPacketCallback idCallback =
     MAKE_LPACKET_CALLBACK_CLIENT(processUsernameResponse, -1);
   lCallbacks.insert({LPACKET_IDENTIFY, idCallback});
@@ -306,6 +308,15 @@ void x801::game::Client::sendChatMessage(const char* message) {
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
+}
+
+void x801::game::Client::processFilehostURIResponse(
+    uint8_t packetType,
+    uint8_t* body, size_t length,
+    RakNet::Packet* p) {
+  (void) p; (void) packetType;
+  RakNet::BitStream input(body, length, false);
+  patcher = new Patcher(readStringFromBitstream16S(input));
 }
 
 static const char* statusMessages[] = {
