@@ -220,3 +220,23 @@ void x801::game::Patcher::refetchFile(const char* fname, uint32_t version) {
   std::string s = ss.str();
   createFileEntry(fname, version, s.length(), (const uint8_t*) s.c_str());
 }
+
+uint32_t x801::game::Patcher::getVersionFromServer(const char* fname) {
+  std::stringstream ss;
+  curl_easy_setopt(curl, CURLOPT_URL, (uri + "/version?fname=" + fname).c_str());
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &ss);
+  CURLcode res = curl_easy_perform(curl);
+  if (res != CURLE_OK) return -1;
+  std::string s = ss.str();
+  return std::stoul(s);
+}
+
+void x801::game::Patcher::fetchFile(const char* fname) {
+  uint32_t lversion;
+  uint32_t contentLength;
+  uint8_t contents;
+  getFileEntry(fname, lversion, contentLength, contents);
+  uint32_t sversion = getVersionFromServer(fname);
+  if (sversion != lversion) refetchFile(fname, sversion);
+}

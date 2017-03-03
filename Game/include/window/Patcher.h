@@ -50,6 +50,7 @@ namespace x801 {
         uint32_t& version,
         uint32_t& contentLength,
         uint8_t*& contents);
+      void fetchFile(const char* fname);
     private:
       sqlite3* conn;
       uint32_t latestVersion = 0;
@@ -66,6 +67,7 @@ namespace x801 {
         const char* fname,
         uint32_t version);
       void refetchFile(const char* fname, uint32_t version);
+      uint32_t getVersionFromServer(const char* fname);
     };
   }
 }
