@@ -26,6 +26,7 @@ using namespace x801::game;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <exception>
 #include <iostream>
 #include <string>
 #include <curl/curl.h>
@@ -34,33 +35,47 @@ using namespace x801::game;
 #include "Credentials.h"
 #include "Server.h"
 
-int lmain(int argc, char** argv) {
-  setlocale(LC_ALL, "");
+static void handleTerminate() {
   try {
-    CLineConfig c;
-    int res = readSettings(c, argc, argv);
-    if (res != 0) return res;
-    std::cout << "Hello from Athena V.\n";
-    if (c.mode == CLIENT) {
-      curl_global_init(CURL_GLOBAL_ALL);
-      std::cout << "You intend to connect to a server.\n";
-      std::string username, password; 
-      std::cout << "Username: ";
-      std::cin >> username;
-      std::cout << "Password: ";
-      std::cin >> password;
-      Credentials cred(username, password);
-      Client client(c.ip, c.port, c.useIPV6);
-      client.login(cred);
-      client.getListenThread().join();
-      curl_global_cleanup();
-    } else {
-      std::cout << "You intend to start a server.\n";
-      Server server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);
-    }
+    std::rethrow_exception(std::current_exception());
+  } catch (std::exception& e) {
+    std::cerr << e.what() << '\n';  
   } catch (const char* c) {
     std::cerr << c << '\n';
-    return -1;
+    exit(-1);
+  } catch (std::string& c) {
+    std::cerr << c << '\n';
+    exit(-1);
+  } catch (...) {
+    std::cerr << "something weird happened\n";
+    exit(-1);
+  }
+  exit(-2);
+}
+
+int lmain(int argc, char** argv) {
+  setlocale(LC_ALL, "");
+  std::set_terminate(handleTerminate);
+  CLineConfig c;
+  int res = readSettings(c, argc, argv);
+  if (res != 0) return res;
+  std::cout << "Hello from Athena V.\n";
+  if (c.mode == CLIENT) {
+    curl_global_init(CURL_GLOBAL_ALL);
+    std::cout << "You intend to connect to a server.\n";
+    std::string username, password; 
+    std::cout << "Username: ";
+    std::cin >> username;
+    std::cout << "Password: ";
+    std::cin >> password;
+    Credentials cred(username, password);
+    Client client(c.ip, c.port, c.useIPV6);
+    client.login(cred);
+    client.getListenThread().join();
+    curl_global_cleanup();
+  } else {
+    std::cout << "You intend to start a server.\n";
+    Server server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);
   }
   return 0;
 }

@@ -42,13 +42,16 @@ x801::game::Patcher::Patcher(std::string u) {
   }
   curl = curl_easy_init();
   if (curl == nullptr) throw "Could not initialise CURL";
-  std::string urishadow = uri;
+  std::string urishadow = u;
+  std::cout << urishadow.c_str() << '\n';
   size_t index = urishadow.find("://") + 3;
   urishadow[urishadow.find(':', index)] = '|';
   RakNet::SystemAddress addr;
   bool stat = addr.FromString(urishadow.c_str() + index);
   char aname[64];
   addr.ToString(true, aname, '_');
+  std::cout << urishadow.c_str() + index << '\n';
+  std::cout << aname << '\n';
   if (!stat) throw "Address of connected server unknown";
   std::stringstream dfnamein;
   dfnamein << PATCHER_DIR << "gd_" << aname << ".dat";
