@@ -36,6 +36,9 @@ namespace x801 {
       ChunkXYZ(int x, int y, int z) :
         x(x), y(y), z(z) {}
       ChunkXYZ() : x(0), y(0), z(0) {}
+      bool operator==(const ChunkXYZ& that) const {
+        return x == that.x && y == that.y && z == that.z;
+      }
     };
     struct ChunkHasher {
       size_t operator()(const ChunkXYZ& xyz) const {
@@ -84,13 +87,13 @@ namespace x801 {
       }
       void write(std::ostream& handle) const;
       ~Chunk();
-      int getX() { return xyz.x; }
-      int getY() { return xyz.y; }
-      int getZ() { return xyz.z; }
-      ChunkXYZ getXYZ() { return xyz; }
-      bool isEmpty() { return empty; }
+      int getX() const { return xyz.x; }
+      int getY() const { return xyz.y; }
+      int getZ() const { return xyz.z; }
+      ChunkXYZ getXYZ() const { return xyz; }
+      bool isEmpty() const { return empty; }
       Block* getMapBlocks() { return map; }
-      Block getMapBlockAt(size_t ix, size_t iy, size_t iz);
+      Block getMapBlockAt(size_t ix, size_t iy, size_t iz) const;
       void setMapBlockAt(size_t ix, size_t iy, size_t iz, Block b);
       Chunk(const Chunk& that) :
           xyz(that.xyz), empty(that.empty),
@@ -98,7 +101,14 @@ namespace x801 {
         if (!that.empty)
           memcpy(map, that.map, BLOCKS_IN_CHUNK * sizeof(Block));
       }
+      Chunk(Chunk&& that) :
+          xyz(that.xyz), empty(that.empty),
+          map(that.map) {
+        that.map = nullptr;
+        that.empty = true;
+      }
       Chunk& operator=(const Chunk& that);
+      Chunk& operator=(Chunk&& that);
     private:
       ChunkXYZ xyz;
       bool empty;

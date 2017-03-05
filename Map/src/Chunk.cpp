@@ -26,7 +26,7 @@ x801::map::Chunk::~Chunk() {
   delete[] map;
 }
 
-Block x801::map::Chunk::getMapBlockAt(size_t ix, size_t iy, size_t iz) {
+Block x801::map::Chunk::getMapBlockAt(size_t ix, size_t iy, size_t iz) const {
   if (empty) return Block();
   size_t index = (iz << 8) | (ix << 4) | iy;
   assert(index < BLOCKS_IN_CHUNK);
@@ -71,5 +71,14 @@ Chunk& x801::map::Chunk::operator=(const Chunk& that) {
   else map = nullptr;
   if (!empty)
     memcpy(map, that.map, BLOCKS_IN_CHUNK * sizeof(Block));
+  return *this;
+}
+
+Chunk& x801::map::Chunk::operator=(Chunk&& that) {
+  xyz = that.xyz;
+  empty = that.empty;
+  map = that.map;
+  that.map = nullptr;
+  that.empty = true;
   return *this;
 }
