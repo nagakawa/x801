@@ -39,6 +39,15 @@ namespace x801 {
       bool operator==(const ChunkXYZ& that) const {
         return x == that.x && y == that.y && z == that.z;
       }
+      bool operator<(const ChunkXYZ& that) const {
+        if (x < that.x) return true;
+        if (x > that.x) return false;
+        if (y < that.y) return true;
+        if (y > that.y) return false;
+        if (z < that.z) return true;
+        if (z > that.z) return false;
+        return false;
+      }
     };
     struct ChunkHasher {
       size_t operator()(const ChunkXYZ& xyz) const {

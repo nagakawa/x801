@@ -146,9 +146,9 @@ void testChunkIO() {
   shouldBeWall = chunk.getMapBlockAt(15, 7, 2);
   assertEqual(shouldBeWall, wall, "Wall on east edge");
   shouldBeWall = chunk.getMapBlockAt(6, 0, 1);
-  assertEqual(shouldBeWall, wall, "Wall on south edge");
-  shouldBeWall = chunk.getMapBlockAt(3, 15, 2);
   assertEqual(shouldBeWall, wall, "Wall on north edge");
+  shouldBeWall = chunk.getMapBlockAt(3, 15, 2);
+  assertEqual(shouldBeWall, wall, "Wall on south edge");
   shouldBeWall = chunk.getMapBlockAt(7, 9, 0);
   assertEqual(shouldBeWall, wall, "Wall on floor (wtf?)");
   x801::map::Block shouldBeSpace = chunk.getMapBlockAt(5, 5, 7);
@@ -161,41 +161,32 @@ void testChunkIO() {
   chunk.write(output);
   assertEqual(output.str(), s, "Input and output match");
 }
-/*
+
 void testTileSecIO() {
-  // Make a two-layer map.
-  // The first layer is the same as before.
-  // The second is bigger and has a square at the center.
+  // Make a two-chunk map.
+  // They are adjacent and identical.
   std::string s = x801::base::construct(
     "\x02\x00"
-    // Layer 0
-    "\x08\x00\x08\x00" // Dimensions
-    "\xfe\xff\xfb\xff" // Offset of NW corner
-    NORTH_OR_SOUTH
-    CENTER CENTER CENTER
-    CENTER CENTER CENTER
-    NORTH_OR_SOUTH
-    // Layer 1
-    "\x0c\x00\x0c\x00"
-    "\xfa\xff\xf7\xff" // (-6, -9)
-    NORTH_OR_SOUTH_2
-    EMPTY_ROW_2 EMPTY_ROW_2
-    SQUARE_EDGE_ROW_2
-    SQUARE_SIDE_ROW_2 SQUARE_SIDE_ROW_2
-    SQUARE_SIDE_ROW_2 SQUARE_SIDE_ROW_2
-    SQUARE_EDGE_ROW_2
-    EMPTY_ROW_2 EMPTY_ROW_2
-    NORTH_OR_SOUTH_2
+    // Chunk 1
+    "\x02\x00\x03\x00\xfe\xff" // Location
+    "\x00\x00" // Not empty
+    A_CHUNK
+    // Chunk 0
+    "\x03\x00\x03\x00\xfe\xff" // Location
+    "\x00\x00" // Not empty
+    A_CHUNK
   );
   std::stringstream input(s, std::ios_base::in | std::ios_base::binary);
   x801::map::TileSec ts(input);
-  assertEqual(ts[0].getWidth(), 8, "Layer 0 of TileSec probably read fine");
-  assertEqual(ts[1].getWidth(), 12, "Layer 1 of TileSec probably read fine");
+  x801::map::Block wall(0x80000001);
+  x801::map::Block shouldBeWall =
+    ts.getBlock(x801::map::BlockXYZ(35, 63, -30));
+  assertEqual(shouldBeWall, wall, "Wall on south edge of chunk 1");
   std::stringstream output(std::ios_base::out | std::ios_base::binary);
   ts.write(output);
   assertEqual(output.str(), s, "Input and output match");
 }
-
+/*
 void testAreaIO() {
   // Make a two-layer map.
   // The first layer is the same as before.
@@ -339,7 +330,7 @@ const Test x801::test::parts[] = {
   {"versionBasic", testVersionBasic, true},
   {"versionRead", testVersionRead, true},
   {"chunk", testChunkIO, true},
-  //{"tileSec", testTileSecIO, true},
+  {"tileSec", testTileSecIO, true},
   //{"area", testAreaIO, true},
   {"dbAuth", testDBAuth, true},
   {"circularQueue", testCircularQueue, true},

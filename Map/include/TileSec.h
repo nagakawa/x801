@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include "Chunk.h"
 
@@ -45,6 +45,15 @@ namespace x801 {
       }
       bool operator==(const BlockXYZ& that) const {
         return x == that.x && y == that.y && z == that.z;
+      }
+      bool operator<(const BlockXYZ& that) const {
+        if (x < that.x) return true;
+        if (x > that.x) return false;
+        if (y < that.y) return true;
+        if (y > that.y) return false;
+        if (z < that.z) return true;
+        if (z > that.z) return false;
+        return false;
       }
     };
     struct BlockHasher {
@@ -67,7 +76,7 @@ namespace x801 {
       void createChunk(const ChunkXYZ& xyz);
       void createChunk(std::istream& fh);
     private:
-      std::unordered_map<ChunkXYZ, Chunk, ChunkHasher> chunks;
+      std::map<ChunkXYZ, Chunk> chunks;
       //int layerCount;
       //std::vector<Layer> layers;
     };
