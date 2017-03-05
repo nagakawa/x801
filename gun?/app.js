@@ -6,7 +6,8 @@ const hostname = '127.0.0.1';
 const port = 3000;
 
 var contents = {};
-var metadata = JSON.parse(fs.readFileSync("assets/index.json", "utf-8"))
+var metadata = JSON.parse(fs.readFileSync("assets/index.json", "utf-8"));
+var nowlist = fs.readFileSync("asset-src/download-now", "utf-8");
 
 function getContent(name, callback) {
   if (name in contents && contents[name] !== undefined)
@@ -22,7 +23,6 @@ function getContent(name, callback) {
 const server = http.createServer((req, res) => {
   var parsedURL = url.parse(req.url, true);
   if (parsedURL.pathname == "/content") {
-    console.log(parsedURL);
     getContent("assets/" + parsedURL.query.fname, (err, data) => {
       if (err) {
         res.setHeader('Content-Type', 'text/plain');
@@ -45,6 +45,10 @@ const server = http.createServer((req, res) => {
       res.statusCode = 404;
       res.end("Resource not found...\n");
     }
+  } else if (parsedURL.pathname == "/download-now") {
+    res.setHeader('Content-Type', 'text/plain');
+    res.statusCode = 200;
+    res.end(nowlist);
   } else {
     res.statusCode = 404;
     res.setHeader('Content-Type', 'text/plain');

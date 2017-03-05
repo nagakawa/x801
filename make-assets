@@ -1,14 +1,34 @@
 substDirList = $(foreach dir, $(1), \
 	$(patsubst %.$(2), %.$(3), \
 	$(patsubst asset-src/%, assets/%, $(wildcard $(dir)/*.$(2)))))
+substDirListT = $(foreach dir, $(1), \
+	$(patsubst %.$(2), %.$(3), \
+	$(patsubst asset-src/%, asset-temp/%, $(wildcard $(dir)/*.$(2)))))
 
-all: maps
+all: maps terrain
 	python3 tools/rebuild-index.py
 
 maps: $(call substDirList,asset-src/maps,msf,map)
 
 assets/maps/%.map: asset-src/maps/%.msf
+	mkdir -p assets/maps
 	python3 tools/compile-map.py --level=9 $< $@
+
+textures: terrain
+
+terrain: terrain-pngs terrain-pngs-stitched
+
+terrain-pngs: $(call substDirListT,asset-src/textures/terrain/gimpfiles,xcf,png)
+
+asset-temp/textures/terrain/gimpfiles/%.png: asset-src/textures/terrain/gimpfiles/%.xcf
+	mkdir -p asset-temp/textures/terrain/gimpfiles
+	xcf2png $< > $@
+
+terrain-pngs-stitched: $(call substDirList,asset-src/textures/terrain,ttd,png) terrain-pngs
+
+assets/textures/terrain/%.png: asset-src/textures/terrain/%.ttd
+	mkdir -p assets/textures/terrain
+	python3 tools/stitch-images.py $< $@ asset-temp/textures/terrain/gimpfiles
 
 yukkuri:
 	@echo "ゆっくりしていってね！"

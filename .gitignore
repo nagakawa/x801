@@ -248,3 +248,4 @@ ENV/
 
 # Rope project settings
 .ropeproject
+asset-temp/
