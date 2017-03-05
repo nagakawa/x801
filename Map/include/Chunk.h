@@ -47,47 +47,41 @@ namespace x801 {
         return label == other.label;
       }
     };
-    class Layer {
+    const size_t BLOCKS_IN_CHUNK = 16 * 16 * 16;
+    class Chunk {
     public:
-      Layer(int w, int h, int xoff = 0, int yoff = 0) :
-          width(w), height(h), xoff(xoff), yoff(yoff),
-          map(new Block[w * h]) {}
-      Layer(std::istream& handle) :
-        width(x801::base::readInt<uint16_t>(handle)),
-        height(x801::base::readInt<uint16_t>(handle)),
-        xoff(x801::base::readInt<int16_t>(handle)),
-        yoff(x801::base::readInt<int16_t>(handle)),
-        map(new Block[width * height]) {
-        for (int i = 0; i < width * height; ++i) {
+      Chunk(int x, int y, int z) :
+          x(x), y(y), z(z), empty(true),
+          map(nullptr) {}
+      Chunk(std::istream& handle) :
+          x(x801::base::readInt<int16_t>(handle)),
+          y(x801::base::readInt<int16_t>(handle)),
+          z(x801::base::readInt<int16_t>(handle)),
+          empty(x801::base::readInt<uint16_t>(handle)),
+          map(new Block[BLOCKS_IN_CHUNK]) {
+        for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
           map[i] = Block(x801::base::readInt<uint32_t>(handle));
         }
       }
       void write(std::ostream& handle) const;
-      ~Layer();
-      int getWidth() { return width; }
-      int getHeight() { return height; }
-      int getXOffset() { return xoff; }
-      int getYOffset() { return yoff; }
+      ~Chunk();
+      int getX() { return x; }
+      int getY() { return y; }
+      int getZ() { return z; }
+      bool isEmpty() { return empty; }
       Block* getMapBlocks() { return map; }
-      // NB: (x, y) is the northwest corner of the block
-      Block getMapBlockAt(int x, int y);
-      Block getMapBlockAtRaw(int x, int y);
-      void setMapBlockAt(int x, int y, Block b);
-      void setMapBlockAtRaw(int x, int y, Block b);
-      Layer(const Layer& that) :
-          width(that.width), height(that.height),
-          xoff(that.xoff), yoff(that.yoff),
-          map(new Block[that.width * that.height]) {
-        memcpy(map, that.map, width * height * sizeof(Block));
+      Block getMapBlockAt(size_t ix, size_t iy, size_t iz);
+      void setMapBlockAt(size_t ix, size_t iy, size_t iz, Block b);
+      Chunk(const Chunk& that) :
+          x(that.x), y(that.y), z(that.z), empty(that.empty),
+          map(that.empty ? nullptr : new Block[BLOCKS_IN_CHUNK]) {
+        if (!that.empty)
+          memcpy(map, that.map, BLOCKS_IN_CHUNK * sizeof(Block));
       }
-      Layer& operator=(const Layer& that);
+      Chunk& operator=(const Chunk& that);
     private:
-      void allocateBlocks();
-      int width, height;
-      // These are the coordinates of the northwest corner of the map.
-      // This is useful if you later want to expand the map in that direction
-      // without having players appear to move.
-      int xoff, yoff;
+      int x, y, z;
+      bool empty;
       // The elements are in row-major order.
       Block* map;
     };
