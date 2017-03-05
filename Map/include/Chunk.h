@@ -25,11 +25,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <string.h>
+#include <functional>
 #include <iostream>
 #include <utils.h>
 
 namespace x801 {
   namespace map {
+    struct ChunkXYZ {
+      int x, y, z;
+      ChunkXYZ(int x, int y, int z) :
+        x(x), y(y), z(z) {}
+      ChunkXYZ() : x(0), y(0), z(0) {}
+    };
+    struct ChunkHasher {
+      size_t operator()(const ChunkXYZ& xyz) const {
+        size_t hx = std::hash<int>{}(xyz.x);
+        size_t hy = std::hash<int>{}(xyz.y);
+        size_t hz = std::hash<int>{}(xyz.z);
+        return hx ^ (hy << 1) ^ (hz << 2);
+      }
+    };
     struct Block {
       Block() : label(0) {}
       Block(uint32_t b) : label(b) {}
@@ -51,12 +66,16 @@ namespace x801 {
     class Chunk {
     public:
       Chunk(int x, int y, int z) :
-          x(x), y(y), z(z), empty(true),
+          xyz(x, y, z), empty(true),
+          map(nullptr) {}
+      Chunk(ChunkXYZ xyz) :
+          xyz(xyz), empty(true),
           map(nullptr) {}
       Chunk(std::istream& handle) :
-          x(x801::base::readInt<int16_t>(handle)),
-          y(x801::base::readInt<int16_t>(handle)),
-          z(x801::base::readInt<int16_t>(handle)),
+          xyz(
+            x801::base::readInt<int16_t>(handle),
+            x801::base::readInt<int16_t>(handle),
+            x801::base::readInt<int16_t>(handle)),
           empty(x801::base::readInt<uint16_t>(handle)),
           map(new Block[BLOCKS_IN_CHUNK]) {
         for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
@@ -65,22 +84,23 @@ namespace x801 {
       }
       void write(std::ostream& handle) const;
       ~Chunk();
-      int getX() { return x; }
-      int getY() { return y; }
-      int getZ() { return z; }
+      int getX() { return xyz.x; }
+      int getY() { return xyz.y; }
+      int getZ() { return xyz.z; }
+      ChunkXYZ getXYZ() { return xyz; }
       bool isEmpty() { return empty; }
       Block* getMapBlocks() { return map; }
       Block getMapBlockAt(size_t ix, size_t iy, size_t iz);
       void setMapBlockAt(size_t ix, size_t iy, size_t iz, Block b);
       Chunk(const Chunk& that) :
-          x(that.x), y(that.y), z(that.z), empty(that.empty),
+          xyz(that.xyz), empty(that.empty),
           map(that.empty ? nullptr : new Block[BLOCKS_IN_CHUNK]) {
         if (!that.empty)
           memcpy(map, that.map, BLOCKS_IN_CHUNK * sizeof(Block));
       }
       Chunk& operator=(const Chunk& that);
     private:
-      int x, y, z;
+      ChunkXYZ xyz;
       bool empty;
       // The elements are in row-major order.
       Block* map;

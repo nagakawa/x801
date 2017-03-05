@@ -55,9 +55,9 @@ void x801::map::Chunk::setMapBlockAt(size_t ix, size_t iy, size_t iz, Block b) {
 }*/
 
 void x801::map::Chunk::write(std::ostream& handle) const {
-  x801::base::writeInt<int16_t>(handle, x);
-  x801::base::writeInt<int16_t>(handle, y);
-  x801::base::writeInt<int16_t>(handle, z);
+  x801::base::writeInt<int16_t>(handle, xyz.x);
+  x801::base::writeInt<int16_t>(handle, xyz.y);
+  x801::base::writeInt<int16_t>(handle, xyz.z);
   x801::base::writeInt<uint16_t>(handle, empty);
   for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
     x801::base::writeInt<uint32_t>(handle, map[i].label);
@@ -65,9 +65,7 @@ void x801::map::Chunk::write(std::ostream& handle) const {
 }
 
 Chunk& x801::map::Chunk::operator=(const Chunk& that) {
-  x = that.x;
-  y = that.y;
-  z = that.z;
+  xyz = that.xyz;
   empty = that.empty;
   if (!empty && map == nullptr) map = new Block[BLOCKS_IN_CHUNK];
   else map = nullptr;

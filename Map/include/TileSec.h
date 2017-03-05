@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <iostream>
 #include <vector>
-#include "Layer.h"
+#include "Chunk.h"
 
 namespace x801 {
   namespace map {
