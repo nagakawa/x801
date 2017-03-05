@@ -31,9 +31,9 @@ using namespace x801::test;
 #include <vector>
 #include <boost/filesystem.hpp>
 #include <Area.h>
+#include <Chunk.h>
 #include <CircularQueue.h>
 #include <Database.h>
-#include <Layer.h>
 #include <Location.h>
 #include <TileSec.h>
 #include <Version.h>
@@ -125,52 +125,43 @@ void testVersionRead() {
   assertEqual(v.getPrereleaseNumber(), 0x2169, "Correct prenum");
 }
 
-#define W "\x01\x00\x00\x80"
-#define O "\x00\x00\x00\x00"
-#define NORTH_OR_SOUTH W W W W W W W W
-#define CENTER W O O O O O O W
-#define NORTH_OR_SOUTH_2 W W NORTH_OR_SOUTH W W
-#define EMPTY_ROW_2 W O O O O O O O O O O W
-#define SQUARE_EDGE_ROW_2 W O O W W W W W W O O W
-#define SQUARE_SIDE_ROW_2 W O O W O O O O W O O W
+#include <test_chunk.h>
 
-void testLayerIO() {
-  // Make an 8x8 map with the northwest corner being (-2, -5).
+void testChunkIO() {
   std::string s = x801::base::construct(
-    "\x08\x00\x08\x00" // Dimensions
-    "\xfe\xff\xfb\xff" // Offset of NW corner
-    NORTH_OR_SOUTH
-    CENTER CENTER CENTER
-    CENTER CENTER CENTER
-    NORTH_OR_SOUTH
+    "\x02\x00\x03\x00\xfe\xff" // Location
+    "\x00\x00" // Not empty
+    A_CHUNK
   );
   std::stringstream input(s, std::ios_base::in | std::ios_base::binary);
-  x801::map::Layer layer(input);
-  assertEqual(layer.getWidth(), 8, "Width should be 8");
-  assertEqual(layer.getHeight(), 8, "Height should be 8");
-  assertEqual(layer.getXOffset(), -2, "Offset should be (-2, -5)");
-  assertEqual(layer.getYOffset(), -5, "Offset should be (-2, -5)");
+  x801::map::Chunk chunk(input);
+  assertEqual(chunk.getX(), 2, "X should be 2");
+  assertEqual(chunk.getY(), 3, "Y should be 3");
+  assertEqual(chunk.getZ(), -2, "Z should be -2");
+  assertEqual(chunk.isEmpty(), false, "Chunk should not be empty");
   x801::map::Block wall(0x80000001);
   x801::map::Block space(0);
-  x801::map::Block shouldBeWall = layer.getMapBlockAt(-2, 1);
+  x801::map::Block shouldBeWall = chunk.getMapBlockAt(0, 5, 3);
   assertEqual(shouldBeWall, wall, "Wall on west edge");
-  shouldBeWall = layer.getMapBlockAt(5, 0);
+  shouldBeWall = chunk.getMapBlockAt(15, 7, 2);
   assertEqual(shouldBeWall, wall, "Wall on east edge");
-  shouldBeWall = layer.getMapBlockAt(3, 2);
+  shouldBeWall = chunk.getMapBlockAt(6, 0, 1);
   assertEqual(shouldBeWall, wall, "Wall on south edge");
-  shouldBeWall = layer.getMapBlockAt(2, -5);
+  shouldBeWall = chunk.getMapBlockAt(3, 15, 2);
   assertEqual(shouldBeWall, wall, "Wall on north edge");
-  x801::map::Block shouldBeSpace = layer.getMapBlockAt(0, 1);
+  shouldBeWall = chunk.getMapBlockAt(7, 9, 0);
+  assertEqual(shouldBeWall, wall, "Wall on floor (wtf?)");
+  x801::map::Block shouldBeSpace = chunk.getMapBlockAt(5, 5, 7);
   assertEqual(shouldBeSpace, space, "Space in center");
-  layer.setMapBlockAt(0, -1, wall);
-  shouldBeWall = layer.getMapBlockAt(0, -1);
+  chunk.setMapBlockAt(5, 5, 7, wall);
+  shouldBeWall = chunk.getMapBlockAt(5, 5, 7);
   assertEqual(shouldBeWall, wall, "Newly-set wall");
-  layer.setMapBlockAt(0, -1, space); // Revert the change
+  chunk.setMapBlockAt(5, 5, 7, space); // Revert the change
   std::stringstream output(std::ios_base::out | std::ios_base::binary);
-  layer.write(output);
+  chunk.write(output);
   assertEqual(output.str(), s, "Input and output match");
 }
-
+/*
 void testTileSecIO() {
   // Make a two-layer map.
   // The first layer is the same as before.
@@ -251,15 +242,7 @@ void testAreaIO() {
   area2.write(output2);
   assertEqual(output.str(), output2.str(), "Outputs match");
 }
-
-#undef W
-#undef O
-#undef NORTH_OR_SOUTH
-#undef CENTER
-#undef NORTH_OR_SOUTH_2
-#undef EMPTY_ROW_2
-#undef SQUARE_EDGE_ROW_2
-#undef SQUARE_SIDE_ROW_2
+*/
 
 void testDBAuth() {
   boost::filesystem::path p = boost::filesystem::system_complete(currentEXE);
@@ -355,9 +338,9 @@ const Test x801::test::parts[] = {
   {"writeInt", testWriteInt, true},
   {"versionBasic", testVersionBasic, true},
   {"versionRead", testVersionRead, true},
-  {"layer", testLayerIO, true},
-  {"tileSec", testTileSecIO, true},
-  {"area", testAreaIO, true},
+  {"chunk", testChunkIO, true},
+  //{"tileSec", testTileSecIO, true},
+  //{"area", testAreaIO, true},
   {"dbAuth", testDBAuth, true},
   {"circularQueue", testCircularQueue, true},
 };
