@@ -98,11 +98,10 @@ void x801::game::ClientWindow::tick() {
     const Location& loc =
       (id == c->g.myID) ? pair.second.getLocation() : c->g.selfPosition;
     ImGui::TextWrapped(
-      "%s (#%d) @ %d-%d-%d (%f, %f) < %f radians",
+      "%s (#%d) @ world-%d area-%d (%f, %f, %f) < %f radians",
       c->getUsername(id).c_str(), id,
       loc.areaID.worldID, loc.areaID.areaID,
-      loc.layer,
-      loc.x, loc.y, loc.rot
+      loc.x, loc.y, loc.z, loc.rot
     );
   }
   ImGui::TextWrapped("inputs = 0x%x", inputs);

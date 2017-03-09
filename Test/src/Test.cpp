@@ -251,8 +251,7 @@ void testDBAuth() {
   assertEqual(id, 0, "User Dworgyn does not exist, so 0 is returned");
   x801::game::Location locationOfUruwi = {
     { 0, 0 }, // Presumably messing around in the x801 counterpart of the Commons?
-    0,
-    3.7f, 9.2f, -0.14f
+    3.7f, 9.2f, 0.0f, -0.14f
   };
   db.savePlayerLocation(1, locationOfUruwi);
   x801::game::Location shouldBeSame;
