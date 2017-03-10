@@ -246,9 +246,9 @@ static const char* CREATE_PLAYER_LOCATION_TABLE_QUERY =
   "  userID INTEGER UNIQUE NOT NULL,"
   "  worldID INTEGER NOT NULL,"
   "  areaID INTEGER NOT NULL,"
-  "  layer INTEGER NOT NULL,"
   "  x DOUBLE NOT NULL,"
   "  y DOUBLE NOT NULL,"
+  "  z DOUBLE NOT NULL,"
   "  rot DOUBLE NOT NULL"
   ");"
   ;
@@ -266,7 +266,7 @@ void x801::game::Database::createPlayerLocationTable() {
 
 static const char* SAVE_PLAYER_LOCATION_QUERY =
   "INSERT OR REPLACE INTO PlayerLocations"
-  "  (userID, worldID, areaID, layer, x, y, rot)"
+  "  (userID, worldID, areaID, x, y, z, rot)"
   "  VALUES (?, ?, ?, ?, ?, ?, ?);"
   ;
 
@@ -288,11 +288,11 @@ void x801::game::Database::savePlayerLocation(
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   stat = sqlite3_bind_int(statement, 3, location.areaID.areaID);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = sqlite3_bind_int(statement, 4, location.layer);
+  stat = sqlite3_bind_double(statement, 4, location.x);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = sqlite3_bind_double(statement, 5, location.x);
+  stat = sqlite3_bind_double(statement, 5, location.y);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = sqlite3_bind_double(statement, 6, location.y);
+  stat = sqlite3_bind_double(statement, 6, location.z);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   stat = sqlite3_bind_double(statement, 7, location.rot);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
@@ -306,9 +306,9 @@ uint32_t x801::game::Database::locationRowToStruct(
     Location& location) {
   location.areaID.worldID = (uint16_t) sqlite3_column_int(statement, 1);
   location.areaID.areaID = (uint16_t) sqlite3_column_int(statement, 2);
-  location.layer = sqlite3_column_int(statement, 3);
-  location.x = (float) sqlite3_column_double(statement, 4);
-  location.y = (float) sqlite3_column_double(statement, 5);
+  location.x = (float) sqlite3_column_double(statement, 3);
+  location.y = (float) sqlite3_column_double(statement, 4);
+  location.z = (float) sqlite3_column_double(statement, 5);
   location.rot = (float) sqlite3_column_double(statement, 6);
   return sqlite3_column_int(statement, 0);
 }

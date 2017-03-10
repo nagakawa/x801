@@ -24,22 +24,51 @@ using namespace x801::map;
 #pragma GCC diagnostic push                // we DO want an explicit ctor
 #pragma GCC diagnostic ignored "-Weffc++"  // since it has complex behaviour
 x801::map::TileSec::TileSec(std::istream& fh) {
-  layerCount = x801::base::readInt<uint16_t>(fh);
-  for (int i = 0; i < layerCount; ++i) {
-    layers.emplace_back(fh);
+  size_t chunkCount = x801::base::readInt<uint16_t>(fh);
+  for (size_t i = 0; i < chunkCount; ++i) {
+    createChunk(fh);
   }
 }
 #pragma GCC diagnostic pop
 
 void x801::map::TileSec::write(std::ostream& fh) const {
-  x801::base::writeInt<uint16_t>(fh, layerCount);
-  for (int i = 0; i < layerCount; ++i) {
-    layers[i].write(fh);
+  x801::base::writeInt<uint16_t>(fh, chunks.size());
+  for (auto& ci : chunks) {
+    ci.second.write(fh);
   }
 }
 
-TileSec& x801::map::TileSec::operator=(const TileSec& that) {
-  layerCount = that.layerCount;
-  layers = that.layers;
+TileSec& x801::map::TileSec::operator=(const TileSec&& that) {
+  chunks = std::move(that.chunks);
   return *this;
+}
+
+Block x801::map::TileSec::getBlock(const BlockXYZ& xyz) {
+  auto ci = chunks.find(xyz.home());
+  if (ci == chunks.end()) return Block();
+  Chunk& c = ci->second;
+  BlockXYZ clc = xyz.chunkLocal();
+  return c.getMapBlockAt(clc.x, clc.y, clc.z);
+}
+
+void x801::map::TileSec::setBlock(const BlockXYZ& xyz, Block b) {
+  auto ci = chunks.find(xyz.home());
+  if (ci == chunks.end()) {
+    createChunk(xyz.home());
+  }
+  Chunk& c = ci->second;
+  BlockXYZ clc = xyz.chunkLocal();
+  c.setMapBlockAt(clc.x, clc.y, clc.z, b);
+}
+
+void x801::map::TileSec::createChunk(const ChunkXYZ& xyz) {
+  chunks.emplace(
+    std::piecewise_construct,
+    std::forward_as_tuple(xyz),
+    std::forward_as_tuple(xyz));
+}
+
+void x801::map::TileSec::createChunk(std::istream& fh) {
+  Chunk c(fh);
+  chunks.insert({c.getXYZ(), std::move(c)});
 }

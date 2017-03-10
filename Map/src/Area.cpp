@@ -67,7 +67,7 @@ x801::map::Area::~Area() {
   if (ts != nullptr) delete ts;
 }
 
-#define SECTION_TILE 0x454c4954L
+#define SECTION_TILE 0x334c4954L
 
 int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   int stat = MAPERR_OK;

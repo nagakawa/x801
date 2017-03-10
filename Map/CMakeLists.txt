@@ -13,7 +13,7 @@ INCLUDE(../dependencies.cmake)
 
 # Sources:
 SET(Map_library_SRCS
-  ${PROJECT_SOURCE_DIR}/Layer.cpp
+  ${PROJECT_SOURCE_DIR}/Chunk.cpp
   ${PROJECT_SOURCE_DIR}/Area.cpp
   ${PROJECT_SOURCE_DIR}/TileSec.cpp
 )

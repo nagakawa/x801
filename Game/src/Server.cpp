@@ -232,6 +232,7 @@ void x801::game::Server::logoutByPacket(
     RakNet::Packet* p) {
   (void) packetType; (void) body; (void) length;
   uint32_t playerID = playersByAddress[p->systemAddress];
+  if (playerID == 0) return;
   logout(playerID);
   playersByAddress.erase(p->systemAddress);
   addressesByPlayer.erase(playerID);

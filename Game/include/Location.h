@@ -34,8 +34,7 @@ namespace x801 {
     const float PLAYER_ANGULAR_VELOCITY = 1.73f;
     struct Location {
       x801::map::QualifiedAreaID areaID;
-      int layer;
-      float x, y, rot;
+      float x, y, z, rot;
       // Used by both the client (for position prediction) and
       // the server.
       void applyKeyInput(KeyInput input, RakNet::Time last);
