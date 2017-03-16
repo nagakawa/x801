@@ -30,7 +30,12 @@
     "*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*cpp*h*h*h*h*c*c*c*c*c*h*h*hpp*h*c*c*h*c*c*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*h*c*c*c*c*h*h*h*h*h*h*h*h*h*hpparray": "cpp",
     "array": "cpp",
     "*c*c*hpp*c*c*c*c*c*c*c*cpprandom": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "*.ipp": "cpp",
+    "csignal": "cpp",
+    "cstdarg": "cpp",
+    "cwchar": "cpp",
+    "typeinfo": "cpp"
   },
   "python.linting.pylintEnabled": false
 }

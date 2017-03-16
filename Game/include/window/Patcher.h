@@ -47,6 +47,10 @@ namespace x801 {
         uint32_t version,
         uint32_t contentLength,
         const uint8_t* contents);
+      /*
+        returns true if file is there; otherwise returns false
+        `contents` must be freed with delete[]
+      */
       bool getFileEntry(
         const char* fname,
         uint32_t& version,

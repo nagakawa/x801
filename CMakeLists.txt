@@ -12,7 +12,7 @@ ELSE()
   MESSAGE(
     STATUS
     "If the build fails, try running "
-    "`git pull --recurse-submodules`."
+    "`git submodule update --recursive --remote`."
   )
 ENDIF()
 
