@@ -40,6 +40,7 @@ namespace x801 {
 #include "packet.h"
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
+#include "window/patcher_views/TextureView.h"
 
 namespace x801 {
   namespace game {
@@ -132,6 +133,7 @@ namespace x801 {
       std::thread listenThread;
       RakNet::Time drift = 0;
       Patcher* patcher = nullptr;
+      TextureView* textureView = nullptr;
       friend class ClientWindow;
     };
   }

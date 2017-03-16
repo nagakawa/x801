@@ -58,6 +58,11 @@ namespace x801 {
         uint8_t*& contents);
       void requestFile(const char* fname);
       void startFetchThread();
+      void stopFetchThread() {
+        done = true;
+        if (fetchThread.joinable())
+          fetchThread.join();
+      }
     private:
       sqlite3* conn;
       uint32_t latestVersion = 0;

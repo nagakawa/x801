@@ -20,7 +20,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// includes
+#include <iostream>
 
 using namespace x801::game;
 
@@ -43,6 +43,7 @@ agl::Texture* x801::game::TextureView::getTexture(const std::string& name) {
     );
     return &(textures[name]);
   } else {
+    std::cerr << "Requesting file " << name << "\n";
     underlying->requestFile(name.c_str());
     return nullptr;
   }

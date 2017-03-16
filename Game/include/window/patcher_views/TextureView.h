@@ -25,6 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unordered_map>
 #include <boost/thread/shared_mutex.hpp>
 #include <Texture.h>
+namespace x801 {
+  namespace game {
+    class TextureView;
+  }
+}
 #include "window/Patcher.h"
 
 namespace x801 {
@@ -38,7 +43,7 @@ namespace x801 {
       mutable boost::shared_mutex mapMutex;
       std::unordered_map<std::string, agl::Texture> textures;
     };
-    void bindTextureFromPointer(agl::Texture* t) {
+    inline void bindTextureFromPointer(agl::Texture* t) {
       if (t != nullptr) t->bind();
       else glBindTexture(GL_TEXTURE_2D, 0);
     }

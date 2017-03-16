@@ -308,6 +308,7 @@ void x801::game::Client::sendChatMessage(const char* message) {
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
+  textureView->getTexture("textures/terrain/terrain-0.png");
 }
 
 void x801::game::Client::processFilehostURIResponse(
@@ -317,6 +318,9 @@ void x801::game::Client::processFilehostURIResponse(
   (void) p; (void) packetType;
   RakNet::BitStream input(body, length, false);
   patcher = new Patcher(readStringFromBitstream16S(input));
+  patcher->startFetchThread();
+  textureView = new TextureView(patcher);
+  textureView->getTexture("textures/terrain/terrain-0.png");
 }
 
 static const char* statusMessages[] = {
@@ -484,6 +488,7 @@ x801::game::Client::~Client() {
   done = true;
   if (listenThread.joinable()) listenThread.join();
   if (windowThread.joinable()) windowThread.join();
+  patcher->stopFetchThread();
   RakNet::RakPeerInterface::DestroyInstance(peer);
   delete cw;
   delete[] publicKey;

@@ -410,7 +410,6 @@ void x801::game::Server::sendFileLocationPacket(RakNet::Packet* p) {
 void x801::game::Server::broadcastLocations() {
   using namespace std::chrono_literals;
   while (true) {
-    std::cerr << "Sending location packets...\n";
     g.playerMutex.lock_shared();
     // Location packets should be sent only to those in the same area
     for (const auto& pair : g.areas) {
