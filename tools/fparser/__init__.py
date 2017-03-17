@@ -78,7 +78,10 @@ def parse(source):
         elif mstr.startswith('"'):
           arglist.append(unescape(match.group(1)))
         else:
-          arglist.append(int(mstr))
+          try:
+            arglist.append(int(mstr))
+          except ValueError:
+            arglist.append(float(mstr))
         i += 1
     elif matchSection:
       deg = degree(matchSection.group(1))

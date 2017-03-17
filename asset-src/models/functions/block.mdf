@@ -1,0 +1,53 @@
+# Block model.
+Solid: 1
+# Invalid directions will be ignored.
+Opaque: "up" "down" "north" "south" "east" "west"
+# faces section -- defines faces that this model has
+@Faces
+# This is equivalent to two Triangle declarations.
+=Quad top
+# Texture used.
+Texture: "texture"
+# X Y Z U V. Simple arithmetic expressions are allowed.
+Vertex1: -0.5 -0.5 0.5 "top[0] / divisor" "top[1] / divisor"
+Vertex2: 0.5 -0.5 0.5 "(top[0] + 1) / divisor" "top[1] / divisor"
+Vertex3: 0.5 0.5 0.5 "(top[0] + 1) / divisor" "(top[1] + 1) / divisor"
+Vertex4: -0.5 0.5 0.5 "top[0] / divisor" "(top[1] + 1) / divisor"
+# This face will not be shown if there is an opaque block above.
+# Specifying multiple faces is okay.
+Occlusion: "up"
+=Quad bottom
+Texture: "texture"
+Vertex1: 0.5 -0.5 -0.5 "bottom[0] / divisor" "bottom[1] / divisor"
+Vertex2: -0.5 -0.5 -0.5 "(bottom[0] + 1) / divisor" "bottom[1] / divisor"
+Vertex3: -0.5 0.5 -0.5 "(bottom[0] + 1) / divisor" "(bottom[1] + 1) / divisor"
+Vertex4: 0.5 0.5 -0.5 "bottom[0] / divisor" "(bottom[1] + 1) / divisor"
+Occlusion: "down"
+=Quad north
+Texture: "texture"
+Vertex1: 0.5 0.5 0.5 "north[0] / divisor" "north[1] / divisor"
+Vertex2: -0.5 0.5 0.5 "(north[0] + 1) / divisor" "north[1] / divisor"
+Vertex3: -0.5 0.5 -0.5 "(north[0] + 1) / divisor" "(north[1] + 1) / divisor"
+Vertex4: 0.5 0.5 -0.5 "north[0] / divisor" "(north[1] + 1) / divisor"
+Occlusion: "north"
+=Quad south
+Texture: "texture"
+Vertex1: -0.5 -0.5 0.5 "south[0] / divisor" "south[1] / divisor"
+Vertex2: 0.5 -0.5 0.5 "(south[0] + 1) / divisor" "south[1] / divisor"
+Vertex3: 0.5 -0.5 -0.5 "(south[0] + 1) / divisor" "(south[1] + 1) / divisor"
+Vertex4: -0.5 -0.5 -0.5 "south[0] / divisor" "(south[1] + 1) / divisor"
+Occlusion: "south"
+=Quad east
+Texture: "texture"
+Vertex1: 0.5 -0.5 0.5 "east[0] / divisor" "east[1] / divisor"
+Vertex2: 0.5 0.5 0.5 "(east[0] + 1) / divisor" "east[1] / divisor"
+Vertex3: 0.5 0.5 -0.5 "(east[0] + 1) / divisor" "(east[1] + 1) / divisor"
+Vertex4: 0.5 -0.5 -0.5 "east[0] / divisor" "(east[1] + 1) / divisor"
+Occlusion: "east"
+=Quad west
+Texture: "texture"
+Vertex1: -0.5 0.5 0.5 "west[0] / divisor" "west[1] / divisor"
+Vertex2: -0.5 -0.5 0.5 "(west[0] + 1) / divisor" "west[1] / divisor"
+Vertex3: -0.5 -0.5 -0.5 "(west[0] + 1) / divisor" "(west[1] + 1) / divisor"
+Vertex4: -0.5 0.5 -0.5 "west[0] / divisor" "(west[1] + 1) / divisor"
+Occlusion: "west"

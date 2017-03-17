@@ -1,0 +1,10 @@
+Function: "block"
+@Parameters
+texture: "sc" "terrain-0.png"
+top: "ls" 0 0
+bottom: "ls" 0 0
+north: "ls" 0 0
+south: "ls" 0 0
+east: "ls" 0 0
+west: "ls" 0 0
+divisor: "sc" 16
