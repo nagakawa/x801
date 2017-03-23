@@ -249,3 +249,4 @@ ENV/
 # Rope project settings
 .ropeproject
 asset-temp/
+.clang-format

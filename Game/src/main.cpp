@@ -39,7 +39,7 @@ static void handleTerminate() {
   try {
     std::rethrow_exception(std::current_exception());
   } catch (std::exception& e) {
-    std::cerr << e.what() << '\n';  
+    std::cerr << e.what() << '\n';
   } catch (const char* c) {
     std::cerr << c << '\n';
     exit(-1);
