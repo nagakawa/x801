@@ -16,7 +16,7 @@ assets/maps/%.map: asset-src/maps/%.msf
 
 textures: terrain
 
-terrain: terrain-pngs terrain-pngs-stitched
+terrain: assets/textures/terrain/blocks.png
 
 terrain-pngs: $(call substDirListT,asset-src/textures/terrain/gimpfiles,xcf,png)
 
@@ -24,11 +24,9 @@ asset-temp/textures/terrain/gimpfiles/%.png: asset-src/textures/terrain/gimpfile
 	mkdir -p asset-temp/textures/terrain/gimpfiles
 	xcf2png $< > $@
 
-terrain-pngs-stitched: $(call substDirList,asset-src/textures/terrain,ttd,png) terrain-pngs
-
-assets/textures/terrain/%.png: asset-src/textures/terrain/%.ttd
+assets/textures/terrain/blocks.png: terrain-pngs
 	mkdir -p assets/textures/terrain
-	python3 tools/stitch-images.py $< $@ asset-temp/textures/terrain/gimpfiles
+	python3 tools/autostitch.py assets/textures/terrain/blocks.png assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
 
 yukkuri:
 	@echo "ゆっくりしていってね！"
