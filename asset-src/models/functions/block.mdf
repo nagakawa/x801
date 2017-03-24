@@ -12,6 +12,7 @@ Opaque: "up" "down" "north" "south" "east" "west"
 # UV coordinates are relative to the texture, and
 # will be converted to absolute coordinates in the
 # stitcehd texture.
+Texture: "top"
 Vertex1: -0.5 -0.5 0.5 0 0
 Vertex2: 0.5 -0.5 0.5 1 0
 Vertex3: 0.5 0.5 0.5 1 1
@@ -20,30 +21,35 @@ Vertex4: -0.5 0.5 0.5 0 1
 # Specifying multiple faces is okay.
 Occlusion: "up"
 =Quad bottom
+Texture: "bottom"
 Vertex1: 0.5 -0.5 -0.5 0 1
 Vertex2: -0.5 -0.5 -0.5 1 0
 Vertex3: -0.5 0.5 -0.5 1 1
 Vertex4: 0.5 0.5 -0.5 0 1
 Occlusion: "down"
 =Quad north
+Texture: "north"
 Vertex1: 0.5 0.5 0.5 0 0
 Vertex2: -0.5 0.5 0.5 1 0
 Vertex3: -0.5 0.5 -0.5 1 1
 Vertex4: 0.5 0.5 -0.5 0 1
 Occlusion: "north"
 =Quad south
+Texture: "south"
 Vertex1: -0.5 -0.5 0.5 0 0
 Vertex2: 0.5 -0.5 0.5 1 0
 Vertex3: 0.5 -0.5 -0.5 1 1
 Vertex4: -0.5 -0.5 -0.5 0 1
 Occlusion: "south"
 =Quad east
+Texture: "east"
 Vertex1: 0.5 -0.5 0.5 0 0
 Vertex2: 0.5 0.5 0.5 1 0
 Vertex3: 0.5 0.5 -0.5 1 1
 Vertex4: 0.5 -0.5 -0.5 0 1
 Occlusion: "east"
 =Quad west
+Texture: "west"
 Vertex1: -0.5 0.5 0.5 0 0
 Vertex2: -0.5 -0.5 0.5 1 0
 Vertex3: -0.5 -0.5 -0.5 1 1

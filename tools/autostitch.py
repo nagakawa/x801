@@ -1,5 +1,5 @@
 # Texture Stitcher for x801
-# Usage: python3 tools/stitch-iamges.py asset-src/textures/terrain/terrain-0.ttd assets/textures/terrain/terrain-0.png asset-temp/textures/terrain/gimpfiles
+# Usage: python3 tools/autostitch.py assets/textures/terrain/blocks.png assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
 
 import argparse
 import pathlib

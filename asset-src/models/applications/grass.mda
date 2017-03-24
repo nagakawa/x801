@@ -1,10 +1,9 @@
 Function: "block"
 @Parameters
-texture: "sc" "terrain-0.png"
-top: "ls" 0 0
-bottom: "ls" 0 0
-north: "ls" 0 0
-south: "ls" 0 0
-east: "ls" 0 0
-west: "ls" 0 0
+top: "sc" "grass_top"
+bottom: "sc" "grass_top"
+north: "sc" "grass_top"
+south: "sc" "grass_top"
+east: "sc" "grass_top"
+west: "sc" "grass_top"
 divisor: "sc" 16
