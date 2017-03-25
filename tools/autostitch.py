@@ -29,13 +29,15 @@ image = Image.new(
 )
 table = {}
 
-for file in pathlib.Path(args.images[0]).glob("*.png"):
+for fn in pathlib.Path(args.images[0]).glob("*.png"):
   if cumul >= capat:
     capat <<= 1
     image = image.crop((0, 0, tsize, capat * tsize))
-  newImage = Image.open(str(file))
+  newImage = Image.open(str(fn))
   image.paste(newImage, (0, cumul * tsize))
-  table[file.name] = cumul
+  shortname = fn.name
+  shortname = shortname[0:shortname.rfind('.')]
+  table[shortname] = cumul
   cumul += 1
 
 image.save(args.destinationImage[0])
@@ -43,6 +45,6 @@ image.save(args.destinationImage[0])
 fh = open(args.destinationTable[0], "w")
 
 for (name, index) in table.items():
-  fh.write(name + " " + str(index))
+  fh.write(name + " " + str(index) + "\n")
 
 fh.close()

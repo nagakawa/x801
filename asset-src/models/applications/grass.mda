@@ -1,8 +1,8 @@
 Function: "block"
-@Parameters
-top: "sc" "grass_top"
-bottom: "sc" "grass_top"
-north: "sc" "grass_top"
-south: "sc" "grass_top"
-east: "sc" "grass_top"
-west: "sc" "grass_top"
+@Textures
+top: "grass_top"
+bottom: "grass_top"
+north: "grass_top"
+south: "grass_top"
+east: "grass_top"
+west: "grass_top"

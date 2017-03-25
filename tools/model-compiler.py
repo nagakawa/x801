@@ -38,7 +38,7 @@ def getDirectionFlags(ls):
       flags |= (1 << faceToOffset[d])
   return flags
 
-evaluator = simpleeval.SimpleEval(names=lambda x: parameters[x])
+evaluator = simpleeval.SimpleEval()
 
 def resolve(vertex):
   for i in range(len(vertex)):
