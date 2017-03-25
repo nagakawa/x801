@@ -167,8 +167,8 @@ for t in triangles:
   for i in range(3):
     writeInt(out, t[i][0], 2)
   for i in range(3):
-    writeInt(out, t[i][1], 1)
-    writeInt(out, t[i][2], 1)
+    writeInt(out, int(t[i][1] * 128), 1)
+    writeInt(out, int(t[i][2] * 128), 1)
   writeInt(out, t[3], 1)
   writeInt(out, t[4] | (t[5] << 1), 1)
 
