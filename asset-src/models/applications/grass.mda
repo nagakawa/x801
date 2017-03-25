@@ -6,4 +6,3 @@ north: "sc" "grass_top"
 south: "sc" "grass_top"
 east: "sc" "grass_top"
 west: "sc" "grass_top"
-divisor: "sc" 16

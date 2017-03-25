@@ -35,10 +35,10 @@ and build PortAudio yourself.
 This project also depends on a custom version of RakNet, but this dependency
 is managed by the configuration files so no extra work for you.
 
-In addition, the Python scripts depend on NumPy.
+In addition, the Python scripts depend on a few packages.
 
     sudo apt install python3-pip
-    pip3 install numpy
+    pip3 install numpy simpleeval
 
 In addition, there are programs used to build assets:
 

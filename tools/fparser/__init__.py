@@ -36,7 +36,7 @@ def follow(tree, path):
 commentRE = re.compile(r"\s*#")
 fieldRE = re.compile(r"\s*(\w+):(.*)")
 sectionRE = re.compile(r"\s*(@|=+)(\w+)(?:\s.*)?")
-valueID = re.compile(r'-?\d+|"((?:[^\\"]|\\[\\nt])*)"|to\s+(\w+)')
+valueID = re.compile(r'-?\d+(?:\.\d+)?|"((?:[^\\"]|\\[\\nt])*)"|to\s+(\w+)')
 
 def parse(source):
   header = defaultdict(list)

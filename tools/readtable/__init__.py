@@ -1,0 +1,27 @@
+import re
+
+# reads a tti
+
+class InputException(Exception):
+  def __init__(self, message):
+    self.message = message
+
+def error(msg):
+  raise InputException(msg)
+
+tableRE = re.compile(r"(\w+).png (\d+)")
+
+def readfh(fh):
+  table = {}
+  for line in fh:
+    line = line.strip()
+    match = re.fullmatch(tableRE, line)
+    if not match:
+      error("malformatted line: " + line)
+    name = match.group(1)
+    index = int(match.group(2))
+    table[name] = index
+  return table
+
+def read(fname):
+  return readfh(open(fname))
