@@ -112,6 +112,8 @@ parser.add_argument('sourceFunction', metavar='sf', type=str, nargs=1,
     help='the model function source')
 parser.add_argument('output', metavar='out', type=str, nargs=1,
     help='the path of the model')
+parser.add_argument('outputTab', metavar='outt', type=str, nargs=1,
+    help='the path of the texture name table')
 
 args = parser.parse_args()
 
@@ -173,3 +175,10 @@ for t in triangles:
   writeInt(out, t[4] | (t[5] << 1), 1)
 
 out.close()
+
+out2 = open(args.outputTab[0], "w")
+
+for name, index in texlookup.items():
+  out2.write(name + " " + str(index) + "\n")
+
+out2.close()

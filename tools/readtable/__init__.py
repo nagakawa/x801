@@ -9,12 +9,13 @@ class InputException(Exception):
 def error(msg):
   raise InputException(msg)
 
-tableRE = re.compile(r"(\w+).png (\d+)")
+tableRE = re.compile(r"(\w+) (\d+)")
 
 def readfh(fh):
   table = {}
   for line in fh:
     line = line.strip()
+    if not line: continue
     match = re.fullmatch(tableRE, line)
     if not match:
       error("malformatted line: " + line)
