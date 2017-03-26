@@ -35,6 +35,7 @@ using namespace x801::test;
 #include <CircularQueue.h>
 #include <Database.h>
 #include <Location.h>
+#include <Model.h>
 #include <TileSec.h>
 #include <Version.h>
 #include <mapErrors.h>
@@ -308,6 +309,46 @@ void testCircularQueue() {
     "Same element has index that is one less than before front was popped");
 }
 
+void testModelFunctionIO() {
+  using namespace std::literals::string_literals;
+  // Taken from block.cmf
+  std::string bdata =
+    "\x01\x00\x3F\x06\x08\x00\x0C\x00\xC0\xC0\x40\x40\xC0\x40\x40\x40"
+    "\x40\xC0\x40\x40\x40\xC0\xC0\xC0\xC0\xC0\xC0\x40\xC0\x40\x40\xC0"
+    "\x00\x00\x01\x00\x02\x00\x00\x00\x80\x00\x80\x80\x00\x01\x02\x00"
+    "\x03\x00\x00\x00\x80\x80\x00\x80\x00\x00\x00\x01\x04\x00\x05\x00"
+    "\x06\x00\x00\x80\x80\x00\x80\x80\x01\x02\x06\x00\x07\x00\x04\x00"
+    "\x80\x80\x00\x80\x00\x80\x01\x02\x02\x00\x03\x00\x06\x00\x00\x00"
+    "\x80\x00\x80\x80\x02\x04\x06\x00\x07\x00\x02\x00\x80\x80\x00\x80"
+    "\x00\x00\x02\x04\x00\x00\x01\x00\x04\x00\x00\x00\x80\x00\x80\x80"
+    "\x03\x08\x04\x00\x05\x00\x00\x00\x80\x80\x00\x80\x00\x00\x03\x08"
+    "\x01\x00\x02\x00\x07\x00\x00\x00\x80\x00\x80\x80\x04\x10\x07\x00"
+    "\x04\x00\x01\x00\x80\x80\x00\x80\x00\x00\x04\x10\x03\x00\x00\x00"
+    "\x05\x00\x00\x00\x80\x00\x80\x80\x05\x20\x05\x00\x06\x00\x03\x00"
+    "\x80\x80\x00\x80\x00\x00\x05\x20"
+    ""s;
+  std::stringstream input(bdata);
+  x801::map::ModelFunction block(input);
+  assertEqual(block.hitboxType, x801::map::HitboxType::HITBOX_FULL,
+    "Read that this is a full block");
+  assertEqual(block.textureCount, 6, "Uses 6 textures");
+  // First vertex is nnp.
+  assertEqual(block.vertices[0].x, -64, "Vertex 0 has X of -64 (-0.5)");
+  assertEqual(block.vertices[0].y, -64, "Vertex 0 has X of -64 (-0.5)");
+  assertEqual(block.vertices[0].z, 64, "Vertex 0 has X of +64 (+0.5)");
+  // First face is 0 - 1 - 2
+  assertEqual(block.faces[0].vertices[0].index, 0,
+    "First vertex of face 0 is vertex 0");
+  assertEqual(block.faces[0].vertices[0].u, 0,
+    "First vertex of face 0 has u = 0");
+  assertEqual(block.faces[0].vertices[0].v, 0,
+    "First vertex of face 0 has v = 0");
+  std::stringstream output;
+  block.write(output);
+  std::string outData = output.str();
+  assertEqual(outData, bdata, "Input and output are equal");
+}
+
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
@@ -321,6 +362,7 @@ const Test x801::test::parts[] = {
   {"area", testAreaIO, true},
   {"dbAuth", testDBAuth, true},
   {"circularQueue", testCircularQueue, true},
+  {"modelFunctionIO", testModelFunctionIO, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 
