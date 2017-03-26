@@ -8,7 +8,6 @@ import fparser
 import pathlib
 import pprint
 import re
-import readtable
 import simpleeval
 from PIL import Image
 

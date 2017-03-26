@@ -35,7 +35,8 @@
     "csignal": "cpp",
     "cstdarg": "cpp",
     "cwchar": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "*.tcc": "cpp"
   },
   "python.linting.pylintEnabled": false
 }
