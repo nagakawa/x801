@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <vector>
 #include <utils.h>
+#include <Version.h>
 
 namespace x801 {
   namespace map {
@@ -66,6 +67,14 @@ namespace x801 {
       uint8_t textureCount;
       std::vector<VertexXYZ> vertices;
       std::vector<Face> faces;
+    };
+    class ModelFunctionIndex {
+    public:
+      ModelFunctionIndex(std::istream& fh);
+      void write(std::ostream& fh);
+      std::vector<ModelFunction> models;
+      int error;
+      x801::base::Version version;
     };
   }
 }

@@ -17,6 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "mapErrors.h"
+
 using namespace x801::map;
 
 x801::map::ModelFunction::ModelFunction(std::istream& fh) {
@@ -78,5 +80,26 @@ void x801::map::ModelFunction::write(std::ostream& fh) {
     }
     fh.put((char) f.texture);
     fh.put((char) f.occlusionFlags);
+  }
+}
+
+x801::map::ModelFunctionIndex::ModelFunctionIndex(std::istream& fh) {
+  int header = x801::base::readInt<uint32_t>(fh);
+  if (header != 0x46444d58L) { // XMap
+    error = MODERR_NOT_A_MODEL;
+  }
+  version = x801::base::Version(fh);
+  uint32_t count = x801::base::readInt<uint32_t>(fh);
+  for (size_t i = 0; i < count; ++i) {
+    models.emplace_back(fh);
+  }
+}
+
+void x801::map::ModelFunctionIndex::write(std::ostream& fh) {
+  x801::base::writeInt<uint32_t>(fh, 0x46444d58L);
+  x801::base::engineVersion.write(fh);
+  x801::base::writeInt<uint32_t>(fh, models.size());
+  for (size_t i = 0; i < models.size(); ++i) {
+    models[i].write(fh);
   }
 }
