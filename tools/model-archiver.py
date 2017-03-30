@@ -28,6 +28,10 @@ parser.add_argument('output', metavar='out', type=str, nargs=1,
     help='the path of the archive')
 parser.add_argument('outputTab', metavar='outt', type=str, nargs=1,
     help='the path of the model name table')
+parser.add_argument('--magic', metavar='m', type=str, default="XMDF",
+    help='the magic four-byte sequence')
+parser.add_argument('--extension', metavar='x', type=str, default="cmf",
+    help='the extension to look for')
 
 args = parser.parse_args()
 
@@ -36,13 +40,13 @@ direct = pathlib.Path(args.sourceDirectory[0])
 out = open(args.output[0], "wb")
 out2 = open(args.outputTab[0], "w")
 
-out.write(b'XMDF')
+out.write(args.magic.encode())
 out.write(version)
 writeInt(out, 0, 4)
 
 count = 0
 
-for fname in direct.glob("*.cmf"):
+for fname in direct.glob("*." + args.extension):
   name = str(fname)
   fh = open(name, "rb")
   contents = fh.read()
