@@ -106,7 +106,7 @@ def parseQuad(section, triangles, vlookup, texlookup):
     (v3, v4, v1, ti, occlusionFlags, pt),
   ]
 
-parser = argparse.ArgumentParser(description='Stitch textures for Experiment801.')
+parser = argparse.ArgumentParser(description='Compile model files for x801.')
 parser.add_argument('sourceFunction', metavar='sf', type=str, nargs=1,
     help='the model function source')
 parser.add_argument('output', metavar='out', type=str, nargs=1,

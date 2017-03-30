@@ -25,4 +25,7 @@ def readfh(fh):
   return table
 
 def read(fname):
-  return readfh(open(fname))
+  fh = open(fname)
+  thing = readfh(fh)
+  fh.close()
+  return thing
