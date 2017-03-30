@@ -113,9 +113,10 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
       mode = HUH;
     } else if (arg[0] == '-') {
       if (arg[1] == '-') {
-        if (!strcmp(arg + 2, "client")) mode = CLIENT;
-        else if (!strcmp(arg + 2, "server")) mode = SERVER;
-        else if (!strcmp(arg + 2, "use-ipv6")) cn.useIPV6 = true;
+        const char* name = arg + 2;
+        if (!strcmp(name, "client") || !strcmp(name, "cheryl")) mode = CLIENT;
+        else if (!strcmp(name, "server") || !strcmp(name, "samantha")) mode = SERVER;
+        else if (!strcmp(name, "use-ipv6")) cn.useIPV6 = true;
         else ok = false;
       } else {
         for (int j = 1; arg[j] != '\0'; ++j) {

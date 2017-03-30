@@ -308,7 +308,7 @@ void x801::game::Client::sendChatMessage(const char* message) {
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
-  textureView->getTexture("textures/terrain/terrain-0.png");
+  textureView->getTexture("textures/terrain/blocks.png");
 }
 
 void x801::game::Client::processFilehostURIResponse(
@@ -320,7 +320,7 @@ void x801::game::Client::processFilehostURIResponse(
   patcher = new Patcher(readStringFromBitstream16S(input));
   patcher->startFetchThread();
   textureView = new TextureView(patcher);
-  textureView->getTexture("textures/terrain/terrain-0.png");
+  textureView->getTexture("textures/terrain/blocks.png");
 }
 
 static const char* statusMessages[] = {
