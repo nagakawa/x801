@@ -32,12 +32,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace map {
+    // This is used to check collisions.
     enum HitboxType {
       HITBOX_NONE = 0,
       HITBOX_FULL = 1,
       HITBOX_TOP_HALF = 2,
       HITBOX_BOTTOM_HALF = 3,
     };
+    // Fun fact:
+    // dir ^ 1 gives the direction opposite of the one provided.
+    // dir1 ^ dir2 is 1 iff dir1 is the opposite direction as dir2.
     enum Direction {
       UP = 0,
       DOWN,
@@ -46,13 +50,28 @@ namespace x801 {
       EAST,
       WEST
     };
+    // XYZ are represented as follows:
+    // 0 represents the center of the block.
+    // +/- 64 represents 0.5 block units.
+    // This gives a precision of 1/128 of a block unit.
     struct VertexXYZ {
       int8_t x, y, z;
     };
+    // UV are represented as follows:
+    // 0 is the left (top) of a single texture.
+    // 128 is the right (bottom) edge.
+    // index is the index of the vertex in the `vertices` array.
     struct VertexIUV {
       uint16_t index;
       uint8_t u, v;
     };
+    // `vertices` stores the three vertices of a face.
+    // `texture` is the index to the `textures` array in a ModelApplication.
+    // `occlusionFlags`:
+    // for i in 0 to 5:
+    // bit i is set iff this face should be occluded if there is a block in
+    // direction i that is opaque in the (i ^ 1)-direction
+    // bit 6 is set iff this face is partially transparent
     struct Face {
       VertexIUV vertices[3];
       uint8_t texture;
@@ -62,12 +81,19 @@ namespace x801 {
     public:
       ModelFunction(std::istream& fh);
       void write(std::ostream& fh);
+      // hitbox type (see above)
       uint16_t hitboxType;
+      // bit i is set iff this block is opaque in direction i
       uint8_t opacityFlags;
+      // number of texture parameters this model function takes
       uint8_t textureCount;
+      // vertices
       std::vector<VertexXYZ> vertices;
+      // faces
       std::vector<Face> faces;
     };
+    // Stores some number of models.
+    // Think of it as a glorified vector<ModelFunction>.
     class ModelFunctionIndex {
     public:
       ModelFunctionIndex(std::istream& fh);
@@ -76,13 +102,19 @@ namespace x801 {
       int error;
       x801::base::Version version;
     };
+    // Describes a block model plus the textures to apply to it.
     class ModelApplication {
     public:
       ModelApplication(std::istream& fh);
       void write(std::ostream& fh);
+      // The index of the model function to use from the MFI.
       uint32_t modfnum;
+      // The textures to use. These are extracted from
+      // blocks.png.
       std::vector<uint32_t> textures;
     };
+    // Stores some number of applications.
+    // Think of it as a glorified vector<ModelApplication>.
     class ModelApplicationIndex {
     public:
       ModelApplicationIndex(std::istream& fh);
