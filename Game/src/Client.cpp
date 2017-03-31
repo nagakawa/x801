@@ -320,7 +320,6 @@ void x801::game::Client::processFilehostURIResponse(
   patcher = new Patcher(readStringFromBitstream16S(input));
   patcher->startFetchThread();
   textureView = new TextureView(patcher);
-  textureView->getTexture("textures/terrain/blocks.png");
 }
 
 static const char* statusMessages[] = {

@@ -252,8 +252,8 @@ void x801::game::Patcher::startFetchThread() {
   auto cback = [this]() {
     while (!this->done) {
       std::string fname;
-      files.wait_dequeue(fname);
-      fetchFile(fname.c_str());
+      bool stat = files.try_dequeue(fname);
+      if (stat) fetchFile(fname.c_str());
     }
   };
   fetchThread = std::thread(cback);
