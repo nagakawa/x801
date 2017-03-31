@@ -76,5 +76,20 @@ namespace x801 {
       int error;
       x801::base::Version version;
     };
+    class ModelApplication {
+    public:
+      ModelApplication(std::istream& fh);
+      void write(std::ostream& fh);
+      uint32_t modfnum;
+      std::vector<uint32_t> textures;
+    };
+    class ModelApplicationIndex {
+    public:
+      ModelApplicationIndex(std::istream& fh);
+      void write(std::ostream& fh);
+      std::vector<ModelApplication> applications;
+      int error;
+      x801::base::Version version;
+    };
   }
 }

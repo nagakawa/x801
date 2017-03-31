@@ -85,7 +85,7 @@ void x801::map::ModelFunction::write(std::ostream& fh) {
 
 x801::map::ModelFunctionIndex::ModelFunctionIndex(std::istream& fh) {
   int header = x801::base::readInt<uint32_t>(fh);
-  if (header != 0x46444d58L) { // XMap
+  if (header != 0x46444d58L) { // XMDF
     error = MODERR_NOT_A_MODEL;
   }
   version = x801::base::Version(fh);
@@ -101,5 +101,43 @@ void x801::map::ModelFunctionIndex::write(std::ostream& fh) {
   x801::base::writeInt<uint32_t>(fh, models.size());
   for (size_t i = 0; i < models.size(); ++i) {
     models[i].write(fh);
+  }
+}
+
+x801::map::ModelApplication::ModelApplication(std::istream& fh) {
+  modfnum = x801::base::readInt<uint32_t>(fh);
+  char c;
+  fh.get(c);
+  uint8_t numTextures = (uint8_t) c;
+  for (size_t i = 0; i < numTextures; ++i)
+    textures.push_back(x801::base::readInt<uint32_t>(fh));
+}
+
+void x801::map::ModelApplication::write(std::ostream& fh) {
+  x801::base::writeInt<uint32_t>(fh, modfnum);
+  if (textures.size() >= 256) throw "too many texture parameters";
+  fh.put((char) textures.size());
+  for (uint32_t t : textures)
+    x801::base::writeInt<uint32_t>(fh, t);
+}
+
+x801::map::ModelApplicationIndex::ModelApplicationIndex(std::istream& fh) {
+  int header = x801::base::readInt<uint32_t>(fh);
+  if (header != 0x41444d58L) { // XMDA
+    error = MODERR_NOT_A_MODEL;
+  }
+  version = x801::base::Version(fh);
+  uint32_t count = x801::base::readInt<uint32_t>(fh);
+  for (size_t i = 0; i < count; ++i) {
+    applications.emplace_back(fh);
+  }
+}
+
+void x801::map::ModelApplicationIndex::write(std::ostream& fh) {
+  x801::base::writeInt<uint32_t>(fh, 0x41444d58L);
+  x801::base::engineVersion.write(fh);
+  x801::base::writeInt<uint32_t>(fh, applications.size());
+  for (size_t i = 0; i < applications.size(); ++i) {
+    applications[i].write(fh);
   }
 }
