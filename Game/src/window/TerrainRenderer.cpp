@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <assert.h>
+#include <utility>
 
 using namespace x801::game;
 
@@ -43,10 +44,42 @@ x801::map::Chunk* x801::game::TerrainRenderer::getChunk(const x801::map::ChunkXY
   return &(it->second);
 }
 
-x801::game::ChunkMeshBuffer::ChunkMeshBuffer(const x801::map::ChunkXYZ& xyz, TerrainRenderer* tr) {
-  this->xyz = xyz;
-  this->tr = tr;
-  chunk = tr->getChunk(xyz);
+ChunkMeshBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& pos) {
+  auto it = cmbs.find(pos);
+  if (it != cmbs.end()) return &(it->second);
+  x801::map::Chunk* chunk = getChunk(pos);
+  if (chunk == nullptr) return nullptr;
+  auto it2 = cmbs.emplace(
+    std::piecewise_construct,
+    std::forward_as_tuple(pos),
+    std::forward_as_tuple(pos, this, chunk)
+  );
+  auto res = &(it2.first->second);
+  res->createMesh();
+  res->setUpRender(false);
+  res->setUpRender(true);
+  return res;
+}
+
+static const int RADIUS = 5;
+
+void x801::game::TerrainRenderer::draw() {
+  fbo.setActive();
+  int cx = gs->selfPosition.x;
+  int cy = gs->selfPosition.y;
+  int cz = gs->selfPosition.z;
+  for (int ix = -RADIUS; ix < RADIUS; ++ix) {
+    for (int iy = -RADIUS; iy < RADIUS; ++iy) {
+      for (int iz = -RADIUS; iz < RADIUS; ++iz) {
+        x801::map::ChunkXYZ c = { cx + ix, cy + iy, cz + iz };
+        ChunkMeshBuffer* cmb = summon(c);
+        if (cmb != nullptr) {
+          cmb->render(false);
+          cmb->render(true);
+        }
+      }
+    }
+  }
 }
 
 void x801::game::ChunkMeshBuffer::createMesh() {

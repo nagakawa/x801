@@ -65,15 +65,17 @@ namespace x801 {
     public:
       ChunkMeshBuffer(
           const x801::map::ChunkXYZ& xyz,
-          TerrainRenderer* tr);
+          TerrainRenderer* tr,
+          x801::map::Chunk* chunk) :
+          xyz(xyz), tr(tr), chunk(chunk) {}
       void createMesh();
       void setUpRender(bool layer);
       void render(bool layer);
     private:
       void addBlock(size_t lx, size_t ly, size_t lz);
-      x801::map::Chunk* chunk;
       x801::map::ChunkXYZ xyz;
       TerrainRenderer* tr;
+      x801::map::Chunk* chunk;
       std::vector<CMVertex> opaqueVertices;
       std::vector<CMVertex> transparentVertices;
       agl::VBO vbo[2];
@@ -87,6 +89,8 @@ namespace x801 {
     class TerrainRenderer {
     public:
       TerrainRenderer(ClientWindow* cw);
+      void draw();
+      ChunkMeshBuffer* summon(const x801::map::ChunkXYZ& pos);
       ClientWindow* cw;
       Client* c;
       Patcher* p;
