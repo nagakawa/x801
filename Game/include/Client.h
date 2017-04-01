@@ -70,6 +70,7 @@ namespace x801 {
       std::thread& getListenThread() { return listenThread; }
       std::string getUsername(uint32_t id);
       bool getServerAddress(RakNet::SystemAddress& out) const;
+      void setDebug(bool d) { debug = d; }
     private:
       void initialise();
       bool handlePacket(
@@ -136,6 +137,7 @@ namespace x801 {
       Patcher* patcher = nullptr;
       TextureView* textureView = nullptr;
       ModelView* modelView = nullptr;
+      bool debug = false;
       friend class ClientWindow;
       friend class TerrainRenderer;
     };
