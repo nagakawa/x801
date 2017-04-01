@@ -86,7 +86,10 @@ namespace x801 {
       }
       void addPlayer(uint32_t id);
       void removePlayer(uint32_t id);
-      x801::map::Area* getArea() { return area; }
+      std::shared_ptr<x801::map::Area> getArea() { return area; }
+      void setArea(std::shared_ptr<x801::map::Area> a) {
+        area = a;
+      }
       // Mutex to make sure multiple threads aren't mutating
       // the set of players in this area simultaneously.
       // This is public so users of the class can use the mutex to
@@ -98,7 +101,7 @@ namespace x801 {
       // Unsure whether this is needed, since ClientGameState can hold
       // only one AreaWithPlayers.
       ClientGameState* cg = nullptr;
-      x801::map::Area* area = nullptr;
+      std::shared_ptr<x801::map::Area> area = nullptr;
       friend class Client;
       friend class Server;
       friend class GameState;

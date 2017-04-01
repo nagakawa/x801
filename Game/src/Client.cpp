@@ -323,6 +323,7 @@ void x801::game::Client::processFilehostURIResponse(
   patcher->startFetchThread();
   textureView = new TextureView(patcher);
   modelView = new ModelView(patcher);
+  mapView = new MapView(patcher);
 }
 
 static const char* statusMessages[] = {

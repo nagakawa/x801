@@ -42,6 +42,9 @@ x801::game::Patcher::Patcher(std::string u) {
   }
   curl = curl_easy_init();
   if (curl == nullptr) throw "Could not initialise CURL";
+#ifndef NDEBUG
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, true);
+#endif
   std::string urishadow = u;
   std::cout << urishadow.c_str() << '\n';
   size_t index = urishadow.find("://") + 3;
@@ -214,6 +217,7 @@ static size_t patcherWriteFunction(char *ptr, size_t size, size_t nmemb, void *u
 }
 
 void x801::game::Patcher::refetchFile(const char* fname, uint32_t version) {
+  std::lock_guard<std::mutex> lock(mutex);
   std::stringstream ss;
   curl_easy_setopt(curl, CURLOPT_URL, (uri + "/content?fname=" + fname).c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
@@ -225,13 +229,19 @@ void x801::game::Patcher::refetchFile(const char* fname, uint32_t version) {
 }
 
 uint32_t x801::game::Patcher::getVersionFromServer(const char* fname) {
+  std::lock_guard<std::mutex> lock(mutex);
   std::stringstream ss;
   curl_easy_setopt(curl, CURLOPT_URL, (uri + "/version?fname=" + fname).c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &ss);
   CURLcode res = curl_easy_perform(curl);
   if (res != CURLE_OK) return -1;
+  long responseCode;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+  //std::cerr << "*** File " << fname << " ***\n";
+  //std::cerr << "Response code: " << responseCode << "\n";
   std::string s = ss.str();
+  //std::cerr << "Contents: " << s << "\n";
   return std::stoul(s);
 }
 
@@ -253,7 +263,11 @@ void x801::game::Patcher::startFetchThread() {
     while (!this->done) {
       std::string fname;
       bool stat = files.try_dequeue(fname);
-      if (stat) fetchFile(fname.c_str());
+      if (stat) {
+        std::cerr << "Fetching file " << fname << "!\n";
+        fetchFile(fname.c_str());
+        std::cerr << "Done fetching file " << fname << "!\n";
+      }
     }
   };
   fetchThread = std::thread(cback);

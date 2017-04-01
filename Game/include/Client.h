@@ -40,6 +40,7 @@ namespace x801 {
 #include "packet.h"
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
+#include "window/patcher_views/MapView.h"
 #include "window/patcher_views/ModelView.h"
 #include "window/patcher_views/TextureView.h"
 
@@ -137,6 +138,7 @@ namespace x801 {
       Patcher* patcher = nullptr;
       TextureView* textureView = nullptr;
       ModelView* modelView = nullptr;
+      MapView* mapView = nullptr;
       bool debug = false;
       friend class ClientWindow;
       friend class TerrainRenderer;

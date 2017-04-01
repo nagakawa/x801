@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <mutex>
 #include <thread>
 #include <curl/curl.h>
 #include <sqlite3.h>
@@ -84,6 +85,7 @@ namespace x801 {
         uint32_t version);
       void refetchFile(const char* fname, uint32_t version);
       uint32_t getVersionFromServer(const char* fname);
+      std::mutex mutex;
     };
   }
 }

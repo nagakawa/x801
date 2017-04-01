@@ -39,7 +39,6 @@ void x801::game::AreaWithPlayers::removePlayer(uint32_t id) {
 }
 
 x801::game::AreaWithPlayers::~AreaWithPlayers() {
-  delete area;
 }
 
 LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {

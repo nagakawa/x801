@@ -36,7 +36,14 @@
     "cstdarg": "cpp",
     "cwchar": "cpp",
     "typeinfo": "cpp",
-    "*.tcc": "cpp"
+    "*.tcc": "cpp",
+    "iostream": "cpp",
+    "hash_map": "cpp",
+    "hash_set": "cpp",
+    "deque": "cpp",
+    "list": "cpp",
+    "vector": "cpp",
+    "slist": "cpp"
   },
   "python.linting.pylintEnabled": false
 }

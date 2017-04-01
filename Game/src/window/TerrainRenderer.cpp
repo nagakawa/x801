@@ -41,8 +41,12 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
 }
 
 x801::map::Chunk* x801::game::TerrainRenderer::getChunk(const x801::map::ChunkXYZ& pos) {
-  x801::map::Area* a = gs->currentArea.getArea();
-  assert(a != nullptr);
+  std::shared_ptr<x801::map::Area> a = gs->currentArea.getArea();
+  if (a == nullptr) {
+    // Request area
+    gs->currentArea.setArea(c->mapView->getArea(gs->selfPosition.areaID));
+    if (a == nullptr) return nullptr;
+  }
   x801::map::TileSec& ts = a->getTileSec();
   auto it = ts.getChunks().find(pos);
   if (it == ts.getChunks().end()) return nullptr;
