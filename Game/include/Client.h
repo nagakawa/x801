@@ -135,6 +135,7 @@ namespace x801 {
       Patcher* patcher = nullptr;
       TextureView* textureView = nullptr;
       friend class ClientWindow;
+      friend class TerrainRenderer;
     };
   }
 }

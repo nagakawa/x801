@@ -21,33 +21,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
-#include <boost/thread/shared_mutex.hpp>
 
 #include <Texture.h>
 
-namespace x801 {
-  namespace game {
-    class TextureView;
-  }
-}
-#include "window/Patcher.h"
+#include <Model.h>
 
 namespace x801 {
   namespace game {
-    class TextureView {
+    class ModelView;
+  }
+}
+
+#include "window/Patcher.h"
+#include "window/patcher_views/TextureView.h"
+
+namespace x801 {
+  namespace game {
+    class ModelView {
     public:
-      TextureView(Patcher* underlying) : underlying(underlying) {}
-      agl::Texture* getTexture(const std::string& name);
+      ModelView(Patcher* underlying) : underlying(underlying) {}
+      ~ModelView() {
+        delete[] mai; delete[] mfi;
+      }
+      x801::map::ModelApplicationIndex* getMAI();
+      x801::map::ModelFunctionIndex* getMFI();
     private:
       Patcher* underlying;
-      mutable boost::shared_mutex mapMutex;
-      std::unordered_map<std::string, agl::Texture> textures;
+      x801::map::ModelApplicationIndex* mai = nullptr;
+      x801::map::ModelFunctionIndex* mfi = nullptr;
+      mutable std::mutex m1, m2;
+      //std::unordered_map<std::string, agl::Texture> textures;
     };
-    inline void bindTextureFromPointer(agl::Texture* t) {
-      if (t != nullptr) t->bind();
-      else glBindTexture(GL_TEXTURE_2D, 0);
-    }
   }
 }

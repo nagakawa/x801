@@ -28,12 +28,12 @@ agl::Texture* x801::game::TextureView::getTexture(const std::string& name) {
   boost::shared_lock<boost::shared_mutex> guard(mapMutex);
   auto iterator = textures.find(name);
   if (iterator != textures.end()) return &(iterator->second);
+  underlying->fetchFile(name.c_str());
   uint32_t version, contentLength;
   uint8_t* contents = nullptr;
   bool status = underlying->getFileEntry(
     name.c_str(),
-    version, contentLength,
-    contents
+    version, contentLength, contents
   );
   if (status) {
     textures.emplace(

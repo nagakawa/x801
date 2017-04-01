@@ -86,6 +86,7 @@ namespace x801 {
       }
       void addPlayer(uint32_t id);
       void removePlayer(uint32_t id);
+      x801::map::Area* getArea() { return area; }
       // Mutex to make sure multiple threads aren't mutating
       // the set of players in this area simultaneously.
       // This is public so users of the class can use the mutex to
@@ -220,6 +221,7 @@ namespace x801 {
       uint32_t myID = 0;
       friend class Client;
       friend class ClientWindow;
+      friend class TerrainRenderer;
     };
   }
 }

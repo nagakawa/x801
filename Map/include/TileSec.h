@@ -75,6 +75,9 @@ namespace x801 {
       void setBlock(const BlockXYZ& xyz, Block b);
       void createChunk(const ChunkXYZ& xyz);
       void createChunk(std::istream& fh);
+      std::map<ChunkXYZ, Chunk>& getChunks() {
+        return chunks;
+      }
     private:
       std::map<ChunkXYZ, Chunk> chunks;
       //int layerCount;

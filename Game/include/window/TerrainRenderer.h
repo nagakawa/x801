@@ -21,33 +21,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
-#include <string>
-#include <unordered_map>
-#include <boost/thread/shared_mutex.hpp>
+#include <FBO.h>
 
-#include <Texture.h>
+#include <Area.h>
+#include <Chunk.h>
 
-namespace x801 {
-  namespace game {
-    class TextureView;
-  }
-}
+#include "Client.h"
+#include "GameState.h"
+#include "window/ClientWindow.h"
 #include "window/Patcher.h"
+#include "window/patcher_views/TextureView.h"
 
 namespace x801 {
   namespace game {
-    class TextureView {
+    class TerrainRenderer;
+    class ChunkMeshBuffer {
     public:
-      TextureView(Patcher* underlying) : underlying(underlying) {}
-      agl::Texture* getTexture(const std::string& name);
+      ChunkMeshBuffer(
+          const x801::map::ChunkXYZ& xyz,
+          TerrainRenderer* tr) :
+        xyz(xyz), tr(tr) {}
     private:
-      Patcher* underlying;
-      mutable boost::shared_mutex mapMutex;
-      std::unordered_map<std::string, agl::Texture> textures;
+      x801::map::ChunkXYZ xyz;
+      TerrainRenderer* tr;
     };
-    inline void bindTextureFromPointer(agl::Texture* t) {
-      if (t != nullptr) t->bind();
-      else glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    class TerrainRenderer {
+    public:
+      TerrainRenderer(ClientWindow* cw);
+      ClientWindow* cw;
+      Client* c;
+      Patcher* p;
+      TextureView* tv;
+      ClientGameState* gs;
+      agl::FBO fbo;
+    private:
+      std::unordered_map<
+          x801::map::ChunkXYZ,
+          ChunkMeshBuffer,
+          x801::map::ChunkHasher> cmbs;
+      x801::map::Chunk* getChunk(const x801::map::ChunkXYZ& pos);
+    };
   }
 }

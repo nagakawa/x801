@@ -29,8 +29,10 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/Location.cpp
   ${PROJECT_SOURCE_DIR}/window/ClientWindow.cpp
   ${PROJECT_SOURCE_DIR}/window/ChatWindow.cpp
+  ${PROJECT_SOURCE_DIR}/window/TerrainRenderer.cpp
   ${PROJECT_SOURCE_DIR}/window/Patcher.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/TextureView.cpp
+  ${PROJECT_SOURCE_DIR}/window/patcher_views/ModelView.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})
