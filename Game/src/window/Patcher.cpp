@@ -238,6 +238,7 @@ uint32_t x801::game::Patcher::getVersionFromServer(const char* fname) {
   if (res != CURLE_OK) return -1;
   long responseCode;
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+  if (responseCode != 200) return -1;
   //std::cerr << "*** File " << fname << " ***\n";
   //std::cerr << "Response code: " << responseCode << "\n";
   std::string s = ss.str();

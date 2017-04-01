@@ -58,12 +58,13 @@ ChunkMeshBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& 
   if (it != cmbs.end()) return &(it->second);
   x801::map::Chunk* chunk = getChunk(pos);
   if (chunk == nullptr) return nullptr;
-  auto it2 = cmbs.emplace(
+  cmbs.emplace(
     std::piecewise_construct,
     std::forward_as_tuple(pos),
     std::forward_as_tuple(pos, this, chunk)
   );
-  auto res = &(it2.first->second);
+  auto it2 = cmbs.find(pos);
+  auto res = &(it2->second);
   res->createMesh();
   res->setUpRender(false);
   res->setUpRender(true);
@@ -73,12 +74,13 @@ ChunkMeshBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& 
 static const int RADIUS = 5;
 
 void x801::game::TerrainRenderer::draw() {
+  size_t rendered = 0;
   fboMS->setActive();
 	glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  int cx = gs->selfPosition.x;
-  int cy = gs->selfPosition.y;
-  int cz = gs->selfPosition.z;
+  int cx = (int) gs->selfPosition.x >> 4;
+  int cy = (int) gs->selfPosition.y >> 4;
+  int cz = (int) gs->selfPosition.z >> 4;
   for (int ix = -RADIUS; ix < RADIUS; ++ix) {
     for (int iy = -RADIUS; iy < RADIUS; ++iy) {
       for (int iz = -RADIUS; iz < RADIUS; ++iz) {
@@ -87,10 +89,15 @@ void x801::game::TerrainRenderer::draw() {
         if (cmb != nullptr) {
           cmb->render(false);
           cmb->render(true);
+          ++rendered;
         }
       }
     }
   }
+  (void) rendered;
+#ifndef NDEBUG
+  std::cerr << rendered << " chunks rendered\n";
+#endif
 }
 
 void x801::game::ChunkMeshBuffer::createMesh() {
@@ -166,8 +173,8 @@ static const char* VERTEX_SOURCE =
   // How many times taller the texture is than wide.
   "uniform float dim; \n"
   "void main() { \n"
-  "  gl_Position = mvp * vec4(position / 128.0 + offset, 1); \n"
-  "  TexCoord = vec2(texCoord.x, 1.0f - texCoord.y / dim); \n"
+  "  gl_Position = mvp * vec4(position / 128.0, 1); \n"
+  "  TexCoord = vec2(u / 128.0, 1.0f - v / (dim * 128.0)); \n"
   "} \n"
   ;
 
@@ -177,7 +184,8 @@ static const char* FRAGMENT_SOURCE =
   "out vec4 colour; \n"
   "uniform sampler2D tex; \n"
   "void main() { \n"
-  "  colour = texture(tex, TexCoord) \n"
+  //"  colour = texture(tex, TexCoord); \n"
+  "  colour = vec4(0.3f, 1.0f, 0.7f, 1.0f); \n"
   "} \n"
   ;
 

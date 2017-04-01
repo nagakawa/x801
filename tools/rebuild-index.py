@@ -9,7 +9,7 @@ index = {}
 
 try:
   stream = open("assets/index.json")
-  index = json.loads(stream.readall())
+  index = json.loads(stream.read())
 except Exception:
   pass
 

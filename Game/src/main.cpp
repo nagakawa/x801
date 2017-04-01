@@ -64,11 +64,17 @@ int lmain(int argc, char** argv) {
   if (c.mode == CLIENT) {
     curl_global_init(CURL_GLOBAL_ALL);
     std::cout << "You intend to connect to a server.\n";
-    std::string username, password; 
-    std::cout << "Username: ";
-    std::cin >> username;
+    std::string username, password;
+    if (c.username.length() != 0) username = c.username;
+    else {
+      std::cout << "Username: ";
+      std::cin >> username;
+    }
+    if (c.password.length() != 0) password = c.password;
+    else {
     std::cout << "Password: ";
-    std::cin >> password;
+      std::cin >> password;
+    }
     Credentials cred(username, password);
     Client client(c.ip, c.port, c.useIPV6);
     client.login(cred);
@@ -90,6 +96,11 @@ const char* x801::game::USAGE =
   "  --server <port> (-s): start a server\n"
   "  -d (--debug): for clients, enable OpenGL live debugging\n"
   "    (requires OpenGL 4.5 or later)\n"
+  "  --username <username>: pass in username from command line\n"
+  "  --password <password>: pass in password from command line\n"
+  "    The above two options are intended for compatibility with\n"
+  "    graphical debuggers such as bugle and are not recommended\n"
+  "    for actually playing the game.\n"
   ;
 
 int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
@@ -121,6 +132,20 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
         else if (!strcmp(name, "server") || !strcmp(name, "samantha")) mode = SERVER;
         else if (!strcmp(name, "use-ipv6")) cn.useIPV6 = true;
         else if (!strcmp(name, "debug")) cn.debug = true;
+        else if (!strcmp(name, "username")) {
+          if (i == argc - 1) ok = false;
+          else {
+            cn.username = argv[i + 1];
+            ++i;
+          }
+        }
+        else if (!strcmp(name, "password")) {
+          if (i == argc - 1) ok = false;
+          else {
+            cn.password = argv[i + 1];
+            ++i;
+          }
+        }
         else ok = false;
       } else {
         for (int j = 1; arg[j] != '\0'; ++j) {
