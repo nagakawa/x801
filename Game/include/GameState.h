@@ -222,6 +222,7 @@ namespace x801 {
       friend class Client;
       friend class ClientWindow;
       friend class TerrainRenderer;
+      friend class ChunkMeshBuffer;
     };
   }
 }

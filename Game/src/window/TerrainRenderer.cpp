@@ -119,7 +119,6 @@ static const char* VERTEX_SOURCE =
   "layout (location = 2) in uint v; \n"
   "out vec2 TexCoord; \n"
   "uniform mat4 mvp; \n"
-  "uniform vec3 offset; \n"
   // How many times taller the texture is than wide.
   "uniform float dim; \n"
   "void main() { \n"
@@ -161,6 +160,10 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
+  program->use();
+  tr->tex->bindTo(0);
+  SETUNSP(program[layer], 1i, "tex", 0);
+  SETUNSP(program[layer], 1f, "dim", ((float) tr->tex->getHeight()) / tr->tex->getWidth());
 #ifndef NDEBUG
   setup[layer] = true;
 #endif
@@ -179,7 +182,33 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   }
   vao->setActive();
   program->use();
-  tr->tex->bindTo(0);
-  SETUNSP(program[layer], 1i, "tex", 0);
-  SETUNSP(program[layer], 1f, "dim", ((float) tr->tex->getHeight()) / tr->tex->getWidth());
+  glm::mat4 mvp;
+  mvp = glm::translate(
+    mvp,
+    glm::vec3(
+      xyz.x * -16.0f,
+      xyz.y * -16.0f,
+      xyz.z * -16.0f
+    )
+  );
+  const auto& selfPos = tr->gs->selfPosition;
+  float theta = selfPos.rot;
+  // Centre on player
+  mvp = glm::translate(
+    mvp,
+    glm::vec3(
+      -selfPos.x,
+      -selfPos.y,
+      -selfPos.z
+    )
+  );
+  // Rotate by theta clockwise
+  mvp = glm::rotate(mvp, -theta, glm::vec3(0.0f, 0.0f, 1.0f));
+  // Rotate 30 degrees backward
+  mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+  float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
+  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, 1.0f));
+  SETUNSPM(program[layer], 4fv, "mvp", glm::value_ptr(mvp));
+  size_t count = layer ? transparentVertices.size() : opaqueVertices.size();
+  glDrawArrays(GL_TRIANGLES, 0, count);
 }
