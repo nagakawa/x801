@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <GLFWApplication.h>
+#include <Sprite2D.h>
 namespace x801 {
   namespace game {
     class ClientWindow;
@@ -30,6 +31,7 @@ namespace x801 {
 }
 #include "Client.h"
 #include "window/ChatWindow.h"
+#include "window/TerrainRenderer.h"
 
 namespace x801 {
   namespace game {
@@ -49,6 +51,8 @@ namespace x801 {
       Client* c;
     private:
       ChatWindow* chat = nullptr;
+      TerrainRenderer* tr = nullptr;
+      agl::Sprite2D* terrain;
     };
   }
 }

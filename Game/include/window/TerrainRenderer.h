@@ -43,6 +43,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <Chunk.h>
 #include <Model.h>
 
+namespace x801 {
+  namespace game {
+    class ClientWindow;
+    class TerrainRenderer;
+  }
+}
 #include "Client.h"
 #include "GameState.h"
 #include "window/ClientWindow.h"
@@ -52,7 +58,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    class TerrainRenderer;
     struct CMVertex {
       // The vertex coordinates are chunk-local and are expressed
       // as signed 9.7's.
@@ -99,7 +104,10 @@ namespace x801 {
       std::shared_ptr<agl::Texture> tex;
       x801::map::ModelApplicationIndex* mai;
       x801::map::ModelFunctionIndex* mfi;
-      agl::FBO fbo;
+      std::shared_ptr<agl::FBO> fboMS;
+      std::shared_ptr<agl::FBO> fboSS;
+      std::shared_ptr<agl::Texture> fboTex;
+      std::shared_ptr<agl::Texture> fboTexMS;
     private:
       std::unordered_map<
           x801::map::ChunkXYZ,

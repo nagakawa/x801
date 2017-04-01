@@ -33,6 +33,11 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
   mai = mv->getMAI();
   mfi = mv->getMFI();
   assert(cw != nullptr && c != nullptr && p != nullptr && tv != nullptr && gs != nullptr && tex != nullptr);
+  agl::FBOTexMS ft = agl::makeFBOForMeMS(1280, 960);
+  fboTex = ft.ss.texture;
+  fboTexMS = ft.ms.texture;
+  fboSS = ft.ss.fbo;
+  fboMS = ft.ms.fbo;
 }
 
 x801::map::Chunk* x801::game::TerrainRenderer::getChunk(const x801::map::ChunkXYZ& pos) {
@@ -64,7 +69,9 @@ ChunkMeshBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& 
 static const int RADIUS = 5;
 
 void x801::game::TerrainRenderer::draw() {
-  fbo.setActive();
+  fboMS->setActive();
+	glClearColor(0.5f, 0.7f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   int cx = gs->selfPosition.x;
   int cy = gs->selfPosition.y;
   int cz = gs->selfPosition.z;

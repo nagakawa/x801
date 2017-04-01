@@ -50,6 +50,14 @@ void x801::game::ClientWindow::initialise() {
   //io.Fonts->AddFontFromFileTTF("/home/uruwi/kiloji/kiloji_p.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
   io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
   chat = new ChatWindow(this);
+  tr = new TerrainRenderer(this);
+  terrain = new agl::Sprite2D(tr->fboTex);
+  terrain->setApp(this);
+  terrain->addSprite({
+    0, 0, 1280, 960,
+    0, 0, 1280, 960
+  });
+  terrain->setUp();
 }
 
 static const int keycodes[] = {
@@ -62,6 +70,10 @@ static const int keycodes[] = {
 static const int keycodeCount = sizeof(keycodes) / sizeof(keycodes[0]);
 
 void x801::game::ClientWindow::tick() {
+  tr->draw();
+  tr->fboMS->blitTo(*(tr->fboSS), 1280, 960);
+  agl::setDefaultFBOAsActive();
+  terrain->tick();
   //RakNet::TimeUS t1 = RakNet::GetTimeUS();
   if (c->isDone() || glfwWindowShouldClose(underlying())) {
     glfwSetWindowShouldClose(underlying(), true);
