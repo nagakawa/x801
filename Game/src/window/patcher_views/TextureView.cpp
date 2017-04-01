@@ -24,10 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
-agl::Texture* x801::game::TextureView::getTexture(const std::string& name) {
+std::shared_ptr<agl::Texture> x801::game::TextureView::getTexture(const std::string& name) {
   boost::shared_lock<boost::shared_mutex> guard(mapMutex);
   auto iterator = textures.find(name);
-  if (iterator != textures.end()) return &(iterator->second);
+  if (iterator != textures.end())
+    return iterator->second;
   underlying->fetchFile(name.c_str());
   uint32_t version, contentLength;
   uint8_t* contents = nullptr;
@@ -36,12 +37,11 @@ agl::Texture* x801::game::TextureView::getTexture(const std::string& name) {
     version, contentLength, contents
   );
   if (status) {
-    textures.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(name),
-      std::forward_as_tuple(contents, (int) contentLength)
+    std::shared_ptr<agl::Texture> tex = std::make_shared<agl::Texture>(
+      contents, (int) contentLength
     );
-    return &(textures[name]);
+    textures[name] = std::move(tex);
+    return textures[name];
   } else {
     std::cerr << "Requesting file " << name << "\n";
     underlying->requestFile(name.c_str());

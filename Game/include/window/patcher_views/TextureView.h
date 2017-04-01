@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <boost/thread/shared_mutex.hpp>
@@ -39,11 +40,11 @@ namespace x801 {
     class TextureView {
     public:
       TextureView(Patcher* underlying) : underlying(underlying) {}
-      agl::Texture* getTexture(const std::string& name);
+      std::shared_ptr<agl::Texture> getTexture(const std::string& name);
     private:
       Patcher* underlying;
       mutable boost::shared_mutex mapMutex;
-      std::unordered_map<std::string, agl::Texture> textures;
+      std::unordered_map<std::string, std::shared_ptr<agl::Texture>> textures;
     };
     inline void bindTextureFromPointer(agl::Texture* t) {
       if (t != nullptr) t->bind();

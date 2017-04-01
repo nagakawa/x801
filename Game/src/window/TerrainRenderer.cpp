@@ -27,10 +27,11 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
   p = c->patcher;
   tv = c->textureView;
   gs = &(c->g);
+  tex = std::move(tv->getTexture("textures/terrain/blocks.png"));
   ModelView* mv = c->modelView;
   mai = mv->getMAI();
   mfi = mv->getMFI();
-  assert(cw != nullptr && c != nullptr && p != nullptr && tv != nullptr && gs != nullptr);
+  assert(cw != nullptr && c != nullptr && p != nullptr && tv != nullptr && gs != nullptr && tex != nullptr);
 }
 
 x801::map::Chunk* x801::game::TerrainRenderer::getChunk(const x801::map::ChunkXYZ& pos) {
@@ -46,6 +47,16 @@ x801::game::ChunkMeshBuffer::ChunkMeshBuffer(const x801::map::ChunkXYZ& xyz, Ter
   this->xyz = xyz;
   this->tr = tr;
   chunk = tr->getChunk(xyz);
+}
+
+void x801::game::ChunkMeshBuffer::createMesh() {
+  vertices.clear();
+  for (size_t lx = 0; lx < 16; ++lx) {
+    for (size_t ly = 0; ly < 16; ++ly) {
+      for (size_t lz = 0; lz < 16; ++lz)
+        addBlock(lx, ly, lz);
+    }
+  }
 }
 
 void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
