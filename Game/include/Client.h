@@ -40,6 +40,7 @@ namespace x801 {
 #include "packet.h"
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
+#include "window/patcher_views/ModelView.h"
 #include "window/patcher_views/TextureView.h"
 
 namespace x801 {
@@ -134,6 +135,7 @@ namespace x801 {
       RakNet::Time drift = 0;
       Patcher* patcher = nullptr;
       TextureView* textureView = nullptr;
+      ModelView* modelView = nullptr;
       friend class ClientWindow;
       friend class TerrainRenderer;
     };

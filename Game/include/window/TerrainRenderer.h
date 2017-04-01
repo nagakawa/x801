@@ -21,29 +21,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <stdint.h>
+
 #include <FBO.h>
 
 #include <Area.h>
 #include <Chunk.h>
+#include <Model.h>
 
 #include "Client.h"
 #include "GameState.h"
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
+#include "window/patcher_views/ModelView.h"
 #include "window/patcher_views/TextureView.h"
 
 namespace x801 {
   namespace game {
     class TerrainRenderer;
+    struct CMVertex {
+      // The vertex coordinates are chunk-local and are expressed
+      // as signed 9.7's.
+      int16_t x, y, z;
+      uint8_t u;
+      uint32_t v;
+    };
     class ChunkMeshBuffer {
     public:
       ChunkMeshBuffer(
           const x801::map::ChunkXYZ& xyz,
-          TerrainRenderer* tr) :
-        xyz(xyz), tr(tr) {}
+          TerrainRenderer* tr);
     private:
+      void addBlock(size_t lx, size_t ly, size_t lz);
+      x801::map::Chunk* chunk;
       x801::map::ChunkXYZ xyz;
       TerrainRenderer* tr;
+      std::vector<CMVertex> vertices;
+      friend class TerrainRenderer;
     };
     class TerrainRenderer {
     public:
@@ -53,6 +67,8 @@ namespace x801 {
       Patcher* p;
       TextureView* tv;
       ClientGameState* gs;
+      x801::map::ModelApplicationIndex* mai;
+      x801::map::ModelFunctionIndex* mfi;
       agl::FBO fbo;
     private:
       std::unordered_map<
@@ -60,6 +76,7 @@ namespace x801 {
           ChunkMeshBuffer,
           x801::map::ChunkHasher> cmbs;
       x801::map::Chunk* getChunk(const x801::map::ChunkXYZ& pos);
+      friend class ChunkMeshBuffer;
     };
   }
 }

@@ -309,6 +309,8 @@ void x801::game::Client::sendChatMessage(const char* message) {
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
   textureView->getTexture("textures/terrain/blocks.png");
+  modelView->getMAI();
+  modelView->getMFI();
 }
 
 void x801::game::Client::processFilehostURIResponse(
@@ -320,6 +322,7 @@ void x801::game::Client::processFilehostURIResponse(
   patcher = new Patcher(readStringFromBitstream16S(input));
   patcher->startFetchThread();
   textureView = new TextureView(patcher);
+  modelView = new ModelView(patcher);
 }
 
 static const char* statusMessages[] = {
@@ -493,4 +496,6 @@ x801::game::Client::~Client() {
   delete[] publicKey;
   delete[] cookie;
   delete patcher;
+  delete textureView;
+  delete modelView;
 }
