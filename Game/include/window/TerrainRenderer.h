@@ -25,8 +25,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <memory>
 
+#define GLEW_STATIC
+#include <GL/glew.h>
+
+#include <EBO.h>
 #include <FBO.h>
+#include <Shader.h>
+#include <ShaderProgram.h>
 #include <Texture.h>
+#include <VAO.h>
+#include <VBO.h>
 
 #include <Area.h>
 #include <Chunk.h>
@@ -49,18 +57,28 @@ namespace x801 {
       uint8_t u;
       uint32_t v;
     };
+    static_assert(offsetof(CMVertex, x) + 2 == offsetof(CMVertex, y) && offsetof(CMVertex, y) + 2 == offsetof(CMVertex, z), "Basic offset checks");
     class ChunkMeshBuffer {
     public:
       ChunkMeshBuffer(
           const x801::map::ChunkXYZ& xyz,
           TerrainRenderer* tr);
       void createMesh();
+      void setUpRender(bool layer);
+      void render(bool layer);
     private:
       void addBlock(size_t lx, size_t ly, size_t lz);
       x801::map::Chunk* chunk;
       x801::map::ChunkXYZ xyz;
       TerrainRenderer* tr;
-      std::vector<CMVertex> vertices;
+      std::vector<CMVertex> opaqueVertices;
+      std::vector<CMVertex> transparentVertices;
+      agl::VBO vbo[2];
+      agl::VAO vao[2];
+      agl::ShaderProgram program[2];
+#ifndef NDEBUG
+      bool setup[2] = {false, false};
+#endif
       friend class TerrainRenderer;
     };
     class TerrainRenderer {
