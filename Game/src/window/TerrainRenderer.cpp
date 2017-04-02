@@ -174,7 +174,7 @@ static const char* VERTEX_SOURCE =
   "uniform float dim; \n"
   "void main() { \n"
   "  gl_Position = mvp * vec4(position / 128.0, 1); \n"
-  "  TexCoord = vec2(u / 128.0, 1.0f - v / (dim * 128.0)); \n"
+  "  TexCoord = vec2(u / 128.0, v / (dim * 128.0)); \n"
   "} \n"
   ;
 
@@ -184,8 +184,8 @@ static const char* FRAGMENT_SOURCE =
   "out vec4 colour; \n"
   "uniform sampler2D tex; \n"
   "void main() { \n"
-  //"  colour = texture(tex, TexCoord); \n"
-  "  colour = vec4(0.3f, 1.0f, 0.7f, 1.0f); \n"
+  "  colour = texture(tex, TexCoord); \n"
+  //"  colour = vec4(TexCoord.x * 0.0f, TexCoord.y * 8.0f, 0.0f, 1.0f); \n"
   "} \n"
   ;
 
@@ -221,7 +221,7 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
 #endif
 }
 
-void x801::game::ChunkMeshBuffer::render(bool layer) {
+void x801::game::ChunkMeshBuffer::render(bool layer) {1
 #ifndef NDEBUG
   if (!setup[layer])
     throw "ChunkMeshBuffer: render() called before setUpRender()";
@@ -232,8 +232,8 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
   }
-  vao->setActive();
-  program->use();
+  vao[layer].setActive();
+  program[layer].use();
   glm::mat4 mvp;
   mvp = glm::translate(
     mvp,
@@ -257,9 +257,9 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   // Rotate by theta clockwise
   mvp = glm::rotate(mvp, -theta, glm::vec3(0.0f, 0.0f, 1.0f));
   // Rotate 30 degrees backward
-  mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+  //mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
   float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
-  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, 1.0f));
+  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, 1.0f) / 8.0f);
   SETUNSPM(program[layer], 4fv, "mvp", glm::value_ptr(mvp));
   size_t count = layer ? transparentVertices.size() : opaqueVertices.size();
   glDrawArrays(GL_TRIANGLES, 0, count);

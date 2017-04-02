@@ -32,7 +32,7 @@ Vertex4: "npp" 0 1
 Occlusion: "up"
 =Quad bottom
 Texture: "bottom"
-Vertex1: "pnn" 0 1
+Vertex1: "pnn" 0 0
 Vertex2: "nnn" 1 0
 Vertex3: "npn" 1 1
 Vertex4: "ppn" 0 1

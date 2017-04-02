@@ -60,6 +60,13 @@ void x801::game::ClientWindow::initialise() {
     0, 0, 1280, 960
   });
   terrain->setUp();
+  fuck = new agl::Sprite2D(tr->tex);
+  fuck->setApp(this);
+  fuck->addSprite({
+    0, 0, (float) tr->tex->getWidth(), (float) tr->tex->getHeight(),
+    0, 0, (float) tr->tex->getWidth(), (float) tr->tex->getHeight(),
+  });
+  fuck->setUp();
 }
 
 static const int keycodes[] = {
@@ -72,10 +79,6 @@ static const int keycodes[] = {
 static const int keycodeCount = sizeof(keycodes) / sizeof(keycodes[0]);
 
 void x801::game::ClientWindow::tick() {
-  tr->draw();
-  tr->fboMS->blitTo(*(tr->fboSS), 1280, 960);
-  agl::setDefaultFBOAsActive();
-  terrain->tick();
   //RakNet::TimeUS t1 = RakNet::GetTimeUS();
   if (c->isDone() || glfwWindowShouldClose(underlying())) {
     glfwSetWindowShouldClose(underlying(), true);
@@ -92,6 +95,11 @@ void x801::game::ClientWindow::tick() {
   ImGui_ImplGlfwGL3_NewFrame();
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+  tr->draw();
+  tr->fboMS->blitTo(*(tr->fboSS), 1280, 960);
+  agl::setDefaultFBOAsActive();
+  terrain->tick();
+  fuck->tick();
   chat->render();
   ImGui::Begin("Basic info");
   ImGui::TextWrapped("FPS: %.2f", getFPS());
@@ -137,4 +145,7 @@ void x801::game::ClientWindow::onMouse(double xpos, double ypos) {
 x801::game::ClientWindow::~ClientWindow() {
   ImGui_ImplGlfwGL3_Shutdown();
   delete chat;
+  delete tr;
+  delete terrain;
+  delete fuck;
 }

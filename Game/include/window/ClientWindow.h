@@ -53,6 +53,7 @@ namespace x801 {
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;
       agl::Sprite2D* terrain;
+      agl::Sprite2D* fuck;
     };
   }
 }
