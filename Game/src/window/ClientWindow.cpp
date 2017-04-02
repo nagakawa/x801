@@ -38,6 +38,8 @@ static void customKeyCallback(
 	else if (action == GLFW_RELEASE) agl::currentApp->resetKey(key);
 }
 
+static const ImWchar range[] = { 0x20, 0xFFFF, 0 };
+
 void x801::game::ClientWindow::initialise() {
   std::cerr << "x801::game::ClientWindow::initialise();\n";
   glfwSetInputMode(underlying(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -48,7 +50,7 @@ void x801::game::ClientWindow::initialise() {
   ImGui_ImplGlfwGL3_Init(underlying(), false);
   ImGuiIO& io = ImGui::GetIO();
   //io.Fonts->AddFontFromFileTTF("/home/uruwi/kiloji/kiloji_p.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-  io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+  io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, range);
   chat = new ChatWindow(this);
   tr = new TerrainRenderer(this);
   terrain = new agl::Sprite2D(tr->fboTex);
