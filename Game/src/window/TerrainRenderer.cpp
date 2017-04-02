@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <assert.h>
+#include <chrono>
 #include <utility>
+
+#include <imgui.h>
 
 using namespace x801::game;
 
@@ -221,7 +224,7 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
 #endif
 }
 
-void x801::game::ChunkMeshBuffer::render(bool layer) {1
+void x801::game::ChunkMeshBuffer::render(bool layer) {
 #ifndef NDEBUG
   if (!setup[layer])
     throw "ChunkMeshBuffer: render() called before setUpRender()";
@@ -243,7 +246,7 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {1
       xyz.z * -16.0f
     )
   );
-  const auto& selfPos = tr->gs->selfPosition;
+  const auto selfPos = tr->gs->selfPosition;
   float theta = selfPos.rot;
   // Centre on player
   mvp = glm::translate(
@@ -254,8 +257,15 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {1
       -selfPos.z
     )
   );
+  bool isChatWindowOpen = ImGui::Begin("Basic info");
+  if (isChatWindowOpen) {
+    ImGui::TextWrapped("Self theta: %f", (double) theta);
+  }
+  ImGui::End();
   // Rotate by theta clockwise
   mvp = glm::rotate(mvp, -theta, glm::vec3(0.0f, 0.0f, 1.0f));
+  // mvp = glm::rotate(mvp, (float) (-0.8 * glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+  // (void) theta;
   // Rotate 30 degrees backward
   //mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
   float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();

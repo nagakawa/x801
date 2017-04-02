@@ -387,8 +387,8 @@ void x801::game::Client::processMovement(
   auto it = g.playersByID.find(g.myID);
   if (it != g.playersByID.end()) {
     g.selfPosition = g.playersByID[g.myID].getLocation();
-    g.locationMutex.unlock_shared();
   }
+  g.locationMutex.unlock_shared();
   g.fastForwardSelf(t);
 }
 
