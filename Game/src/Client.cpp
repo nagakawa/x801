@@ -383,6 +383,7 @@ void x801::game::Client::processMovement(
     l.rot = 2 * M_PI * tfix / (65536.0f * 65536.0f);
     // std::cerr << playerID << " " <<  xfix << " " << yfix << " " << tfix << '\n';
   }
+  g.selfPositionMutex.lock();
   g.locationMutex.lock_shared();
   auto it = g.playersByID.find(g.myID);
   if (it != g.playersByID.end()) {
@@ -390,6 +391,7 @@ void x801::game::Client::processMovement(
   }
   g.locationMutex.unlock_shared();
   g.fastForwardSelf(t);
+  g.selfPositionMutex.unlock();
 }
 
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {

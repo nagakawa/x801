@@ -37,7 +37,7 @@ namespace x801 {
       float x, y, z, rot;
       // Used by both the client (for position prediction) and
       // the server.
-      void applyKeyInput(KeyInput input, RakNet::Time last);
+      bool applyKeyInput(KeyInput input, RakNet::Time last);
     };
   }
 }

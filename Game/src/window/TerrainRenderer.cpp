@@ -177,7 +177,9 @@ static const char* VERTEX_SOURCE =
   "uniform float dim; \n"
   "void main() { \n"
   "  gl_Position = mvp * vec4(position / 128.0, 1); \n"
-  "  TexCoord = vec2(u / 128.0, v / (dim * 128.0)); \n"
+  // Shift texcoords north by 0.5 pixels
+  "  float bias = 0.1 / 32;\n"
+  "  TexCoord = vec2(u / 128.0, v / (dim * 128.0) - bias / dim); \n"
   "} \n"
   ;
 
@@ -219,6 +221,8 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
   tr->tex->bindTo(0);
   SETUNSP(program[layer], 1i, "tex", 0);
   SETUNSP(program[layer], 1f, "dim", ((float) tr->tex->getHeight()) / tr->tex->getWidth());
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 #ifndef NDEBUG
   setup[layer] = true;
 #endif
@@ -246,7 +250,9 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
       xyz.z * -16.0f
     )
   );
+  tr->gs->selfPositionMutex.lock();
   const auto selfPos = tr->gs->selfPosition;
+  tr->gs->selfPositionMutex.unlock();
   float theta = selfPos.rot;
   // Centre on player
   mvp = glm::translate(
@@ -259,7 +265,7 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   );
   bool isChatWindowOpen = ImGui::Begin("Basic info");
   if (isChatWindowOpen) {
-    ImGui::TextWrapped("Self theta: %f", (double) theta);
+    //ImGui::TextWrapped("Self theta: %f", (double) theta);
   }
   ImGui::End();
   // Rotate by theta clockwise

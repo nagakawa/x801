@@ -211,6 +211,7 @@ namespace x801 {
       // safely iterate over all elements of a map.
       mutable boost::shared_mutex lookupMutex;
       mutable boost::shared_mutex locationMutex;
+      mutable std::mutex selfPositionMutex;
       //mutable boost::shared_mutex keyHistoryMutex;
     private:
       AreaWithPlayers currentArea;

@@ -130,8 +130,8 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
   RakNet::Time tp = t;
   selfPosition = playersByID[myID].getLocation();
   for (size_t i = 0; i < size; ++i) {
-    selfPosition.applyKeyInput(history[i], tp);
-    tp = history[i].time;
+    bool stat = selfPosition.applyKeyInput(history[i], tp);
+    if (stat) tp = history[i].time;
   }
   lastTime = t;
 }
