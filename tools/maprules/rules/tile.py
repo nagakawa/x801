@@ -57,14 +57,14 @@ class TileSec:
       self.chunks[x >> 4, y >> 4, z >> 4] = chunk
   def put(self, x, y, z, b):
     if b == "air": self.putn(x, y, z, 0)
-    else: self.putn(x, y, z, self.table[b])
+    else: self.putn(x, y, z, self.table[b] + 1)
   def write(self, output):
     chunks = self.chunks.values()
     writeInt(output, len(chunks), 2)
     for c in chunks:
       c.write(output)
   def fill(self, x1, y1, z1, x2, y2, z2, t):
-    n = self.table[t] if t != "air" else 0
+    n = self.table[t] + 1 if t != "air" else 0
     for x in range(x1, x2 + 1):
       for y in range(y1, y2 + 1):
         for z in range(z1, z2 + 1):

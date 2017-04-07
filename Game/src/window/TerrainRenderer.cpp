@@ -231,11 +231,13 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   if (!setup[layer])
     throw "ChunkMeshBuffer: render() called before setUpRender()";
 #endif
+  glEnable(GL_DEPTH_TEST);
   if (layer) {
     glEnable(GL_BLEND);
+    glDepthMask(false);
   } else {
     glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
+    glDepthMask(true);
   }
   vao[layer].setActive();
   program[layer].use();
@@ -261,11 +263,13 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
       -selfPos.z
     )
   );
+  /*
   bool isChatWindowOpen = ImGui::Begin("Basic info");
   if (isChatWindowOpen) {
     //ImGui::TextWrapped("Self theta: %f", (double) theta);
   }
   ImGui::End();
+  */
   // Rotate by theta clockwise
   mvp = glm::rotate(mvp, -theta, glm::vec3(0.0f, 0.0f, 1.0f));
   // mvp = glm::rotate(mvp, (float) (-0.8 * glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -273,7 +277,9 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   // Rotate 30 degrees backward
   mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
   float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
-  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, 1.0f) / 8.0f);
+  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, -1.0f) / 8.0f);
+  // Orthographic
+  mvp *= glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1000.0f, 1000.0f);
   SETUNSPM(program[layer], 4fv, "mvp", glm::value_ptr(mvp));
   size_t count = layer ? transparentVertices.size() : opaqueVertices.size();
   glDrawArrays(GL_TRIANGLES, 0, count);
