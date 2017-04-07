@@ -6,6 +6,7 @@ import array
 import fparser
 import io
 import maprules
+import readtable
 import zlib
 
 def writeInt(f, n, b):
@@ -17,6 +18,8 @@ version = bytes.fromhex("00 00 00 00 01 00 00 00")
 parser = argparse.ArgumentParser(description='Compile a map for Experiment801.')
 parser.add_argument('source', metavar='source', type=str, nargs=1,
     help='the source path')
+parser.add_argument('table', metavar='table', type=str, nargs=1,
+    help='the path to the texture table')
 parser.add_argument('destination', metavar='destination', type=str, nargs=1,
     help='the destination path')
 parser.add_argument('--level', metavar='L', type=int, nargs='?',
@@ -25,6 +28,7 @@ parser.add_argument('--level', metavar='L', type=int, nargs='?',
 args = parser.parse_args()
 source = open(args.source[0], "r")
 dest = open(args.destination[0], "wb")
+table = readtable.read(args.table[0])
 level = args.level if args.level else -1
 
 header, sections, dsCount = fparser.parse(source)
@@ -41,7 +45,7 @@ for name, seclist in sections.items():
     if len(bname) != 4:
       fparser.error("Section names must be 4 bytes long. You put" + name)
     dest.write(bname)
-    buf = maprules.handlers[name](sec)
+    buf = maprules.handlers[name](sec, table=table)
     usize = len(buf)
     cbuf = zlib.compress(buf, level)
     csize = len(cbuf)

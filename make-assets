@@ -13,9 +13,9 @@ all: maps terrain models
 
 maps: $(call substDirList,asset-src/maps,msf,map)
 
-assets/maps/%.map: asset-src/maps/%.msf
+assets/maps/%.map: asset-src/maps/%.msf models
 	mkdir -p assets/maps
-	python3 tools/compile-map.py --level=9 $< $@
+	python3 tools/compile-map.py --level=9 $< asset-temp/models/applications.tab $@
 
 terrain: assets/textures/terrain/blocks.png
 
