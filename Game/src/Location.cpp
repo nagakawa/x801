@@ -29,8 +29,7 @@ using namespace x801::game;
 bool x801::game::Location::applyKeyInput(KeyInput input, RakNet::Time last) {
   uint32_t inputs = input.inputs;
   if (inputs == 0) return true;
-  if (input.time <= last) return false;
-  float delta = (input.time - last) / 1000.0f;
+  float delta = ((ssize_t) input.time - (ssize_t) last) / 1000.0f;
   int isMovingForward = (inputs & (1 << K_OFFSET_FORWARD)) != 0;
   int isMovingBack = (inputs & (1 << K_OFFSET_BACK)) != 0;
   int isTurningLeft = (inputs & (1 << K_OFFSET_LEFT)) != 0;

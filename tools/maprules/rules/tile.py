@@ -85,6 +85,7 @@ def export_TIL3(sec):
   codess = sec["Code"]
   for codes in codess:
     for code in codes:
+      print(code)
       exec(code, {**yourfuncs, "_": tiles})
   tiles.write(output)
   return output.getvalue()

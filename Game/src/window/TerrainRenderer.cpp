@@ -177,9 +177,7 @@ static const char* VERTEX_SOURCE =
   "uniform float dim; \n"
   "void main() { \n"
   "  gl_Position = mvp * vec4(position / 128.0, 1); \n"
-  // Shift texcoords north by 0.5 pixels
-  "  float bias = 0.1 / 32;\n"
-  "  TexCoord = vec2(u / 128.0, v / (dim * 128.0) - bias / dim); \n"
+  "  TexCoord = vec2(u / 128.0, v / (dim * 128.0)); \n"
   "} \n"
   ;
 
@@ -219,10 +217,10 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
   glEnableVertexAttribArray(2);
   program->use();
   tr->tex->bindTo(0);
-  SETUNSP(program[layer], 1i, "tex", 0);
-  SETUNSP(program[layer], 1f, "dim", ((float) tr->tex->getHeight()) / tr->tex->getWidth());
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  SETUNSP(program[layer], 1i, "tex", 0);
+  SETUNSP(program[layer], 1f, "dim", ((float) tr->tex->getHeight()) / tr->tex->getWidth());
 #ifndef NDEBUG
   setup[layer] = true;
 #endif
@@ -245,9 +243,9 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   mvp = glm::translate(
     mvp,
     glm::vec3(
-      xyz.x * -16.0f,
-      xyz.y * -16.0f,
-      xyz.z * -16.0f
+      xyz.x * 16.0f,
+      xyz.y * 16.0f,
+      xyz.z * 16.0f
     )
   );
   tr->gs->selfPositionMutex.lock();
@@ -273,7 +271,7 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   // mvp = glm::rotate(mvp, (float) (-0.8 * glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
   // (void) theta;
   // Rotate 30 degrees backward
-  //mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+  mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
   float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
   mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, 1.0f) / 8.0f);
   SETUNSPM(program[layer], 4fv, "mvp", glm::value_ptr(mvp));
