@@ -51,6 +51,7 @@ namespace x801 {
 }
 #include "Client.h"
 #include "GameState.h"
+#include "window/Axes.h"
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
 #include "window/patcher_views/ModelView.h"
@@ -108,6 +109,9 @@ namespace x801 {
       std::shared_ptr<agl::FBO> fboSS;
       std::shared_ptr<agl::Texture> fboTex;
       std::shared_ptr<agl::Texture> fboTexMS;
+#ifndef NDEBUG
+      Axes axes;
+#endif
     private:
       std::unordered_map<
           x801::map::ChunkXYZ,

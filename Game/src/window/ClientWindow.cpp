@@ -94,7 +94,7 @@ void x801::game::ClientWindow::tick() {
   c->g.history.pushBack(ki);
   ImGui_ImplGlfwGL3_NewFrame();
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   tr->draw();
   tr->fboMS->blitTo(*(tr->fboSS), 1280, 960);
   agl::setDefaultFBOAsActive();

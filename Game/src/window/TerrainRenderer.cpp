@@ -41,6 +41,10 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
   fboTexMS = ft.ms.texture;
   fboSS = ft.ss.fbo;
   fboMS = ft.ms.fbo;
+#ifndef NDEBUG
+  axes.setUpRender();
+  axes.setScale(100);
+#endif
 }
 
 x801::map::Chunk* x801::game::TerrainRenderer::getChunk(const x801::map::ChunkXYZ& pos) {
@@ -99,7 +103,8 @@ void x801::game::TerrainRenderer::draw() {
   }
   (void) rendered;
 #ifndef NDEBUG
-  std::cerr << rendered << " chunks rendered\n";
+  //std::cerr << rendered << " chunks rendered\n";
+  axes.render();
 #endif
 }
 
@@ -173,11 +178,12 @@ static const char* VERTEX_SOURCE =
   "layout (location = 2) in uint v; \n"
   "out vec2 TexCoord; \n"
   "uniform mat4 mvp; \n"
+  "uniform vec3 offset;"
   // How many times taller the texture is than wide.
   "uniform float dim; \n"
   "void main() { \n"
-  "  gl_Position = mvp * vec4(position / 128.0, 1); \n"
-  "  TexCoord = vec2(u / 128.0, v / (dim * 128.0)); \n"
+  "  gl_Position = mvp * vec4(position / 128.0f + offset, 1.0f); \n"
+  "  TexCoord = vec2(u / 128.0f, v / (dim * 128.0f)); \n"
   "} \n"
   ;
 
@@ -215,7 +221,7 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
-  program->use();
+  program[layer].use();
   tr->tex->bindTo(0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -234,26 +240,30 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   glEnable(GL_DEPTH_TEST);
   if (layer) {
     glEnable(GL_BLEND);
-    glDepthMask(false);
+    //glDepthMask(false);
   } else {
     glDisable(GL_BLEND);
-    glDepthMask(true);
+    //glDepthMask(true);
   }
+  //glDisable(GL_DEPTH_TEST);
   vao[layer].setActive();
   program[layer].use();
   glm::mat4 mvp;
-  mvp = glm::translate(
-    mvp,
-    glm::vec3(
-      xyz.x * 16.0f,
-      xyz.y * 16.0f,
-      xyz.z * 16.0f
-    )
+  glm::vec3 offset(
+    xyz.x * 16.0f,
+    xyz.y * 16.0f,
+    xyz.z * 16.0f
   );
   tr->gs->selfPositionMutex.lock();
   const auto selfPos = tr->gs->selfPosition;
   tr->gs->selfPositionMutex.unlock();
   float theta = selfPos.rot;
+  float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
+  // I don't know why I have to multiply the y by -1, but it works.
+  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, -1.0f, -1.0f) / 8.0f);
+  // Rotate 30 degrees backwards
+  mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+  mvp = glm::rotate(mvp, glm::radians(90.0f) - theta, glm::vec3(0.0f, 0.0f, 1.0f));
   // Centre on player
   mvp = glm::translate(
     mvp,
@@ -271,16 +281,17 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   ImGui::End();
   */
   // Rotate by theta clockwise
-  mvp = glm::rotate(mvp, -theta, glm::vec3(0.0f, 0.0f, 1.0f));
   // mvp = glm::rotate(mvp, (float) (-0.8 * glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
   // (void) theta;
   // Rotate 30 degrees backward
-  mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-  float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
-  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, -1.0f) / 8.0f);
+  //mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
   // Orthographic
-  mvp *= glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1000.0f, 1000.0f);
+  // mvp *= glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1000.0f, 1000.0f);
+#ifndef NDEBUG
+  tr->axes.setMVP(mvp);
+#endif
   SETUNSPM(program[layer], 4fv, "mvp", glm::value_ptr(mvp));
+  SETUNSPV(program[layer], 3fv, "offset", glm::value_ptr(offset));
   size_t count = layer ? transparentVertices.size() : opaqueVertices.size();
   glDrawArrays(GL_TRIANGLES, 0, count);
 }
