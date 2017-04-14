@@ -178,12 +178,10 @@ static const char* VERTEX_SOURCE =
   "layout (location = 2) in uint v; \n"
   "out vec2 TexCoord; \n"
   "uniform mat4 mvp; \n"
-  "uniform vec3 offset;"
-  // How many times taller the texture is than wide.
-  "uniform float dim; \n"
+  "uniform vec3 offset; \n"
   "void main() { \n"
   "  gl_Position = mvp * vec4(position / 128.0f + offset, 1.0f); \n"
-  "  TexCoord = vec2(u / 128.0f, v / (dim * 128.0f)); \n"
+  "  TexCoord = vec2(u / 128.0f, v / 128.0f); \n"
   "} \n"
   ;
 
@@ -192,8 +190,21 @@ static const char* FRAGMENT_SOURCE =
   "in vec2 TexCoord; \n"
   "out vec4 colour; \n"
   "uniform sampler2D tex; \n"
+  // How many times taller the texture is than wide.
+  "uniform float dim; \n"
   "void main() { \n"
-  "  colour = texture(tex, TexCoord); \n"
+#if 0
+  "  float ypx = 32 * TexCoord.y; \n"
+  "  int ypxn = int(floor(ypx)); \n"
+  "  float ypxnn = ((ypxn % 32) == 31) ? ypxn + 32 : ypxn; \n"
+  "  vec2 nearestNorth = vec2(TexCoord.x, ypxnn / (32 * dim)); \n"
+  "  int ypxs = int(floor(ypx)) + 1; \n"
+  "  float ypxsn = ((ypxs % 32) == 0) ? ypxs - 32 : ypxs; \n"
+  "  vec2 nearestSouth = vec2(TexCoord.x, ypxsn / (32 * dim)); \n"
+  "  float grad = fract(ypx); \n"
+  "  colour = /*((ypxn % 32) == 31) ? vec4(0.0f, 0.0f, 0.0f, 1.0f) :*/ mix(texture(tex, nearestNorth), texture(tex, nearestSouth), grad); \n"
+#endif
+  "colour = texture(tex, vec2(TexCoord.x, TexCoord.y / dim)); \n"
   //"  colour = vec4(TexCoord.x * 0.0f, TexCoord.y * 8.0f, 0.0f, 1.0f); \n"
   "} \n"
   ;
@@ -240,10 +251,9 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   glEnable(GL_DEPTH_TEST);
   if (layer) {
     glEnable(GL_BLEND);
-    //glDepthMask(false);
+    glDepthMask(false);
   } else {
     glDisable(GL_BLEND);
-    //glDepthMask(true);
   }
   //glDisable(GL_DEPTH_TEST);
   vao[layer].setActive();
@@ -294,4 +304,5 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   SETUNSPV(program[layer], 3fv, "offset", glm::value_ptr(offset));
   size_t count = layer ? transparentVertices.size() : opaqueVertices.size();
   glDrawArrays(GL_TRIANGLES, 0, count);
+  if (layer) glDepthMask(true);
 }

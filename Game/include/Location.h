@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace game {
     // blocks per second
-    const float PLAYER_SPEED = 2.5f;
+    const float PLAYER_SPEED = 4.5f;
     // radians per second
     const float PLAYER_ANGULAR_VELOCITY = 1.73f;
     struct Location {
