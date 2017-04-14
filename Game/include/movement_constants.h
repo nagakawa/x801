@@ -21,19 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
-#include <stdint.h>
-#include <RakNetTypes.h>
-#include <QualifiedAreaID.h>
-#include "KeyInput.h"
 
 namespace x801 {
   namespace game {
-    struct Location {
-      x801::map::QualifiedAreaID areaID;
-      float x, y, z, rot;
-      // Used by both the client (for position prediction) and
-      // the server.
-      bool applyKeyInput(KeyInput input, RakNet::Time last);
-    };
+    // blocks per second
+    constexpr float PLAYER_SPEED = 4.5f;
+    // radians per second
+    constexpr float PLAYER_ANGULAR_VELOCITY = 1.73f;
   }
 }

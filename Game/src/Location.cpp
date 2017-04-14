@@ -25,6 +25,8 @@ using namespace x801::game;
 #include <math.h>
 #include <iostream>
 
+#include "movement_constants.h"
+
 // TODO: support passing a reference to a map and use collision detection.
 bool x801::game::Location::applyKeyInput(KeyInput input, RakNet::Time last) {
   uint32_t inputs = input.inputs;
