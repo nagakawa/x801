@@ -117,6 +117,7 @@ void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
 void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
   // Find the first (backmost) element in the queue greater than or
   // equal to t, using binary search.
+  historyMutex.lock_shared();
   size_t start = 0;
   size_t end = history.size();
   while (end - start > 1) {
@@ -125,13 +126,22 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
     if (t < midTime) end = mid;
     else start = mid;
   }
+  historyMutex.unlock_shared();
+  historyMutex.lock();
   history.popFront(start);
+  historyMutex.unlock();
+  historyMutex.lock_shared();
   size_t size = history.size();
+  // Replay key inputs starting from this element.
   RakNet::Time tp = t;
   selfPosition = playersByID[myID].getLocation();
   for (size_t i = 0; i < size; ++i) {
     bool stat = selfPosition.applyKeyInput(history[i], tp);
     if (stat) tp = history[i].time;
   }
+  RakNet::Time present = RakNet::GetTime();
+  KeyInput last = { present, history[size - 1].inputs };
+  selfPosition.applyKeyInput(last, tp);
   lastTime = t;
+  historyMutex.unlock_shared();
 }

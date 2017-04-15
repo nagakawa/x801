@@ -91,7 +91,9 @@ void x801::game::ClientWindow::tick() {
   RakNet::Time t = RakNet::GetTime();
   KeyInput ki = { t, inputs };
   c->sendKeyInput(ki);
+  c->g.historyMutex.lock();
   c->g.history.pushBack(ki);
+  c->g.historyMutex.unlock();
   ImGui_ImplGlfwGL3_NewFrame();
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -102,7 +104,14 @@ void x801::game::ClientWindow::tick() {
   fuck->tick();
   chat->render();
   ImGui::Begin("Basic info");
-  ImGui::TextWrapped("FPS: %.2f", getFPS());
+  curr = (curr + 1) % FTIMES_TO_STORE;
+  ftimes[curr] = 1000.0f / getFPS();
+  ImGui::TextWrapped("FPS: %.2f", getRollingFPS());
+  ImGui::PlotLines(
+    "Frame times\n(0 to 100)",
+    ftimes, FTIMES_TO_STORE, curr + 1,
+    "hi", 0.0f, 100.0f, ImVec2(0, 200)
+  );
   std::stringstream s;
   s << "User ID: ";
   s << c->g.getID();

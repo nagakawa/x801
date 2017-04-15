@@ -54,6 +54,9 @@ namespace x801 {
       TerrainRenderer* tr = nullptr;
       agl::Sprite2D* terrain;
       agl::Sprite2D* fuck;
+      static constexpr size_t FTIMES_TO_STORE = 128;
+      float ftimes[FTIMES_TO_STORE];
+      size_t curr;
     };
   }
 }

@@ -78,7 +78,7 @@ ChunkMeshBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& 
   return res;
 }
 
-static const int RADIUS = 5;
+static constexpr int RADIUS = 2;
 
 void x801::game::TerrainRenderer::draw() {
   size_t rendered = 0;
@@ -88,9 +88,9 @@ void x801::game::TerrainRenderer::draw() {
   int cx = (int) gs->selfPosition.x >> 4;
   int cy = (int) gs->selfPosition.y >> 4;
   int cz = (int) gs->selfPosition.z >> 4;
-  for (int ix = -RADIUS; ix < RADIUS; ++ix) {
-    for (int iy = -RADIUS; iy < RADIUS; ++iy) {
-      for (int iz = -RADIUS; iz < RADIUS; ++iz) {
+  for (int ix = -RADIUS; ix <= RADIUS; ++ix) {
+    for (int iy = -RADIUS; iy <= RADIUS; ++iy) {
+      for (int iz = -RADIUS; iz <= RADIUS; ++iz) {
         x801::map::ChunkXYZ c = { cx + ix, cy + iy, cz + iz };
         ChunkMeshBuffer* cmb = summon(c);
         if (cmb != nullptr) {

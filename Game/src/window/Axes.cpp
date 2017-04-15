@@ -58,7 +58,7 @@ static const char* VERTEX_SOURCE =
   "uniform vec3 myPos; \n"
   "uniform float scale; \n"
   "void main() { \n"
-  "  gl_Position = mvp * vec4(position + myPos, 1.0f); \n"
+  "  gl_Position = mvp * (scale * vec4(position + myPos, 1.0f)); \n"
   "  outColour = inColour; \n"
   "} \n"
   ;
@@ -67,7 +67,6 @@ static const char* FRAGMENT_SOURCE =
   "#version 330 core \n"
   "in vec3 outColour; \n"
   "out vec4 colour; \n"
-  "uniform sampler2D tex; \n"
   "void main() { \n"
   "  colour = vec4(outColour, 1.0f); \n"
   "} \n"

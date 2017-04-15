@@ -211,6 +211,7 @@ namespace x801 {
       // safely iterate over all elements of a map.
       mutable boost::shared_mutex lookupMutex;
       mutable boost::shared_mutex locationMutex;
+      mutable boost::shared_mutex historyMutex;
       mutable std::mutex selfPositionMutex;
       //mutable boost::shared_mutex keyHistoryMutex;
     private:
@@ -219,7 +220,7 @@ namespace x801 {
       std::unordered_map<std::string, uint32_t> idsByUsername;
       std::unordered_set<uint32_t> alreadyRequestedIDs;
       std::unordered_map<uint32_t, Player> playersByID;
-      x801::base::ConcurrentCircularQueue<KeyInput> history;
+      x801::base::CircularQueue<KeyInput> history;
       Location selfPosition;
       RakNet::Time lastTime = RakNet::GetTime();
       uint32_t myID = 0;
