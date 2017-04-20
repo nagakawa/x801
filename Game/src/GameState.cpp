@@ -128,20 +128,30 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
   }
   historyMutex.unlock_shared();
   historyMutex.lock();
-  history.popFront(start);
+  history.popFront(end);
   historyMutex.unlock();
   historyMutex.lock_shared();
   size_t size = history.size();
   // Replay key inputs starting from this element.
   RakNet::Time tp = t;
   selfPosition = playersByID[myID].getLocation();
+  //std::cout << "Fast-forwarding: ";
   for (size_t i = 0; i < size; ++i) {
+    //std::cout << "{" << selfPosition.x << ", " << selfPosition.y << ", " << selfPosition.z << ", " << selfPosition.rot << "} ";
+    //std::cout << i << "[" << history[i].inputs << ", " << (ssize_t) (history[i].time - tp) << "] ";
     bool stat = selfPosition.applyKeyInput(history[i], tp);
     if (stat) tp = history[i].time;
   }
+  //std::cout << "{" << selfPosition.x << ", " << selfPosition.y << ", " << selfPosition.z << ", " << selfPosition.rot << "} ";
+  //std::cout << "\n";
   RakNet::Time present = RakNet::GetTime();
   KeyInput last = { present, history[size - 1].inputs };
   selfPosition.applyKeyInput(last, tp);
-  lastTime = t;
+  lastTimeServer = t;
   historyMutex.unlock_shared();
+}
+
+void x801::game::ClientGameState::fastForwardSelfClient(const KeyInput& ki) {
+  selfPosition.applyKeyInput(ki, lastTimeClient);
+  lastTimeClient = ki.time;
 }

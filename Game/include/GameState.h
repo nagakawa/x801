@@ -203,6 +203,7 @@ namespace x801 {
       // and compensate for latency. Discard all key inputs before
       // the specified time.
       void fastForwardSelf(RakNet::Time t);
+      void fastForwardSelfClient(const KeyInput& ki);
       // Mutex to make sure multiple threads aren't changing
       // player maps simultaneously.
       // This is public so the client can add multiple ID-username
@@ -222,7 +223,8 @@ namespace x801 {
       std::unordered_map<uint32_t, Player> playersByID;
       x801::base::CircularQueue<KeyInput> history;
       Location selfPosition;
-      RakNet::Time lastTime = RakNet::GetTime();
+      RakNet::Time lastTimeServer = RakNet::GetTime();
+      RakNet::Time lastTimeClient = RakNet::GetTime();
       uint32_t myID = 0;
       friend class Client;
       friend class ClientWindow;

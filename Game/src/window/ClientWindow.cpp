@@ -88,12 +88,13 @@ void x801::game::ClientWindow::tick() {
   for (int i = 0; i < keycodeCount; ++i) {
     if (testKey(keycodes[i])) inputs |= (1 << i);
   }
+  c->g.historyMutex.lock();
   RakNet::Time t = RakNet::GetTime();
   KeyInput ki = { t, inputs };
-  c->sendKeyInput(ki);
-  c->g.historyMutex.lock();
   c->g.history.pushBack(ki);
   c->g.historyMutex.unlock();
+  c->g.fastForwardSelfClient(ki);
+  c->sendKeyInput(ki);
   ImGui_ImplGlfwGL3_NewFrame();
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
