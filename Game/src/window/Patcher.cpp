@@ -92,13 +92,15 @@ static const char* CREATE_FILE_TABLE_QUERY =
   "  filesByName ON Files (fname);"
   ;
 
+static const char* DEFAULT_ERROR = "patcher default error";
+
 void x801::game::Patcher::createFileTable() {
-  char* errMessage;
+  const char* errMessage = DEFAULT_ERROR;
   int stat = sqlite3_exec(
     conn,
     CREATE_FILE_TABLE_QUERY,
     nullptr, nullptr, // don't callback
-    &errMessage
+    (char**) &errMessage
   );
   if (stat != SQLITE_OK) throw errMessage;
 }

@@ -155,7 +155,7 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
       }
     }
     if (occluded) continue;
-    size_t textureVOffset = ma.textures[face.texture] << 7;
+    size_t textureIndex = ma.textures[face.texture];
     for (size_t j = 0; j < 3; ++j) {
       uint16_t index = face.vertices[j].index;
       VertexXYZ& blvertex = mf.vertices[index];
@@ -163,7 +163,8 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
       triangle[j].y = (ly << 7) + blvertex.y;
       triangle[j].z = (lz << 7) + blvertex.z;
       triangle[j].u = face.vertices[j].u;
-      triangle[j].v = face.vertices[j].v + textureVOffset;
+      triangle[j].v = face.vertices[j].v;
+      triangle[j].w = textureIndex;
       if (flags & 64)
         transparentVertices.push_back(triangle[j]);
       else
@@ -175,20 +176,23 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
 static const char* VERTEX_SOURCE =
   "#version 330 core \n"
   "layout (location = 0) in ivec3 position; \n"
-  "layout (location = 1) in int u; \n"
-  "layout (location = 2) in uint v; \n"
+  "layout (location = 1) in ivec2 uv; \n"
+  "layout (location = 2) in uint w; \n"
   "out vec2 TexCoord; \n"
+  "flat out uint W; \n"
   "uniform mat4 mvp; \n"
   "uniform vec3 offset; \n"
   "void main() { \n"
   "  gl_Position = mvp * vec4(position / 128.0f + offset, 1.0f); \n"
-  "  TexCoord = vec2(u / 128.0f, v / 128.0f); \n"
+  "  TexCoord = uv / 128.0f; \n"
+  "  W = w; \n"
   "} \n"
   ;
 
 static const char* FRAGMENT_SOURCE =
   "#version 330 core \n"
   "in vec2 TexCoord; \n"
+  "flat in uint W; \n"
   "out vec4 colour; \n"
   "uniform sampler2D tex; \n"
   // How many times taller the texture is than wide.
@@ -205,7 +209,8 @@ static const char* FRAGMENT_SOURCE =
   "  float grad = fract(ypx); \n"
   "  colour = /*((ypxn % 32) == 31) ? vec4(0.0f, 0.0f, 0.0f, 1.0f) :*/ mix(texture(tex, nearestNorth), texture(tex, nearestSouth), grad); \n"
 #endif
-  "colour = texture(tex, vec2(TexCoord.x, TexCoord.y / dim)); \n"
+  "vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(0, W)) / vec2(1.0f, dim); \n"
+  "colour = texture(tex, realtc); \n"
   //"  colour = vec4(TexCoord.x * 0.0f, TexCoord.y * 8.0f, 0.0f, 1.0f); \n"
   "} \n"
   ;
@@ -226,10 +231,10 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
     vbo[layer].feedData(opaqueVertices.size() * sizeof(CMVertex), opaqueVertices.data(), GL_STATIC_DRAW);
   // Set xyz
   glVertexAttribIPointer(0, 3, GL_SHORT, sizeof(CMVertex), (void*) offsetof(CMVertex, x));
-  // Set u
-  glVertexAttribIPointer(1, 1, GL_UNSIGNED_BYTE, sizeof(CMVertex), (void*) offsetof(CMVertex, u));
-  // Set v
-  glVertexAttribIPointer(2, 1, GL_INT, sizeof(CMVertex), (void*) offsetof(CMVertex, v));
+  // Set uv
+  glVertexAttribIPointer(1, 2, GL_UNSIGNED_BYTE, sizeof(CMVertex), (void*) offsetof(CMVertex, u));
+  // Set w
+  glVertexAttribIPointer(2, 1, GL_INT, sizeof(CMVertex), (void*) offsetof(CMVertex, w));
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);

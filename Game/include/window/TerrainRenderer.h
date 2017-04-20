@@ -62,11 +62,11 @@ namespace x801 {
     struct CMVertex {
       // The vertex coordinates are chunk-local and are expressed
       // as signed 9.7's.
+      uint32_t w;
       int16_t x, y, z;
-      uint8_t u;
-      uint32_t v;
+      uint8_t u, v;
     };
-    static_assert(offsetof(CMVertex, x) + 2 == offsetof(CMVertex, y) && offsetof(CMVertex, y) + 2 == offsetof(CMVertex, z), "Basic offset checks");
+    static_assert(offsetof(CMVertex, x) + 2 == offsetof(CMVertex, y) && offsetof(CMVertex, y) + 2 == offsetof(CMVertex, z) && offsetof(CMVertex, u) + 1 == offsetof(CMVertex, v), "Basic offset checks");
     class ChunkMeshBuffer {
     public:
       ChunkMeshBuffer(
