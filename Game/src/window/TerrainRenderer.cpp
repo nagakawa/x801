@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <assert.h>
 #include <chrono>
+#include <math.h>
 #include <utility>
 
 #include <imgui.h>
@@ -269,6 +270,7 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   tr->gs->selfPositionMutex.unlock();
   float theta = selfPos.rot;
   float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
+#if 0 // top-downish perspective code
   // I don't know why I have to multiply the y by -1, but it works.
   mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, -1.0f, -1.0f) / 8.0f);
   // Rotate 30 degrees backwards
@@ -283,6 +285,14 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
       -selfPos.z
     )
   );
+#endif
+  mvp = glm::scale(mvp, glm::vec3(1.0f, -1.0f, 1.0f));
+  mvp *= glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+  mvp *= glm::lookAt(
+    glm::vec3(selfPos.x, selfPos.y, selfPos.z + 1.6f),
+    glm::vec3(selfPos.x + cosf(theta), selfPos.y + sinf(theta), selfPos.z + 1.6f),
+    glm::vec3(0.0f, 0.0f, 1.0f)
+  );
   /*
   bool isChatWindowOpen = ImGui::Begin("Basic info");
   if (isChatWindowOpen) {
@@ -290,13 +300,6 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   }
   ImGui::End();
   */
-  // Rotate by theta clockwise
-  // mvp = glm::rotate(mvp, (float) (-0.8 * glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
-  // (void) theta;
-  // Rotate 30 degrees backward
-  //mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-  // Orthographic
-  // mvp *= glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1000.0f, 1000.0f);
 #ifndef NDEBUG
   tr->axes.setMVP(mvp);
 #endif
