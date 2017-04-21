@@ -103,6 +103,11 @@ void x801::game::TerrainRenderer::draw() {
     }
   }
   (void) rendered;
+  bool isChatWindowOpen = ImGui::Begin("Basic info");
+  if (isChatWindowOpen) {
+    ImGui::TextWrapped("%zu chunks rendered", rendered);
+  }
+  ImGui::End();
 #ifndef NDEBUG
   //std::cerr << rendered << " chunks rendered\n";
   axes.render();
@@ -175,12 +180,21 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
 
 static const char* VERTEX_SOURCE =
   "#version 330 core \n"
+  // The position of the vertex, in metres, from the centre
+  // of the bottom northwestmost block of the chunk.
   "layout (location = 0) in ivec3 position; \n"
+  // The texcoords u/v are separate from the texture# w,
+  // as to help the fragment shader prevent texel bleeding.
   "layout (location = 1) in ivec2 uv; \n"
   "layout (location = 2) in uint w; \n"
+  // Counterparts to uv and w passed to the fragment shader.
+  // TexCoord is normalised to [0, 1].
+  // W is untouched.
   "out vec2 TexCoord; \n"
   "flat out uint W; \n"
+  // The model-view-projection matrix.
   "uniform mat4 mvp; \n"
+  // The offset of this chunk, in metres.
   "uniform vec3 offset; \n"
   "void main() { \n"
   "  gl_Position = mvp * vec4(position / 128.0f + offset, 1.0f); \n"
@@ -198,20 +212,8 @@ static const char* FRAGMENT_SOURCE =
   // How many times taller the texture is than wide.
   "uniform float dim; \n"
   "void main() { \n"
-#if 0
-  "  float ypx = 32 * TexCoord.y; \n"
-  "  int ypxn = int(floor(ypx)); \n"
-  "  float ypxnn = ((ypxn % 32) == 31) ? ypxn + 32 : ypxn; \n"
-  "  vec2 nearestNorth = vec2(TexCoord.x, ypxnn / (32 * dim)); \n"
-  "  int ypxs = int(floor(ypx)) + 1; \n"
-  "  float ypxsn = ((ypxs % 32) == 0) ? ypxs - 32 : ypxs; \n"
-  "  vec2 nearestSouth = vec2(TexCoord.x, ypxsn / (32 * dim)); \n"
-  "  float grad = fract(ypx); \n"
-  "  colour = /*((ypxn % 32) == 31) ? vec4(0.0f, 0.0f, 0.0f, 1.0f) :*/ mix(texture(tex, nearestNorth), texture(tex, nearestSouth), grad); \n"
-#endif
   "vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(0, W)) / vec2(1.0f, dim); \n"
   "colour = texture(tex, realtc); \n"
-  //"  colour = vec4(TexCoord.x * 0.0f, TexCoord.y * 8.0f, 0.0f, 1.0f); \n"
   "} \n"
   ;
 
