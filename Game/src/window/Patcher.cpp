@@ -275,3 +275,16 @@ void x801::game::Patcher::startFetchThread() {
   };
   fetchThread = std::thread(cback);
 }
+
+bool x801::game::Patcher::fetchIndex(std::stringstream& ss) {
+  std::lock_guard<std::mutex> lock(mutex);
+  curl_easy_setopt(curl, CURLOPT_URL, "/v0tgil-sucks");
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &ss);
+  CURLcode res = curl_easy_perform(curl);
+  if (res != CURLE_OK) return false;
+  long responseCode;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+  if (responseCode != 200) return false;
+  return true;
+}
