@@ -53,7 +53,7 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 # OPTION(Boost_NO_BOOST_CMAKE "" ON)
 OPTION(Boost_DEBUG "" OFF)
-FIND_PACKAGE(BoostCustom REQUIRED)
+FIND_PACKAGE(BoostCustom REQUIRED COMPONENTS filesystem)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 # Will have to make this work with other platforms.
