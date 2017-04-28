@@ -86,6 +86,7 @@ namespace x801 {
       void refetchFile(const char* fname, uint32_t version);
       uint32_t getVersionFromServer(const char* fname);
       bool fetchIndex(std::stringstream& ss);
+      bool updateAllFiles();
       std::mutex mutex;
     };
   }

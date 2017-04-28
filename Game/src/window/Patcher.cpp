@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <string>
 #include <boost/filesystem.hpp>
+#include <rapidjson/document.h>
 #include <RakNetTypes.h>
 #include "Database.h"
 
@@ -287,4 +288,42 @@ bool x801::game::Patcher::fetchIndex(std::stringstream& ss) {
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
   if (responseCode != 200) return false;
   return true;
+}
+
+bool x801::game::Patcher::updateAllFiles() {
+  std::stringstream ss;
+  bool stat = fetchIndex(ss);
+  if (!stat) return false;
+  std::string indexStr = ss.str();
+  rapidjson::Document index;
+  if (index.Parse(indexStr.c_str()).HasParseError())
+    return false;
+  if (!index.IsObject()) return false;
+  rapidjson::Value::ConstMemberIterator begin = index.MemberBegin();
+  rapidjson::Value::ConstMemberIterator end = index.MemberEnd();
+  bool ok = true;
+  for (auto it = begin; it != end; ++it) {
+    auto fname = it->name.GetString();
+    const rapidjson::Value& props = it->value;
+    if (!props.IsObject()) {
+      ok = false;
+      continue;
+    }
+    auto verNode = props.FindMember("version");
+    auto endNode = props.MemberEnd();
+    if (verNode == endNode || !verNode->value.IsInt()) {
+      ok = false;
+      continue;
+    }
+    uint32_t version = verNode->value.GetInt();
+    uint32_t oldVersion, oldLength;
+    uint8_t* oldContents;
+    bool fileExists = getFileEntry(fname, oldVersion, oldLength, oldContents);
+    if (fileExists) delete[] oldContents;
+    bool needsToUpdate = !fileExists || (oldVersion < version);
+    if (needsToUpdate) {
+      refetchFile(fname, version);
+    }
+  }
+  return ok;
 }
