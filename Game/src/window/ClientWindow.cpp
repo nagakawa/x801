@@ -109,9 +109,9 @@ void x801::game::ClientWindow::tick() {
   ftimes[curr] = 1000.0f / getFPS();
   ImGui::TextWrapped("FPS: %.2f", getRollingFPS());
   ImGui::PlotLines(
-    "Frame times\n(0 to 100)",
+    "",
     ftimes, FTIMES_TO_STORE, curr + 1,
-    "hi", 0.0f, 100.0f, ImVec2(0, 200)
+    "Frame times (0 to 100)", 0.0f, 100.0f, ImVec2(0, 200)
   );
   std::stringstream s;
   s << "User ID: ";
