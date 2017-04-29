@@ -24,19 +24,23 @@ using namespace x801::game;
 
 #include <stdlib.h>
 #include <algorithm>
+#include <chrono>
+#include <cmath>
 #include <iostream>
+#include <ratio>
 #include <sstream>
 #include <GLFW/glfw3.h>
 #include <BitStream.h>
 #include <SecureHandshake.h>
+#include <portable_endian.h>
 #include "Server.h"
 
 void x801::game::Client::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
+  peer->SetOccasionalPing(true);
   RakNet::SocketDescriptor clientSocket(0, 0);
   clientSocket.socketFamily = useIPV6 ? AF_INET6 : AF_INET;
   peer->Startup(1, &clientSocket, 1);
-  peer->SetOccasionalPing(true);
   RakNet::PublicKey pk;
   pk.publicKeyMode = RakNet::PKM_ACCEPT_ANY_PUBLIC_KEY;
   publicKey = new char[cat::EasyHandshake::PUBLIC_KEY_BYTES];
@@ -69,45 +73,21 @@ void x801::game::Client::initialise() {
       }, -1
   };
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
-  LPacketCallback idCallback = {
-    [this](
-      uint16_t lPacketType, uint32_t playerID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) playerID; (void) t;
-        this->processUsernameResponse(
-          lPacketType, lbody, llength, p
-        );
-      }, -1
-  };
+  PacketCallback filehostCallback =
+    MAKE_PACKET_CALLBACK(processFilehostURIResponse, -1);
+  callbacks.insert({PACKET_FILE, filehostCallback});
+  LPacketCallback idCallback =
+    MAKE_LPACKET_CALLBACK_CLIENT(processUsernameResponse, -1);
   lCallbacks.insert({LPACKET_IDENTIFY, idCallback});
-  LPacketCallback chatCallback1 = {
-    [this](
-      uint16_t lPacketType, uint32_t playerID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) playerID; (void) t;
-        this->processChatMessageCode(
-          lPacketType, lbody, llength, p
-        );
-      }, -1
-  };
+  LPacketCallback chatCallback1 =
+    MAKE_LPACKET_CALLBACK_CLIENT(processChatMessageCode, -1);
   lCallbacks.insert({LPACKET_CHAT, chatCallback1});
-  LPacketCallback chatCallback2 = {
-    [this](
-      uint16_t lPacketType, uint32_t playerID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) playerID; (void) t;
-        this->processChatMessage(
-          lPacketType, lbody, llength, p
-        );
-      }, -1
-  };
+  LPacketCallback chatCallback2 =
+    MAKE_LPACKET_CALLBACK_CLIENT(processChatMessage, -1);
   lCallbacks.insert({LPACKET_RECEIVE_CHAT, chatCallback2});
+  LPacketCallback moveCallback =
+    MAKE_LPACKET_CALLBACK_CLIENT_TIMED(processMovement, -1);
+  lCallbacks.insert({LPACKET_MOVE, moveCallback});
   listenConcurrent();
 }
 
@@ -168,9 +148,13 @@ bool x801::game::Client::handleLPacket(
   return true;
 }
 
+static const double GAP = 10e-3;
+static const double THRESH = 2e-3;
+
 void x801::game::Client::listen() {
   std::cerr << "Listening...\n";
   bool shouldContinue = true;
+  auto lastTime = std::chrono::steady_clock::now();
   while (shouldContinue) {
     for (
         RakNet::Packet* p = peer->Receive();
@@ -178,8 +162,9 @@ void x801::game::Client::listen() {
         peer->DeallocatePacket(p), p = peer->Receive()) {
       RakNet::Time t = 0;
       if (p->data[0] == ID_TIMESTAMP) {
-        RakNet::BitStream s(p->data, 1, sizeof(RakNet::Time));
+        RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
+        // fprintf(stderr, "Time: %llx ~ %llx\n", t, RakNet::GetTime());
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -194,12 +179,33 @@ void x801::game::Client::listen() {
         shouldContinue = handlePacket(packetType, body, length, t, p);
       }
     }
+    std::chrono::time_point<std::chrono::steady_clock> thisTime;
+    double diff = 0;
+    while (diff < GAP) {
+      thisTime = std::chrono::steady_clock::now();
+      std::chrono::duration<double, std::ratio<1, 1>> diffd = (thisTime - lastTime);
+      diff = diffd.count();
+      if (diff < GAP && diff >= GAP - THRESH)
+        std::this_thread::sleep_for(diffd / 2);
+    }
+    if (cw != nullptr && (cw->underlying() == nullptr ||
+        glfwWindowShouldClose(cw->underlying()))) {
+      shouldContinue = false;
+    }
+    lastTime = thisTime;
   }
-  if (cw != nullptr) glfwSetWindowShouldClose(cw->underlying(), true);
+  if (cw != nullptr && cw->underlying() != nullptr)
+    glfwSetWindowShouldClose(cw->underlying(), true);
 }
 
 void x801::game::Client::listenConcurrent() {
   listenThread = std::thread([this]() { this->listen(); });
+}
+
+bool x801::game::Client::getServerAddress(RakNet::SystemAddress& out) const {
+  uint16_t n = 1;
+  (void) peer->GetConnectionList(&out, &n);
+  return n >= 1;
 }
 
 void x801::game::Client::requestMOTD(PacketCallback motdCallback) {
@@ -302,6 +308,22 @@ void x801::game::Client::sendChatMessage(const char* message) {
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
+  textureView->getTexture("textures/terrain/blocks.png");
+  modelView->getMAI();
+  modelView->getMFI();
+}
+
+void x801::game::Client::processFilehostURIResponse(
+    uint8_t packetType,
+    uint8_t* body, size_t length,
+    RakNet::Packet* p) {
+  (void) p; (void) packetType;
+  RakNet::BitStream input(body, length, false);
+  patcher = new Patcher(readStringFromBitstream16S(input));
+  patcher->startFetchThread();
+  textureView = new TextureView(patcher);
+  modelView = new ModelView(patcher);
+  mapView = new MapView(patcher);
 }
 
 static const char* statusMessages[] = {
@@ -336,6 +358,41 @@ void x801::game::Client::processChatMessage(
   std::string message = readStringFromBitstream16S(stream);
   cw->getChatWindow()->pushMessage(playerID, message);
 }
+#include <stdio.h>
+void x801::game::Client::processMovement(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Time t,
+    RakNet::Packet* p) {
+  (void) lPacketType; (void) p;
+  if (t == 0) return;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint32_t playerCount;
+  stream.Read(playerCount);
+  for (size_t i = 0; i < playerCount; ++i) {
+    uint32_t playerID;
+    int32_t xfix, yfix, tfix;
+    stream.Read(playerID);
+    stream.Read(xfix);
+    stream.Read(yfix);
+    stream.Read(tfix);
+    Player& p = g.getPlayer(playerID);
+    Location& l = p.getLocation();
+    l.x = xfix / 65536.0f;
+    l.y = yfix / 65536.0f;
+    l.rot = 2 * M_PI * tfix / (65536.0f * 65536.0f);
+    // std::cerr << playerID << " " <<  xfix << " " << yfix << " " << tfix << '\n';
+  }
+  g.selfPositionMutex.lock();
+  g.locationMutex.lock_shared();
+  auto it = g.playersByID.find(g.myID);
+  if (it != g.playersByID.end()) {
+    g.selfPosition = g.playersByID[g.myID].getLocation();
+  }
+  g.locationMutex.unlock_shared();
+  g.fastForwardSelf(t);
+  g.selfPositionMutex.unlock();
+}
 
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {
   RakNet::BitStream stream;
@@ -367,10 +424,18 @@ void x801::game::Client::login(Credentials& c) {
       RakNet::Time t,
       RakNet::Packet* p) {
         (void) p; (void) packetType; (void) t;
-        uint8_t stat = body[0];
-        if (length < 17) stat = LOGIN_NOT_ENOUGH_DATA;
+        RakNet::BitStream stream(body, length, false);
+        uint8_t stat;
+        stream.Read(stat);
+        if (length < (1 + COOKIE_LEN + sizeof(uint32_t))
+            && stat == LOGIN_OK)
+          stat = LOGIN_NOT_ENOUGH_DATA;
         if (stat == LOGIN_OK) {
-          this->cookie = new uint8_t[RAW_HASH_LENGTH];
+          this->cookie = new uint8_t[COOKIE_LEN];
+          stream.Read((char*) this->cookie, COOKIE_LEN);
+          uint32_t id;
+          stream.Read(id);
+          this->g.setID(id);
           openWindowConcurrent();
           memcpy(this->cookie, body + 1, 16);
         } else {
@@ -398,10 +463,29 @@ void x801::game::Client::login(Credentials& c, PacketCallback loginCallback) {
   callbacks.insert({ID_CONNECTION_REQUEST_ACCEPTED, connectCallback});
 }
 
+void x801::game::Client::sendKeyInput(const KeyInput& input) {
+  RakNet::BitStream stream;
+  stream.Write(static_cast<uint8_t>(ID_TIMESTAMP));
+  stream.Write(input.time);
+  stream.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  stream.Write(static_cast<uint16_t>(LPACKET_MOVE));
+  stream.Write((char*) cookie, COOKIE_LEN);
+  stream.Write(input.inputs);
+  peer->Send(
+    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    RakNet::UNASSIGNED_RAKNET_GUID, true
+  );
+}
+
 void x801::game::Client::openWindow() {
-  cw = new ClientWindow(1280, 960, 0, 0, "Experiment801", 3, 3, false);
+  glfwInit();
+  if (debug)
+    cw = new ClientWindow(1280, 960, 0, 0, "Experiment801 (live debug)", 4, 5, true);
+  else
+    cw = new ClientWindow(1280, 960, 0, 0, "Experiment801", 3, 3, false);
   cw->c = this;
   cw->start();
+  glfwTerminate();
 }
 
 void x801::game::Client::openWindowConcurrent() {
@@ -410,6 +494,14 @@ void x801::game::Client::openWindowConcurrent() {
 
 x801::game::Client::~Client() {
   done = true;
+  if (listenThread.joinable()) listenThread.join();
+  if (windowThread.joinable()) windowThread.join();
+  patcher->stopFetchThread();
   RakNet::RakPeerInterface::DestroyInstance(peer);
+  delete cw;
   delete[] publicKey;
+  delete[] cookie;
+  delete patcher;
+  delete textureView;
+  delete modelView;
 }

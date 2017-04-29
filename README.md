@@ -27,10 +27,18 @@ files ask for the same libraries as TDR, plus a few other libraries. On Debian
 
     sudo apt install libglfw3-dev libglew-dev libsoil-dev libglm-dev \
       libcairo2-dev libpango1.0-dev libglib2.0-dev zlib1g-dev libboost-dev \
-      libsqlite3-dev libboost-filesystem-dev libboost-random-dev cmake
+      libsqlite3-dev libboost-filesystem-dev libboost-random-dev \
+      libasound2-dev libogg-dev libvorbis-dev cmake
+
+and build PortAudio yourself.
 
 This project also depends on a custom version of RakNet, but this dependency
 is managed by the configuration files so no extra work for you.
+
+In addition, the Python scripts depend on a few packages.
+
+    sudo apt install python3-pip
+    pip3 install numpy simpleeval
 
 In addition, there are programs used to build assets:
 
@@ -40,6 +48,7 @@ In addition, there are programs used to build assets:
   Other distributions might have their own ways to get the program.
 * FluidSynth (used to convert .mid files to .wav). The package name is,
   unsurprisingly, `fluidsynth`.
+* XCFTools (`xcftools`).
 
 There is a bug with older versions of Valgrind that will prevent it from running
 some tests. Valgrind 3.12.0 should resolve the issue, but you'll probably have

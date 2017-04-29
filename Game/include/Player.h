@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <GetTime.h>
 #include "Database.h"
 #include "Location.h"
 
@@ -31,26 +32,29 @@ namespace x801 {
     class Player {
     public:
       Player() : playerID(0), location(defaultLocation) {}
-      Player(uint32_t id, Database& db) : playerID(id) {
+      Player(uint32_t id, Database& db) :
+          playerID(id), lastMoved(RakNet::GetTime()) {
         if (!db.loadPlayerLocation(id, location))
           location = defaultLocation;
       }
       Player(const Player& other) :
-        playerID(other.playerID), location(other.location) {}
+        playerID(other.playerID), location(other.location),
+        lastMoved(RakNet::GetTime()) {}
       inline Player& operator=(const Player& other) {
         playerID = other.playerID;
         location = other.location;
+        lastMoved = other.lastMoved;
         return *this;
       }
       Location& getLocation() { return location; }
       const Location& getLocation() const { return location; }
-      void applyKeyInput(KeyInput input, RakNet::Time last) {
-        location.applyKeyInput(input, last);
-      }
+      void applyKeyInput(KeyInput input, RakNet::Time last);
+      void applyKeyInput(KeyInput input);
       ~Player();
     private:
       uint32_t playerID;
       Location location;
+      RakNet::Time lastMoved;
     };
   }
 }

@@ -31,6 +31,15 @@ const Location x801::game::defaultLocation = {
   0.0f
 };
 
+void x801::game::Player::applyKeyInput(KeyInput input, RakNet::Time last) {
+  location.applyKeyInput(input, last);
+  lastMoved = input.time;
+}
+
+void x801::game::Player::applyKeyInput(KeyInput input) {
+  applyKeyInput(input, lastMoved);
+}
+
 x801::game::Player::~Player() {
   // nothing
 }

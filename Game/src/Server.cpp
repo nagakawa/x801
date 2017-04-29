@@ -23,11 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::game;
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <BitStream.h>
 #include <RakNetTypes.h>
+#include <portable_endian.h>
+#include "KeyInput.h"
 #include "packet.h"
 
 static const char* SERVER_MOTD =
@@ -38,68 +41,33 @@ static const char* SERVER_MOTD =
 
 void x801::game::Server::initialise() {
   peer = RakNet::RakPeerInterface::GetInstance();
+  peer->SetOccasionalPing(true);
   updateKeyFiles();
   RakNet::SocketDescriptor socket(port, 0);
   socket.socketFamily = useIPV6 ? AF_INET6 : AF_INET;
   peer->Startup(maxConnections, &socket, 1);
   peer->SetMaximumIncomingConnections(maxConnections);
   // set packet callbacks
-  PacketCallback logoutCallback = {
-    [this](
-      uint8_t packetType,
-      uint8_t* body, size_t length,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->logoutByPacket(packetType, body, length, p);
-      }, -1
-  };
+  PacketCallback logoutCallback =
+    MAKE_PACKET_CALLBACK(logoutByPacket, -1);
   callbacks.insert({ID_CONNECTION_LOST, logoutCallback});
   callbacks.insert({ID_DISCONNECTION_NOTIFICATION, logoutCallback});
-  PacketCallback motdCallback = {
-    [this](
-      uint8_t packetType,
-      uint8_t* body, size_t length,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->sendMOTD(packetType, body, length, p);
-      }, -1
-  };
+  PacketCallback motdCallback =
+    MAKE_PACKET_CALLBACK(sendMOTD, -1);
   callbacks.insert({PACKET_MOTD, motdCallback});
-  PacketCallback loginCallback = {
-    [this](
-      uint8_t packetType,
-      uint8_t* body, size_t length,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->processLogin(packetType, body, length, p);
-      }, -1
-  };
+  PacketCallback loginCallback =
+    MAKE_PACKET_CALLBACK(processLogin, -1);
   callbacks.insert({PACKET_LOGIN, loginCallback});
-  LPacketCallback usernameCallback = {
-    [this](
-      uint16_t lPacketType, uint32_t userID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->processUsernameRequest(lPacketType, userID, lbody, llength, p);
-      }, -1
-  };
+  LPacketCallback usernameCallback =
+    MAKE_LPACKET_CALLBACK(processUsernameRequest, -1);
   lCallbacks.insert({LPACKET_IDENTIFY, usernameCallback});
-  LPacketCallback chatCallback = {
-    [this](
-      uint16_t lPacketType, uint32_t userID,
-      uint8_t* lbody, size_t llength,
-      RakNet::Time t,
-      RakNet::Packet* p) {
-        (void) t;
-        this->processChatRequest(lPacketType, userID, lbody, llength, p);
-      }, -1
-  };
+  LPacketCallback chatCallback =
+    MAKE_LPACKET_CALLBACK(processChatRequest, -1);
   lCallbacks.insert({LPACKET_CHAT, chatCallback});
+  LPacketCallback moveCallback =
+    MAKE_LPACKET_CALLBACK_TIMED(processMoveRequest, -1);
+  lCallbacks.insert({LPACKET_MOVE, moveCallback});
+  broadcastLocationsConcurrent();
   listen();
 }
 
@@ -158,7 +126,7 @@ void x801::game::Server::handleLPacket(
     else ++iterator;
   }
 }
-
+#include <stdio.h>
 void x801::game::Server::listen() {
   while (true) {
     for (
@@ -167,8 +135,9 @@ void x801::game::Server::listen() {
         peer->DeallocatePacket(p), p = peer->Receive()) {
       RakNet::Time t = 0;
       if (p->data[0] == ID_TIMESTAMP) {
-        RakNet::BitStream s(p->data, 1, sizeof(RakNet::Time));
+        RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
+        // printf("Time: %llx ~ %llx\n", t, RakNet::GetTime());
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -263,6 +232,7 @@ void x801::game::Server::logoutByPacket(
     RakNet::Packet* p) {
   (void) packetType; (void) body; (void) length;
   uint32_t playerID = playersByAddress[p->systemAddress];
+  if (playerID == 0) return;
   logout(playerID);
   playersByAddress.erase(p->systemAddress);
   addressesByPlayer.erase(playerID);
@@ -296,6 +266,18 @@ LoginStatus x801::game::Server::login(
   cookiesByPlayer[playerID] = cookieAsArray;
   playersByAddress[address] = playerID;
   addressesByPlayer[playerID] = address;
+  // Add player to the correct area
+  Player p;
+  bool succeeded = g.findPlayer(playerID, p);
+  assert(succeeded); (void) succeeded;
+  x801::map::QualifiedAreaID aid = p.getLocation().areaID;
+  if (g.areas.count(aid) == 0) {
+    std::ifstream mapInput("assets/map/map.0.0.map", std::ios::binary);
+    std::unique_ptr<AreaWithPlayers> area =
+      std::make_unique<AreaWithPlayers>(&g, mapInput);
+    g.areas[aid] = std::move(area);
+  }
+  g.areas[aid]->addPlayer(playerID);
   return stat;
 }
 
@@ -309,14 +291,20 @@ void x801::game::Server::processLogin(
   uint8_t hash[RAW_HASH_LENGTH];
   stream.Read((char*) hash, RAW_HASH_LENGTH);
   Credentials cred(string, hash);
-  uint8_t output[2 + COOKIE_LEN];
-  output[0] = PACKET_LOGIN;
+  RakNet::BitStream output;
+  output.Write(static_cast<uint8_t>(PACKET_LOGIN));
+  uint8_t cookie[COOKIE_LEN];
   uint32_t playerID;
-  LoginStatus status = login(cred, playerID, output + 2, p->systemAddress);
-  output[1] = (uint8_t) status;
+  LoginStatus status = login(cred, playerID, cookie, p->systemAddress);
+  output.Write(static_cast<uint8_t>(status));
+  if (status == LOGIN_OK) {
+    output.Write((const char*) cookie, COOKIE_LEN);
+    output.Write(playerID);
+  }
   std::cerr << "Login status was " << status << '\n';
+  sendFileLocationPacket(p);
   peer->Send(
-    (const char*) output, 2 + COOKIE_LEN, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    &output, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
     p->systemAddress, false
   );
 }
@@ -382,6 +370,22 @@ void x801::game::Server::processChatRequest(
   }
   delete[] message;
 }
+void x801::game::Server::processMoveRequest(
+    uint16_t lPacketType, uint32_t playerID,
+    uint8_t* lbody, size_t llength,
+    RakNet::Time t,
+    RakNet::Packet* p) {
+  if (t == 0) return;
+  (void) lPacketType; (void) p;
+  RakNet::BitStream stream(lbody, llength, false);
+  KeyInput input;
+  input.time = t;
+  stream.Read(input.inputs);
+  boost::shared_lock<boost::shared_mutex> guard(g.playerMutex);
+  auto player = g.findPlayer(playerID);
+  if (player == g.endOfPlayerMap()) return;
+  ((Player& )player->second).applyKeyInput(input);
+}
 
 void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {
   uint8_t message = PACKET_UNRECOGNISED_COOKIE;
@@ -389,4 +393,65 @@ void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {
     (const char*) &message, 1, MEDIUM_PRIORITY, RELIABLE_ORDERED, 9,
     p->systemAddress, false
   );
+}
+
+static const char* FILEHOST_URI = "http://localhost:3000";
+
+void x801::game::Server::sendFileLocationPacket(RakNet::Packet* p) {
+  RakNet::BitStream packet;
+  packet.Write(static_cast<uint8_t>(PACKET_FILE));
+  writeStringToBitstream16(packet, FILEHOST_URI);
+  peer->Send(
+    &packet, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0,
+    p->systemAddress, false
+  );
+}
+
+void x801::game::Server::broadcastLocations() {
+  using namespace std::chrono_literals;
+  while (true) {
+    g.playerMutex.lock_shared();
+    // Location packets should be sent only to those in the same area
+    for (const auto& pair : g.areas) {
+      const std::unique_ptr<AreaWithPlayers>& area = pair.second;
+      RakNet::BitStream output;
+      output.Write(static_cast<uint8_t>(ID_TIMESTAMP));
+      output.Write(RakNet::GetTime());
+      output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+      output.Write(static_cast<uint16_t>(LPACKET_MOVE));
+      auto begin = area->playerBegin();
+      auto end = area->playerEnd();
+      area->playerMutex.lock_shared();
+      uint32_t count = area->playerCount();
+      output.Write(count);
+      for (auto it = begin; it != end; ++it) {
+        uint32_t id = *it;
+        output.Write(id);
+        const Location& loc = g.allPlayers.at(id).getLocation();
+        int32_t xfix = (int32_t) (loc.x * 65536.0f);
+        int32_t yfix = (int32_t) (loc.y * 65536.0f);
+        uint32_t tfix =
+          (uint32_t) (fmod(loc.rot, 2 * M_PI) * 65536.0f * 65536.0f / (2 * M_PI));
+        output.Write(xfix);
+        output.Write(yfix);
+        output.Write(tfix);
+      }
+      for (auto it = begin; it != end; ++it) {
+        // std::cerr << "* Sending to player #" << *it << "\n";
+        peer->Send(
+          &output, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 2,
+          addressesByPlayer[*it], false
+        );
+      }
+      area->playerMutex.unlock_shared();
+    }
+    g.playerMutex.unlock_shared();
+    std::this_thread::sleep_for(50ms);
+  }
+}
+
+void x801::game::Server::broadcastLocationsConcurrent() {
+  broadcastLocationThread = std::thread([this]() {
+    this->broadcastLocations();
+  });
 }

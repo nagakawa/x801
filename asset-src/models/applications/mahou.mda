@@ -1,0 +1,8 @@
+Function: "block"
+@Textures
+top: "mb_top"
+bottom: "mb_bottom"
+north: "mb_north"
+south: "mb_south"
+east: "mb_right"
+west: "mb_left"

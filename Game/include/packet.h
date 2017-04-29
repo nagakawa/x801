@@ -27,6 +27,56 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <MessageIdentifiers.h>
 #include <RakNetTypes.h>
 
+#define MAKE_PACKET_CALLBACK(method, count) { \
+  [this]( \
+    uint8_t packetType, \
+    uint8_t* body, size_t length, \
+    RakNet::Time t, \
+    RakNet::Packet* p) { \
+      (void) t; \
+      this->method(packetType, body, length, p); \
+    }, count \
+}
+#define MAKE_LPACKET_CALLBACK(method, count) { \
+  [this]( \
+    uint16_t lpacketType, uint32_t userID, \
+    uint8_t* lbody, size_t llength, \
+    RakNet::Time t, \
+    RakNet::Packet* p) { \
+      (void) t; \
+      this->method(lpacketType, userID, lbody, llength, p); \
+    }, count \
+}
+#define MAKE_LPACKET_CALLBACK_CLIENT(method, count) { \
+  [this]( \
+    uint16_t lpacketType, uint32_t userID, \
+    uint8_t* lbody, size_t llength, \
+    RakNet::Time t, \
+    RakNet::Packet* p) { \
+      (void) t; (void) userID; \
+      this->method(lpacketType, lbody, llength, p); \
+    }, count \
+}
+#define MAKE_LPACKET_CALLBACK_TIMED(method, count) { \
+  [this]( \
+    uint16_t lpacketType, uint32_t userID, \
+    uint8_t* lbody, size_t llength, \
+    RakNet::Time t, \
+    RakNet::Packet* p) { \
+      this->method(lpacketType, userID, lbody, llength, t, p); \
+    }, count \
+}
+#define MAKE_LPACKET_CALLBACK_CLIENT_TIMED(method, count) { \
+  [this]( \
+    uint16_t lpacketType, uint32_t userID, \
+    uint8_t* lbody, size_t llength, \
+    RakNet::Time t, \
+    RakNet::Packet* p) { \
+      (void) userID; \
+      this->method(lpacketType, lbody, llength, t, p); \
+    }, count \
+}
+
 namespace x801 {
   namespace game {
     enum PacketIDs {
@@ -34,6 +84,7 @@ namespace x801 {
       PACKET_LOGIN,
       PACKET_IM_LOGGED_IN,
       PACKET_UNRECOGNISED_COOKIE,
+      PACKET_FILE,
     };
     enum LoggedPacketIDs {
       LPACKET_CHAT = 0,

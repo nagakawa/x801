@@ -33,5 +33,7 @@ namespace x801 {
     const int MAPERR_WRONG_SIZE = 4;
     const int MAPERR_UNRECOGNISED_SECTION = 5;
     const int MAPERR_NOT_A_MAP = 6;
+    const int MODERR_OK = 0;
+    const int MODERR_NOT_A_MODEL = 1;
   }
 }
