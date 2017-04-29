@@ -63,6 +63,8 @@ x801::game::Patcher::Patcher(std::string u) {
   open(conn, dfname.c_str());
   createFileTable();
   uri = u;
+  // XXX this is blocking
+  updateAllFiles();
 }
 
 x801::game::Patcher::~Patcher() {
@@ -279,7 +281,7 @@ void x801::game::Patcher::startFetchThread() {
 
 bool x801::game::Patcher::fetchIndex(std::stringstream& ss) {
   std::lock_guard<std::mutex> lock(mutex);
-  curl_easy_setopt(curl, CURLOPT_URL, "/v0tgil-sucks");
+  curl_easy_setopt(curl, CURLOPT_URL, (uri + "/v0tgil-sucks").c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &ss);
   CURLcode res = curl_easy_perform(curl);
@@ -319,11 +321,18 @@ bool x801::game::Patcher::updateAllFiles() {
     uint32_t oldVersion, oldLength;
     uint8_t* oldContents;
     bool fileExists = getFileEntry(fname, oldVersion, oldLength, oldContents);
-    if (fileExists) delete[] oldContents;
     bool needsToUpdate = !fileExists || (oldVersion < version);
     if (needsToUpdate) {
+#ifndef NDEBUG
+      std::cerr << "Updating file " << fname << "\n";
+#endif
       refetchFile(fname, version);
+    } else {
+#ifndef NDEBUG
+      std::cerr << fname << " doesn't need to update\n";
+#endif
     }
+    if (fileExists) delete[] oldContents;
   }
   return ok;
 }
