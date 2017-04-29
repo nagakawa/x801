@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <string>
 #include <boost/filesystem.hpp>
+#include <rapidjson/document.h>
 #include <RakNetTypes.h>
 #include "Database.h"
 
@@ -62,6 +63,8 @@ x801::game::Patcher::Patcher(std::string u) {
   open(conn, dfname.c_str());
   createFileTable();
   uri = u;
+  // XXX this is blocking
+  updateAllFiles();
 }
 
 x801::game::Patcher::~Patcher() {
@@ -274,4 +277,62 @@ void x801::game::Patcher::startFetchThread() {
     }
   };
   fetchThread = std::thread(cback);
+}
+
+bool x801::game::Patcher::fetchIndex(std::stringstream& ss) {
+  std::lock_guard<std::mutex> lock(mutex);
+  curl_easy_setopt(curl, CURLOPT_URL, (uri + "/v0tgil-sucks").c_str());
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &ss);
+  CURLcode res = curl_easy_perform(curl);
+  if (res != CURLE_OK) return false;
+  long responseCode;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+  if (responseCode != 200) return false;
+  return true;
+}
+
+bool x801::game::Patcher::updateAllFiles() {
+  std::stringstream ss;
+  bool stat = fetchIndex(ss);
+  if (!stat) return false;
+  std::string indexStr = ss.str();
+  rapidjson::Document index;
+  if (index.Parse(indexStr.c_str()).HasParseError())
+    return false;
+  if (!index.IsObject()) return false;
+  rapidjson::Value::ConstMemberIterator begin = index.MemberBegin();
+  rapidjson::Value::ConstMemberIterator end = index.MemberEnd();
+  bool ok = true;
+  for (auto it = begin; it != end; ++it) {
+    auto fname = it->name.GetString();
+    const rapidjson::Value& props = it->value;
+    if (!props.IsObject()) {
+      ok = false;
+      continue;
+    }
+    auto verNode = props.FindMember("version");
+    auto endNode = props.MemberEnd();
+    if (verNode == endNode || !verNode->value.IsInt()) {
+      ok = false;
+      continue;
+    }
+    uint32_t version = verNode->value.GetInt();
+    uint32_t oldVersion, oldLength;
+    uint8_t* oldContents;
+    bool fileExists = getFileEntry(fname, oldVersion, oldLength, oldContents);
+    bool needsToUpdate = !fileExists || (oldVersion < version);
+    if (needsToUpdate) {
+#ifndef NDEBUG
+      std::cerr << "Updating file " << fname << "\n";
+#endif
+      refetchFile(fname, version);
+    } else {
+#ifndef NDEBUG
+      std::cerr << fname << " doesn't need to update\n";
+#endif
+    }
+    if (fileExists) delete[] oldContents;
+  }
+  return ok;
 }

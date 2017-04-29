@@ -6,7 +6,8 @@ const hostname = '127.0.0.1';
 const port = 3000;
 
 var contents = {};
-var metadata = JSON.parse(fs.readFileSync("assets/index.json", "utf-8"));
+var mdStr = fs.readFileSync("assets/index.json", "utf-8");
+var metadata = JSON.parse(mdStr);
 var nowlist = fs.readFileSync("asset-src/download-now", "utf-8");
 
 function getContent(name, callback) {
@@ -49,6 +50,10 @@ const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     res.statusCode = 200;
     res.end(nowlist);
+  } else if (parsedURL.pathname == "/v0tgil-sucks") {
+    res.setHeader('Content-Type', 'text/plain');
+    res.statusCode = 200;
+    res.end(mdStr);
   } else {
     res.statusCode = 404;
     res.setHeader('Content-Type', 'text/plain');
