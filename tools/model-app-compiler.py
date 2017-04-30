@@ -27,7 +27,7 @@ parser.add_argument('sourceApplication', metavar='sa', type=str, nargs=1,
 parser.add_argument('tableFunction', metavar='tf', type=str, nargs=1,
     help='the .tab file containing function names')
 parser.add_argument('tableBlocks', metavar='tb', type=str, nargs=1,
-    help='the directory of individual block moel .tab files')
+    help='the directory of individual block model .tab files')
 parser.add_argument('tableTextures', metavar='tb', type=str, nargs=1,
     help='the .tti file with the texture names')
 parser.add_argument('output', metavar='out', type=str, nargs=1,
