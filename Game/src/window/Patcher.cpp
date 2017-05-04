@@ -221,16 +221,20 @@ static size_t patcherWriteFunction(char *ptr, size_t size, size_t nmemb, void *u
   return size * nmemb;
 }
 
-void x801::game::Patcher::refetchFile(const char* fname, uint32_t version) {
+bool x801::game::Patcher::refetchFile(const char* fname, uint32_t version) {
   std::lock_guard<std::mutex> lock(mutex);
   std::stringstream ss;
   curl_easy_setopt(curl, CURLOPT_URL, (uri + "/content?fname=" + fname).c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, patcherWriteFunction);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*) &ss);
   CURLcode res = curl_easy_perform(curl);
-  if (res != CURLE_OK) return;
+  if (res != CURLE_OK) return false;
+  long responseCode;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+  if (responseCode != 200) return false;
   std::string s = ss.str();
   createFileEntry(fname, version, s.length(), (const uint8_t*) s.c_str());
+  return true;
 }
 
 uint32_t x801::game::Patcher::getVersionFromServer(const char* fname) {
@@ -305,7 +309,11 @@ bool x801::game::Patcher::updateAllFiles() {
   rapidjson::Value::ConstMemberIterator end = index.MemberEnd();
   bool ok = true;
   for (auto it = begin; it != end; ++it) {
-    auto fname = it->name.GetString();
+    auto fnameWithAssetsSlash = it->name.GetString();
+    auto fname =
+      (strncmp(fnameWithAssetsSlash, "assets/", 7) == 0) ?
+      fnameWithAssetsSlash + 7 :
+      fnameWithAssetsSlash;
     const rapidjson::Value& props = it->value;
     if (!props.IsObject()) {
       ok = false;
@@ -326,7 +334,10 @@ bool x801::game::Patcher::updateAllFiles() {
 #ifndef NDEBUG
       std::cerr << "Updating file " << fname << "\n";
 #endif
-      refetchFile(fname, version);
+      bool stat = refetchFile(fname, version);
+      if (!stat) {
+        std::cerr << "ERROR! Couldn't fetch file " << fname << '\n';
+      }
     } else {
 #ifndef NDEBUG
       std::cerr << fname << " doesn't need to update\n";

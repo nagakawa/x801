@@ -83,7 +83,7 @@ namespace x801 {
       void updateFileVersion(
         const char* fname,
         uint32_t version);
-      void refetchFile(const char* fname, uint32_t version);
+      bool refetchFile(const char* fname, uint32_t version);
       uint32_t getVersionFromServer(const char* fname);
       bool fetchIndex(std::stringstream& ss);
       bool updateAllFiles();
