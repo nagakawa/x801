@@ -37,7 +37,7 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
   mai = mv->getMAI();
   mfi = mv->getMFI();
   assert(cw != nullptr && c != nullptr && p != nullptr && tv != nullptr && gs != nullptr && tex != nullptr);
-  agl::FBOTexMS ft = agl::makeFBOForMeMS(1280, 960);
+  agl::FBOTexMS ft = agl::makeFBOForMeMS(cw->getWidth(), cw->getHeight());
   fboTex = ft.ss.texture;
   fboTexMS = ft.ms.texture;
   fboSS = ft.ss.fbo;

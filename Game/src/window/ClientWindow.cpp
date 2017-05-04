@@ -56,8 +56,8 @@ void x801::game::ClientWindow::initialise() {
   terrain = new agl::Sprite2D(tr->fboTex);
   terrain->setApp(this);
   terrain->addSprite({
-    0, 0, 1280, 960,
-    0, 0, 1280, 960
+    0, 0, (float) getWidth(), (float) getHeight(),
+    0, 0, (float) getWidth(), (float) getHeight(),
   });
   terrain->setUp();
   fuck = new agl::Sprite2D(tr->tex);
@@ -99,7 +99,7 @@ void x801::game::ClientWindow::tick() {
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   tr->draw();
-  tr->fboMS->blitTo(*(tr->fboSS), 1280, 960);
+  tr->fboMS->blitTo(*(tr->fboSS), getWidth(), getHeight());
   agl::setDefaultFBOAsActive();
   terrain->tick();
   fuck->tick();
