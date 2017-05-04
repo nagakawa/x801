@@ -39,6 +39,10 @@ namespace x801 {
 #include "KeyInput.h"
 #include "packet.h"
 #include "window/ClientWindow.h"
+#include "window/Patcher.h"
+#include "window/patcher_views/MapView.h"
+#include "window/patcher_views/ModelView.h"
+#include "window/patcher_views/TextureView.h"
 
 namespace x801 {
   namespace game {
@@ -58,7 +62,7 @@ namespace x801 {
       void operator=(const Client& s) = delete;
       const uint16_t port;
       std::string getIPAddress() const { return ipAddress; }
-      bool isDone() { return done; }
+      bool isDone() volatile { return done; }
       void login(Credentials& c, PacketCallback loginCallback);
       void login(Credentials& c);
       void sendChatMessage(const char* message);
@@ -66,8 +70,11 @@ namespace x801 {
       void listenConcurrent();
       std::thread& getListenThread() { return listenThread; }
       std::string getUsername(uint32_t id);
+      bool getServerAddress(RakNet::SystemAddress& out) const;
+      void setDebug(bool d) { debug = d; }
     private:
       void initialise();
+      bool readConfig();
       bool handlePacket(
         uint8_t packetType,
         uint8_t* body, size_t length,
@@ -87,6 +94,11 @@ namespace x801 {
       void sendLoginPacket(PacketCallback loginCallback);
       void requestUsernames(size_t count, uint32_t* ids);
       void requestUsername(uint32_t id);
+      void processFilehostURIResponse(
+        uint8_t packetType,
+        uint8_t* body, size_t length,
+        RakNet::Packet* p
+      );
       void processUsernameResponse(
         uint16_t lPacketType,
         uint8_t* lbody, size_t llength,
@@ -102,6 +114,13 @@ namespace x801 {
         uint8_t* lbody, size_t llength,
         RakNet::Packet* p
       );
+      void processMovement(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Time t,
+        RakNet::Packet* p
+      );
+      void sendKeyInput(const KeyInput& input);
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;
@@ -116,6 +135,16 @@ namespace x801 {
       Credentials cred;
       std::thread windowThread;
       std::thread listenThread;
+      RakNet::Time drift = 0;
+      Patcher* patcher = nullptr;
+      TextureView* textureView = nullptr;
+      ModelView* modelView = nullptr;
+      MapView* mapView = nullptr;
+      bool debug = false;
+      int width = 1280;
+      int height = 960;
+      friend class ClientWindow;
+      friend class TerrainRenderer;
     };
   }
 }

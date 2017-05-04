@@ -12,7 +12,7 @@ ELSE()
   MESSAGE(
     STATUS
     "If the build fails, try running "
-    "`git submodule update --init --recursive`."
+    "`git submodule update --recursive --remote`."
   )
 ENDIF()
 
@@ -22,6 +22,13 @@ ADD_CUSTOM_TARGET(
   Argon2
   COMMAND make
   WORKING_DIRECTORY argon2
+)
+
+ADD_CUSTOM_TARGET(
+  Assets
+  COMMAND make -f make-assets
+  COMMAND cp -r assets build
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
 # ######### General setup ##########

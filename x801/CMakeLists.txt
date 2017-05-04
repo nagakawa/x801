@@ -17,6 +17,7 @@ include_directories(${PROJECT_INCLUDE_DIR})
 ADD_EXECUTABLE(x801 ${x801_executable_SRCS})
 
 ADD_DEPENDENCIES(x801 Argon2)
+ADD_DEPENDENCIES(x801 Assets)
 
 TARGET_LINK_LIBRARIES(x801
   ${PROJECT_SOURCE_DIR}/../build/libGame.a
@@ -24,6 +25,7 @@ TARGET_LINK_LIBRARIES(x801
   ${PROJECT_SOURCE_DIR}/../build/libBase.a
   ${PROJECT_SOURCE_DIR}/../build/libRakNetLibStatic.a
   ${PROJECT_SOURCE_DIR}/../build/libAGL.a
+  ${PROJECT_SOURCE_DIR}/../build/libFileUtil.a
   ${PROJECT_SOURCE_DIR}/../build/libImgui.a
   ${PROJECT_SOURCE_DIR}/../argon2/libargon2.a
   ${ZLIB_LIBRARIES}
@@ -34,15 +36,18 @@ TARGET_LINK_LIBRARIES(x801
   ${OPENGL_LIBRARIES}
   ${GLEW_LIBRARIES}
   ${SOIL_LIBRARY}
+  ${PORTAUDIO_LIBRARIES}
+  ${VORBIS_LIBRARIES}
+  ${CURL_LIBRARIES}
   # ${GOBJECT_LIBRARIES}
   # ${GLIB_LIBRARIES}
 )
 
-#ADD_CUSTOM_COMMAND(
-#  TARGET AGLTest
-#  POST_BUILD
-#  COMMAND cp -r shader textures ../build
-#)
+ADD_CUSTOM_COMMAND(
+  TARGET x801
+  POST_BUILD
+  COMMAND cp -r ../intrinsic-assets ../build
+)
 
 # add install target:
 INSTALL(TARGETS x801 DESTINATION bin)

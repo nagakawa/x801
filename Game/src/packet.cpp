@@ -26,13 +26,13 @@ using namespace x801::game;
 
 uint8_t x801::game::getPacketType(RakNet::Packet* p) {
   if (p->data[0] == ID_TIMESTAMP)
-    return p->data[sizeof(uint8_t) + sizeof(RakNet::TimeMS)];
+    return p->data[sizeof(uint8_t) + sizeof(RakNet::Time)];
   return p->data[0];
 }
 
 size_t x801::game::getPacketOffset(RakNet::Packet* p) {
   if (p->data[0] == ID_TIMESTAMP)
-    return 2 * sizeof(uint8_t) + sizeof(RakNet::TimeMS);
+    return 2 * sizeof(uint8_t) + sizeof(RakNet::Time);
   return 1;
 }
 

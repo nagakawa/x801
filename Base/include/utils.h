@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <array>
+#include <fstream>
 #include <iostream>
 #include <zlib.h>
 #include <boost/functional/hash.hpp>
@@ -122,5 +123,7 @@ namespace x801 {
     const char* getPointer(const char* s);
     template<>
     const char* getPointer(std::string s);
+
+    std::string slurp(std::ifstream& fh);
   }
 }

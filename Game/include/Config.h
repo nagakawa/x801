@@ -30,8 +30,11 @@ namespace x801 {
     struct CLineConfig {
       ClientOrServer mode = HUH;
       std::string ip = "localhost";
+      std::string username = "";
+      std::string password = "";
       uint16_t port = 0;
       bool useIPV6 = false;
+      bool debug = false;
     };
   }
 }

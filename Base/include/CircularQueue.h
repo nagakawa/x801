@@ -69,14 +69,14 @@ namespace x801 {
         makeRoomForBack();
         elements[(start + totalElements - 1) & ((1 << capacity) - 1)] = t;
       }
-      void popFront() {
+      void popFront(size_t n = 1) {
         if (totalElements == 0) return;
-        --totalElements;
-        ++start;
+        totalElements -= n;
+        start += n;
       }
-      void popBack() {
+      void popBack(size_t n = 1) {
         if (totalElements == 0) return;
-        --totalElements;
+        totalElements -= n;
       }
       template<class... Args>
       void emplaceFront(Args&&... args) {

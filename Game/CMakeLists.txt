@@ -10,6 +10,7 @@ SET(PROJECT_INCLUDE_DIR
   ${PROJECT_SOURCE_DIR}/../Base/include
   ${PROJECT_SOURCE_DIR}/../Map/include
   ${PROJECT_SOURCE_DIR}/../argon2/include
+  ${PROJECT_SOURCE_DIR}/../tdr/AGL/include
 )
 
 SET(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -25,8 +26,15 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/sha2.c
   ${PROJECT_SOURCE_DIR}/Credentials.cpp
   ${PROJECT_SOURCE_DIR}/packet.cpp
+  ${PROJECT_SOURCE_DIR}/Location.cpp
   ${PROJECT_SOURCE_DIR}/window/ClientWindow.cpp
   ${PROJECT_SOURCE_DIR}/window/ChatWindow.cpp
+  ${PROJECT_SOURCE_DIR}/window/TerrainRenderer.cpp
+  ${PROJECT_SOURCE_DIR}/window/Patcher.cpp
+  ${PROJECT_SOURCE_DIR}/window/Axes.cpp
+  ${PROJECT_SOURCE_DIR}/window/patcher_views/TextureView.cpp
+  ${PROJECT_SOURCE_DIR}/window/patcher_views/ModelView.cpp
+  ${PROJECT_SOURCE_DIR}/window/patcher_views/MapView.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

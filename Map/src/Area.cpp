@@ -28,8 +28,6 @@ using namespace x801::map;
 #include <utils.h>
 #include "mapErrors.h"
 
-#pragma GCC diagnostic push                // we DO want an explicit ctor
-#pragma GCC diagnostic ignored "-Weffc++"  // since it has complex behaviour
 x801::map::Area::Area(std::istream& fh, bool dontCare) {
   error = 0;
   int header = x801::base::readInt<uint32_t>(fh);
@@ -50,7 +48,6 @@ x801::map::Area::Area(std::istream& fh, bool dontCare) {
     }
   }
 }
-#pragma GCC diagnostic pop
 
 void x801::map::Area::write(std::ostream& fh) const {
   x801::base::writeInt<uint32_t>(fh, 0x70614d58L);
@@ -70,7 +67,7 @@ x801::map::Area::~Area() {
   if (ts != nullptr) delete ts;
 }
 
-#define SECTION_TILE 0x454c4954L
+#define SECTION_TILE 0x334c4954L
 
 int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   int stat = MAPERR_OK;
@@ -83,7 +80,7 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   uint32_t adler32Expected = x801::base::readInt<uint32_t>(fh);
   if (!dontCare) {
     int startPos = fh.tellg();
-    char* buffer = new char[256];
+    char buffer[256];
     uint32_t adler32Actual = adler32(0L, Z_NULL, 0);
     for (unsigned int i = 0; i < (size >> 8); ++i) {
       fh.read(buffer, 256);
@@ -91,7 +88,6 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
     }
     fh.read(buffer, size & 255);
     adler32Actual = adler32(adler32Actual, (const unsigned char*) buffer, size & 255);
-    delete[] buffer;
     fh.clear();
     fh.seekg(startPos);
     assert(fh.tellg() == startPos);
