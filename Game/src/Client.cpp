@@ -29,6 +29,10 @@ using namespace x801::game;
 #include <iostream>
 #include <ratio>
 #include <sstream>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
 #include <GLFW/glfw3.h>
 #include <BitStream.h>
 #include <SecureHandshake.h>
@@ -36,6 +40,7 @@ using namespace x801::game;
 #include "Server.h"
 
 void x801::game::Client::initialise() {
+  readConfig();
   peer = RakNet::RakPeerInterface::GetInstance();
   peer->SetOccasionalPing(true);
   RakNet::SocketDescriptor clientSocket(0, 0);
@@ -89,6 +94,60 @@ void x801::game::Client::initialise() {
     MAKE_LPACKET_CALLBACK_CLIENT_TIMED(processMovement, -1);
   lCallbacks.insert({LPACKET_MOVE, moveCallback});
   listenConcurrent();
+}
+
+static const char* CONFIG_PATH = "intrinsic-assets/config.json";
+
+bool x801::game::Client::readConfig() {
+  // Try to read
+  if (!boost::filesystem::exists(CONFIG_PATH) ||
+      boost::filesystem::is_directory(CONFIG_PATH)) {
+    std::cerr <<
+      "Error: " << CONFIG_PATH <<
+      " doesn't exist or is a directory.\n" <<
+      "Aborting and using defaults.\n";
+    return false;
+  }
+  boost::filesystem::ifstream input(
+    CONFIG_PATH,
+    std::ios_base::in | std::ios_base::binary
+  );
+  std::string s = x801::base::slurp(input);
+  rapidjson::Document config;
+  rapidjson::ParseResult stat = config.Parse(s.c_str());
+  if (stat.IsError()) {
+    std::cerr << "Error when reading config file: " <<
+      rapidjson::GetParseError_En(stat.Code()) << '\n'
+      << "  at offset " << stat.Offset() << '\n';
+    return false;
+  }
+  if (!config.IsObject()) {
+    std::cerr << "Error: Config file must contain a JSON object.\n";
+    return false;
+  }
+  auto endNode = config.MemberEnd();
+  // resolution
+  auto resolutionNode = config.FindMember("resolution");
+  if (resolutionNode != endNode) {
+    if (!resolutionNode->value.IsArray() ||
+        resolutionNode->value.GetArray().Size() != 2) {
+      std::cerr << "Warning: member 'resolution' of config must be " <<
+        "a two-element array of integers." <<
+        "Ignoring this attribute.\n";
+    } else {
+      const auto& wnode = resolutionNode->value[0];
+      const auto& hnode = resolutionNode->value[1];
+      if (!wnode.IsInt() || !hnode.IsInt()) {
+        std::cerr << "Warning: member 'resolution' of config must be " <<
+          "a two-element array of integers." <<
+          "Ignoring this attribute.\n";
+      } else {
+        width = wnode.GetInt();
+        height = hnode.GetInt();
+      }
+    }
+  }
+  return true;
 }
 
 bool x801::game::Client::handlePacket(
@@ -480,9 +539,9 @@ void x801::game::Client::sendKeyInput(const KeyInput& input) {
 void x801::game::Client::openWindow() {
   glfwInit();
   if (debug)
-    cw = new ClientWindow(1280, 960, 0, 0, "Experiment801 (live debug)", 4, 5, true);
+    cw = new ClientWindow(width, height, 0, 0, "Experiment801 (live debug)", 4, 5, true);
   else
-    cw = new ClientWindow(1280, 960, 0, 0, "Experiment801", 3, 3, false);
+    cw = new ClientWindow(width, height, 0, 0, "Experiment801", 3, 3, false);
   cw->c = this;
   cw->start();
   glfwTerminate();

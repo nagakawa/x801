@@ -74,6 +74,7 @@ namespace x801 {
       void setDebug(bool d) { debug = d; }
     private:
       void initialise();
+      bool readConfig();
       bool handlePacket(
         uint8_t packetType,
         uint8_t* body, size_t length,
@@ -140,6 +141,8 @@ namespace x801 {
       ModelView* modelView = nullptr;
       MapView* mapView = nullptr;
       bool debug = false;
+      int width = 1280;
+      int height = 960;
       friend class ClientWindow;
       friend class TerrainRenderer;
     };

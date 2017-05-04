@@ -43,7 +43,11 @@
     "deque": "cpp",
     "list": "cpp",
     "vector": "cpp",
-    "slist": "cpp"
+    "slist": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "utility": "cpp",
+    "system_error": "cpp"
   },
   "python.linting.pylintEnabled": false
 }
