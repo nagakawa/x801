@@ -472,7 +472,7 @@ void x801::game::Client::sendKeyInput(const KeyInput& input) {
   stream.Write((char*) cookie, COOKIE_LEN);
   stream.Write(input.inputs);
   peer->Send(
-    &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 0,
+    &stream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
 }

@@ -1,0 +1,3 @@
+This is the MOTD (message of the day) that was read from motd.txt.
+If you see this, then the MOTD was read correctly.
+Thank you for playing Experiment801.

@@ -27,6 +27,8 @@ using namespace x801::game;
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
 #include <BitStream.h>
 #include <RakNetTypes.h>
 #include <portable_endian.h>
@@ -39,7 +41,13 @@ static const char* SERVER_MOTD =
   "you'll be able to change it through configuration files."
   ;
 
+static const char* FILEHOST_URI = "http://localhost:3000";
+static const char* CONFIG_PATH = "intrinsic-assets/settings.json";
+static const char* MOTD_PATH = "intrinsic-assets/motd.txt";
+
 void x801::game::Server::initialise() {
+  readConfig();
+  readMOTD();
   peer = RakNet::RakPeerInterface::GetInstance();
   peer->SetOccasionalPing(true);
   updateKeyFiles();
@@ -69,6 +77,68 @@ void x801::game::Server::initialise() {
   lCallbacks.insert({LPACKET_MOVE, moveCallback});
   broadcastLocationsConcurrent();
   listen();
+}
+
+bool x801::game::Server::readConfig() {
+  // Default configuration
+  filehost = FILEHOST_URI;
+  // Try to read
+  if (!boost::filesystem::exists(CONFIG_PATH) ||
+      boost::filesystem::is_directory(CONFIG_PATH)) {
+    std::cerr <<
+      "Error: " << CONFIG_PATH <<
+      " doesn't exist or is a directory.\n" <<
+      "Aborting and using defaults.\n";
+    return false;
+  }
+  boost::filesystem::ifstream input(
+    CONFIG_PATH,
+    std::ios_base::in | std::ios_base::binary
+  );
+  std::string s = x801::base::slurp(input);
+  rapidjson::Document config;
+  rapidjson::ParseResult stat = config.Parse(s.c_str());
+  if (stat.IsError()) {
+    std::cerr << "Error when reading config file: " <<
+      rapidjson::GetParseError_En(stat.Code()) << '\n'
+      << "  at offset " << stat.Offset() << '\n';
+    return false;
+  }
+  if (!config.IsObject()) {
+    std::cerr << "Error: Config file must contain a JSON object.\n";
+    return false;
+  }
+  auto endNode = config.MemberEnd();
+  // Filehost
+  auto filehostNode = config.FindMember("filehost");
+  if (filehostNode != endNode) {
+    if (!filehostNode->value.IsString()) {
+      std::cerr << "Warning: member 'filehost' of config must be a string." <<
+        "Ignoring this attribute.\n";
+    }
+    else filehost = filehostNode->value.GetString();
+  }
+  return true;
+}
+
+bool x801::game::Server::readMOTD() {
+  // Default configuration
+  motd = SERVER_MOTD;
+  // Try to read
+  if (!boost::filesystem::exists(MOTD_PATH) ||
+      boost::filesystem::is_directory(MOTD_PATH)) {
+    std::cerr <<
+      "Error: " << MOTD_PATH <<
+      " doesn't exist or is a directory.\n" <<
+      "Aborting and using defaults.\n";
+    return false;
+  }
+  boost::filesystem::ifstream input(
+    MOTD_PATH,
+    std::ios_base::in | std::ios_base::binary
+  );
+  motd = x801::base::slurp(input);
+  return true;
 }
 
 void x801::game::Server::logout(uint32_t playerID) {
@@ -245,7 +315,7 @@ void x801::game::Server::sendMOTD(
   (void) packetType; (void) body; (void) length;
   RakNet::BitStream stream;
   stream.Write(static_cast<RakNet::MessageID>(PACKET_MOTD));
-  writeStringToBitstream32(stream, SERVER_MOTD);
+  writeStringToBitstream32(stream, motd);
   peer->Send(
     &stream,
     HIGH_PRIORITY, RELIABLE_ORDERED,
@@ -394,8 +464,6 @@ void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {
     p->systemAddress, false
   );
 }
-
-static const char* FILEHOST_URI = "http://localhost:3000";
 
 void x801::game::Server::sendFileLocationPacket(RakNet::Packet* p) {
   RakNet::BitStream packet;

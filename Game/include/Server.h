@@ -63,6 +63,8 @@ namespace x801 {
       const uint16_t port;
     private:
       void initialise();
+      bool readConfig();
+      bool readMOTD();
       void updateKeyFiles();
       void handlePacket(
         uint8_t packetType,
@@ -135,6 +137,8 @@ namespace x801 {
       std::multimap<uint8_t, PacketCallback> callbacks;
       std::multimap<uint16_t, LPacketCallback> lCallbacks;
       std::thread broadcastLocationThread;
+      std::string filehost;
+      std::string motd;
       RakNet::Time drift = 0;
       GameState g;
     };

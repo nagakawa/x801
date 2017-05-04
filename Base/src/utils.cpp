@@ -190,3 +190,13 @@ namespace x801 {
     }
   }
 }
+
+std::string x801::base::slurp(std::ifstream& fh) {
+  size_t b = fh.tellg();
+  fh.seekg(0, std::ios_base::end);
+  size_t e = fh.tellg();
+  fh.seekg(b);
+  std::string res(e - b, '\0');
+  fh.read(&res[0], e - b);
+  return res;
+}
