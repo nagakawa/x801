@@ -28,7 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    extern const Location defaultLocation;
+    const Location defaultLocation = {
+      {0, 0},
+      0.0f, 0.0f, 0.0f,
+      0.0f
+    };
     class Player {
     public:
       Player() : playerID(0), location(defaultLocation) {}

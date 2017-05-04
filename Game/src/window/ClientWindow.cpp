@@ -67,6 +67,9 @@ void x801::game::ClientWindow::initialise() {
     0, 0, (float) tr->tex->getWidth(), (float) tr->tex->getHeight(),
   });
   fuck->setUp();
+  for (size_t i = 0; i < FTIMES_TO_STORE; ++i) {
+    ftimes[i] = 100.0f;
+  }
 }
 
 static const int keycodes[] = {

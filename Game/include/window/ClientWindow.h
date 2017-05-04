@@ -56,7 +56,7 @@ namespace x801 {
       agl::Sprite2D* fuck;
       static constexpr size_t FTIMES_TO_STORE = 128;
       float ftimes[FTIMES_TO_STORE];
-      size_t curr;
+      size_t curr = 0;
     };
   }
 }

@@ -357,7 +357,7 @@ void x801::game::Server::processLogin(
     RakNet::Packet* p) {
   (void) packetType;
   RakNet::BitStream stream(body, length, false);
-  std::string string = readStringFromBitstream16(stream);
+  std::string string = readStringFromBitstream16S(stream);
   uint8_t hash[RAW_HASH_LENGTH];
   stream.Read((char*) hash, RAW_HASH_LENGTH);
   Credentials cred(string, hash);
@@ -454,7 +454,7 @@ void x801::game::Server::processMoveRequest(
   boost::shared_lock<boost::shared_mutex> guard(g.playerMutex);
   auto player = g.findPlayer(playerID);
   if (player == g.endOfPlayerMap()) return;
-  ((Player& )player->second).applyKeyInput(input);
+  ((Player&) player->second).applyKeyInput(input);
 }
 
 void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {

@@ -68,7 +68,10 @@ Chunk& x801::map::Chunk::operator=(const Chunk& that) {
   xyz = that.xyz;
   empty = that.empty;
   if (!empty && map == nullptr) map = new Block[BLOCKS_IN_CHUNK];
-  else map = nullptr;
+  else {
+    delete[] map;
+    map = nullptr;
+  }
   if (!empty)
     memcpy(map, that.map, BLOCKS_IN_CHUNK * sizeof(Block));
   return *this;

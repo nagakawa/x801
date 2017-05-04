@@ -145,7 +145,10 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
   //std::cout << "{" << selfPosition.x << ", " << selfPosition.y << ", " << selfPosition.z << ", " << selfPosition.rot << "} ";
   //std::cout << "\n";
   RakNet::Time present = RakNet::GetTime();
-  KeyInput last = { present, history[size - 1].inputs };
+  KeyInput last = {
+    present,
+    (size > 0) ? history[size - 1].inputs : 0
+  };
   selfPosition.applyKeyInput(last, tp);
   lastTimeServer = t;
   historyMutex.unlock_shared();
