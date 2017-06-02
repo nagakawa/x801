@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <imgui.h>
 
+#include <static_block.h>
+
 using namespace x801::game;
 
 x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
@@ -146,12 +148,59 @@ static const uint8_t oriNorthRawToCanonical[3][4] = {
   { UP, DOWN, NORTH, SOUTH },
 };
 
+static const uint8_t oriNorthRawToEast[3][4] = {
+  // UP (direct) or DOWN (inverted)
+  { EAST, WEST, SOUTH, NORTH },
+  // NORTH or SOUTH
+  { WEST, EAST, UP, DOWN },
+  // EAST or WEST
+  { NORTH, SOUTH, DOWN, UP },
+};
+
 static const glm::vec3 oriDirections[6] = {
   {0, 0, 1}, {0, 0, -1},
   {0, 1, 0}, {0, -1, 0},
   {1, 0, 0}, {-1, 0, 0},
 };
-#include <glm/gtx/string_cast.hpp>
+
+static uint8_t oriTable[48][6];
+static uint8_t oriTableInverse[48][6];
+
+/*
+  Computes two lookup tables:
+  after the function is called:
+  table will contain the direct orientation table. That is,
+  table[orientation][direction] will be the direction transformed by
+  that orientation.
+  tableInv[orientation][direction] == old iff
+  table[orientation][old] == direction.
+*/
+static void generateTable(uint8_t table[48][6], uint8_t tableInv[48][6]) {
+  for (size_t i = 0; i < 48; ++i) {
+    uint8_t up = i >> 3;
+    uint8_t northRaw = (i >> 1) & 3;
+    uint8_t north = oriNorthRawToCanonical[up >> 1][northRaw];
+    bool isFlipped = (i & 1) != 0;
+    uint8_t east = oriNorthRawToEast[up >> 1][northRaw] ^ (up & 1) ^ isFlipped;
+    table[i][UP] = up;
+    table[i][DOWN] = up ^ 1;
+    table[i][NORTH] = north;
+    table[i][SOUTH] = north ^ 1;
+    table[i][EAST] = east;
+    table[i][WEST] = east ^ 1;
+    tableInv[i][up] = UP;
+    tableInv[i][up ^ 1] = DOWN;
+    tableInv[i][north] = NORTH;
+    tableInv[i][north ^ 1] = SOUTH;
+    tableInv[i][east] = EAST;
+    tableInv[i][east ^ 1] = WEST;
+  }
+}
+
+static_block {
+  generateTable(oriTable, oriTableInverse);
+}
+
 void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
   using namespace x801::map;
   Block b = chunk->getMapBlockAt(lx, ly, lz);
@@ -171,7 +220,6 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
     glm::cross(oriNewNorthVec, oriNewUpVec);
   glm::mat3 oriMatrix(oriNewEastVec, oriNewNorthVec, oriNewUpVec);
   oriMatrix = transpose(oriMatrix);
-  std::cout << glm::to_string(oriMatrix) << '\n';
   // Get appropriate application and function
   ModelApplication& ma = tr->mai->applications[id - 1];
   ModelFunction& mf = tr->mfi->models[ma.modfnum];
@@ -185,25 +233,35 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
     uint8_t flags = face.occlusionFlags;
     bool occluded = false;
     for (size_t i = 0; i < 6; ++i) {
-      if ((flags & (1 << i)) == 0) continue;
+      // Get true direction of face
+      size_t trueDir = oriTable[ori][i];
+      // This face is not hidden when occluded from this direction.
+      if ((flags & (1 << trueDir)) == 0) continue;
       // If any of them are out of range, they will either be 16 or the max value of size_t.
-      if (disturbed[3 * i] >= 16 || disturbed[3 * i + 1] >= 16 || disturbed[3 * i + 2] >= 16)
+      if (disturbed[3 * trueDir] >= 16 ||
+          disturbed[3 * trueDir + 1] >= 16 ||
+          disturbed[3 * trueDir + 2] >= 16)
         continue;
       Block db = chunk->getMapBlockAt(
-        (size_t) disturbed[3 * i],
-        (size_t) disturbed[3 * i + 1],
-        (size_t) disturbed[3 * i + 2]
+        (size_t) disturbed[3 * trueDir],
+        (size_t) disturbed[3 * trueDir + 1],
+        (size_t) disturbed[3 * trueDir + 2]
       );
+      // This is air.
       if (db.label == 0) continue;
+      uint8_t neighbourOri = db.getOrientation();
+      uint8_t neighbourDir = oriTableInverse[neighbourOri][trueDir];
       // TODO maybe cache the opacity flags?
       ModelApplication& dma = tr->mai->applications[db.getBlockID() - 1];
       ModelFunction dmf = tr->mfi->models[dma.modfnum];
-      if ((dmf.opacityFlags & (1 << (i ^ 1))) == 0) {
+      if ((dmf.opacityFlags & (1 << (neighbourDir ^ 1))) == 0) {
         occluded = true;
         break;
       }
     }
+    // Don't show this face if it's occluded.
     if (occluded) continue;
+    // Add the face to the vertex buffer.
     size_t textureIndex = ma.textures[face.texture];
     for (size_t j = 0; j < 3; ++j) {
       uint16_t index = face.vertices[j].index;
@@ -258,8 +316,8 @@ static const char* FRAGMENT_SOURCE =
   // How many times taller the texture is than wide.
   "uniform float dim; \n"
   "void main() { \n"
-  "vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(0, W)) / vec2(1.0f, dim); \n"
-  "colour = texture(tex, realtc); \n"
+  "  vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(0, W)) / vec2(1.0f, dim); \n"
+  "  colour = texture(tex, realtc); \n"
   "} \n"
   ;
 
