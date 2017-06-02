@@ -125,11 +125,55 @@ void x801::game::ChunkMeshBuffer::createMesh() {
   }
 }
 
+/*
+  See "Data Format Specifications", "Map Format", "Data", "TIL3 section"
+  for more details about how orientation is represented in x801.
+*/
+
+using x801::map::Direction::UP;
+using x801::map::Direction::DOWN;
+using x801::map::Direction::NORTH;
+using x801::map::Direction::SOUTH;
+using x801::map::Direction::EAST;
+using x801::map::Direction::WEST;
+
+static const uint8_t oriNorthRawToCanonical[3][4] = {
+  // UP or DOWN
+  { NORTH, SOUTH, EAST, WEST },
+  // NORTH or SOUTH
+  { UP, DOWN, EAST, WEST },
+  // EAST or WEST
+  { UP, DOWN, NORTH, SOUTH },
+};
+
+static const glm::vec3 oriDirections[6] = {
+  {0, 0, 1}, {0, 0, -1},
+  {0, 1, 0}, {0, -1, 0},
+  {1, 0, 0}, {-1, 0, 0},
+};
+#include <glm/gtx/string_cast.hpp>
 void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
   using namespace x801::map;
   Block b = chunk->getMapBlockAt(lx, ly, lz);
   if (b.label == 0) return; // it is air
-  ModelApplication& ma = tr->mai->applications[b.label - 1];
+  uint32_t id = b.getBlockID();
+  // Extract orientation bits
+  uint8_t ori = b.getOrientation();
+  uint8_t oriNewUp = ori >> 3;
+  uint8_t oriNewNorthRaw = (ori >> 1) & 3;
+  uint8_t oriNewNorth = oriNorthRawToCanonical[oriNewUp >> 1][oriNewNorthRaw];
+  bool oriFlipped = (ori & 1) != 0;
+  // Build rotation matrix
+  glm::vec3 oriNewUpVec = oriDirections[oriNewUp];
+  glm::vec3 oriNewNorthVec = oriDirections[oriNewNorth];
+  glm::vec3 oriNewEastVec = oriFlipped ?
+    glm::cross(oriNewUpVec, oriNewNorthVec) :
+    glm::cross(oriNewNorthVec, oriNewUpVec);
+  glm::mat3 oriMatrix(oriNewEastVec, oriNewNorthVec, oriNewUpVec);
+  oriMatrix = transpose(oriMatrix);
+  std::cout << glm::to_string(oriMatrix) << '\n';
+  // Get appropriate application and function
+  ModelApplication& ma = tr->mai->applications[id - 1];
   ModelFunction& mf = tr->mfi->models[ma.modfnum];
   CMVertex triangle[3];
   size_t disturbed[18] = {
@@ -152,7 +196,7 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
       );
       if (db.label == 0) continue;
       // TODO maybe cache the opacity flags?
-      ModelApplication& dma = tr->mai->applications[db.label - 1];
+      ModelApplication& dma = tr->mai->applications[db.getBlockID() - 1];
       ModelFunction dmf = tr->mfi->models[dma.modfnum];
       if ((dmf.opacityFlags & (1 << (i ^ 1))) == 0) {
         occluded = true;
@@ -164,9 +208,11 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
     for (size_t j = 0; j < 3; ++j) {
       uint16_t index = face.vertices[j].index;
       VertexXYZ& blvertex = mf.vertices[index];
-      triangle[j].x = (lx << 7) + blvertex.x;
-      triangle[j].y = (ly << 7) + blvertex.y;
-      triangle[j].z = (lz << 7) + blvertex.z;
+      glm::vec3 rotatedVertex =
+        oriMatrix * glm::vec3(blvertex.x, blvertex.y, blvertex.z);
+      triangle[j].x = (lx << 7) + rotatedVertex.x;
+      triangle[j].y = (ly << 7) + rotatedVertex.y;
+      triangle[j].z = (lz << 7) + rotatedVertex.z;
       triangle[j].u = face.vertices[j].u;
       triangle[j].v = face.vertices[j].v;
       triangle[j].w = textureIndex;

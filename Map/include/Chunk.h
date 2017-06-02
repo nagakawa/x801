@@ -61,14 +61,11 @@ namespace x801 {
       Block() : label(0) {}
       Block(uint32_t b) : label(b) {}
       uint32_t label;
-      bool isSolid() {
-        return label >> 31;
+      uint8_t getOrientation() {
+        return (uint8_t) (label >> 26);
       }
-      bool getBlockID() {
-        return label & 0xffffff;
-      }
-      bool getElevation() {
-        return (label >> 25) & 63;
+      uint32_t getBlockID() {
+        return label & ((1 << 26) - 1);
       }
       bool operator==(Block other) {
         return label == other.label;
