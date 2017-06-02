@@ -49,12 +49,14 @@ void x801::game::ChatWindow::render() {
     );
     for (size_t i = 0; i < messageCount; ++i) {
       ChatEntry entry = entries[(start + i) % ringSize];
-      std::stringstream output;
-      output << "[" <<
-        window->c->getUsername(entry.playerID) <<
-        "] " << entry.message;
-      std::string str = output.str();
-      ImGui::TextWrapped("%s", str.c_str());
+      std::string username = window->c->getUsername(entry.playerID);
+      ImGui::BeginGroup();
+      ImGui::TextWrapped("[%s]", username.c_str());
+      if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("%s (#%d)", username.c_str(), entry.playerID);
+      ImGui::SameLine();
+      ImGui::TextWrapped("%s", entry.message.c_str());
+      ImGui::EndGroup();
     }
     if (shouldScrollToBottom) {
       ImGui::SetScrollHere();

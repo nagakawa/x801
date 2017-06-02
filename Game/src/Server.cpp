@@ -153,7 +153,6 @@ void x801::game::Server::handlePacket(
     uint8_t* body, size_t length,
     RakNet::Time t,
     RakNet::Packet* p) {
-  std::cerr << "It's a packet! ID = " << (int) packetType << "\n";
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != packetType) {
@@ -173,7 +172,6 @@ void x801::game::Server::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
-  std::cerr << "It's an lpacket! ID = " << lPacketType << "\n";
   std::array<uint8_t, COOKIE_LEN> cookieAsArray;
   for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
   // Not sure why playersByCookie.find(cookieAsArray) returns a
