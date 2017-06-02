@@ -12,6 +12,8 @@ install:
   - ./test
 addons:
   apt:
+    sources:
+      - debian-sid
     packages:
       - libglfw3-dev
       - libglew-dev
