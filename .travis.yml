@@ -13,7 +13,7 @@ install:
 addons:
   apt:
     sources:
-      - sourceline: "http://ftp.us.debian.org/debian/ unstable/main"
+      - sourceline: "deb http://ftp.us.debian.org/debian unstable/main"
     packages:
       - libglfw3-dev
       - libglew-dev
