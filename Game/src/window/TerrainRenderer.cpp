@@ -116,17 +116,6 @@ void x801::game::TerrainRenderer::draw() {
 #endif
 }
 
-void x801::game::ChunkMeshBuffer::createMesh() {
-  opaqueVertices.clear();
-  transparentVertices.clear();
-  for (size_t lx = 0; lx < 16; ++lx) {
-    for (size_t ly = 0; ly < 16; ++ly) {
-      for (size_t lz = 0; lz < 16; ++lz)
-        addBlock(lx, ly, lz);
-    }
-  }
-}
-
 /*
   See "Data Format Specifications", "Map Format", "Data", "TIL3 section"
   for more details about how orientation is represented in x801.
@@ -201,7 +190,42 @@ static_block {
   generateTable(oriTable, oriTableInverse);
 }
 
-void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
+void x801::game::ChunkMeshBuffer::createMesh() {
+  opaqueVertices.clear();
+  transparentVertices.clear();
+  using namespace x801::map;
+  uint8_t obuf[16][16][16];
+  for (size_t lx = 0; lx < 16; ++lx) {
+    for (size_t ly = 0; ly < 16; ++ly) {
+      for (size_t lz = 0; lz < 16; ++lz) {
+        Block db = chunk->getMapBlockAt(lx, ly, lz);
+        // This is air.
+        if (db.label == 0) {
+          obuf[lx][ly][lz] = 0;
+          continue;
+        }
+        uint8_t ori = db.getOrientation();
+        uint8_t opacity = 0;
+        ModelApplication& dma = tr->mai->applications[db.getBlockID() - 1];
+        ModelFunction dmf = tr->mfi->models[dma.modfnum];
+        for (size_t i = 0; i < 6; ++i) {
+          if ((dmf.opacityFlags & (1 << (i ^ 1))) == 0) continue;
+          size_t trueDir = oriTable[ori][i];
+          opacity |= (1 << trueDir);
+        }
+        obuf[lx][ly][lz] = opacity;
+      }
+    }
+  }
+  for (size_t lx = 0; lx < 16; ++lx) {
+    for (size_t ly = 0; ly < 16; ++ly) {
+      for (size_t lz = 0; lz < 16; ++lz)
+        addBlock(lx, ly, lz, obuf);
+    }
+  }
+}
+
+void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]) {
   using namespace x801::map;
   Block b = chunk->getMapBlockAt(lx, ly, lz);
   if (b.label == 0) return; // it is air
@@ -238,11 +262,12 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
       // This face is not hidden when occluded from this direction.
       if ((flags & (1 << trueDir)) == 0) continue;
       // If any of them are out of range, they will either be 16 or the max value of size_t.
-      if (disturbed[3 * trueDir] >= 16 ||
-          disturbed[3 * trueDir + 1] >= 16 ||
-          disturbed[3 * trueDir + 2] >= 16)
+      size_t dx = (size_t) disturbed[3 * trueDir];
+      size_t dy = (size_t) disturbed[3 * trueDir + 1];
+      size_t dz = (size_t) disturbed[3 * trueDir + 2];
+      if (dx >= 16 || dy >= 16 || dz >= 16)
         continue;
-      Block db = chunk->getMapBlockAt(
+      /*Block db = chunk->getMapBlockAt(
         (size_t) disturbed[3 * trueDir],
         (size_t) disturbed[3 * trueDir + 1],
         (size_t) disturbed[3 * trueDir + 2]
@@ -251,10 +276,14 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
       if (db.label == 0) continue;
       uint8_t neighbourOri = db.getOrientation();
       uint8_t neighbourDir = oriTableInverse[neighbourOri][trueDir];
-      // TODO maybe cache the opacity flags?
       ModelApplication& dma = tr->mai->applications[db.getBlockID() - 1];
       ModelFunction dmf = tr->mfi->models[dma.modfnum];
-      if ((dmf.opacityFlags & (1 << (neighbourDir ^ 1))) == 0) {
+      if ((dmf.opacityFlags & (1 << (neighbourDir ^ 1))) != 0) {
+        occluded = true;
+        break;
+      }
+      */
+      if ((obuf[dx][dy][dz] & (1 << trueDir)) != 0) {
         occluded = true;
         break;
       }
