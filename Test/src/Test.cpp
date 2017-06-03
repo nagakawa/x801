@@ -41,10 +41,9 @@ using namespace x801::test;
 #include <mapErrors.h>
 #include <utils.h>
 
-const char* currentEXE = nullptr;
-
 int main(int argc, char** argv) {
-  currentEXE = argv[0];
+  std::cout << "The path of the test exe is " <<
+      x801::base::getPathOfCurrentExecutable() << '\n';
   const char* arg = argc >= 2 ? argv[1] : DEFAULT;
   bool isDefault = argc <= 1 || !strcmp(arg, DEFAULT);
   if (!strcmp(arg, "list")) {

@@ -30,6 +30,7 @@ using namespace x801::game;
 #include <iostream>
 #include <string>
 #include <curl/curl.h>
+#include <boost/filesystem.hpp>
 #include <portable_endian.h>
 #include "Client.h"
 #include "Credentials.h"
@@ -55,7 +56,18 @@ static void handleTerminate() {
   exit(-2);
 }
 
+static boost::filesystem::path oldPath;
+
+void handleExit() {
+  boost::filesystem::current_path(oldPath);
+}
+
 int lmain(int argc, char** argv) {
+  oldPath = boost::filesystem::current_path();
+  boost::filesystem::path ofEXE = x801::base::getPathOfCurrentExecutable();
+  boost::filesystem::current_path(ofEXE.parent_path());
+  atexit(handleExit);
+  at_quick_exit(handleExit);
   setlocale(LC_ALL, "");
   std::set_terminate(handleTerminate);
   if (argc == 1) {
