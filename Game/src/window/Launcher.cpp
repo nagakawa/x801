@@ -1,0 +1,65 @@
+#include "window/Launcher.h"
+
+/*
+Copyright (C) 2016 AGC.
+
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+using namespace x801::game;
+
+#include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw_gl3.h>
+#include "window/imgui_hooks.h"
+
+extern agl::GLFWApplication* agl::currentApp;
+
+void x801::game::Launcher::initialise() {
+  std::cerr << "x801::game::Launcher::initialise();\n";
+  glfwSetInputMode(underlying(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetKeyCallback(underlying(), x801::game::customKeyCallback);
+  glfwSetMouseButtonCallback(underlying(), ImGui_ImplGlfwGL3_MouseButtonCallback);
+  glfwSetScrollCallback(underlying(), ImGui_ImplGlfwGL3_ScrollCallback);
+  glfwSetCharCallback(underlying(), ImGui_ImplGlfwGL3_CharCallback);
+  ImGui_ImplGlfwGL3_Init(underlying(), false);
+  ImGuiIO& io = ImGui::GetIO();
+  //io.Fonts->AddFontFromFileTTF("/home/uruwi/kiloji/kiloji_p.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+  io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, x801::game::range);
+  // blah blah blah
+}
+
+void x801::game::Launcher::tick() {
+  if (glfwWindowShouldClose(underlying())) {
+    glfwSetWindowShouldClose(underlying(), true);
+  }
+  ImGui::Begin("Experiment801");
+  ImGui::End();
+  ImGui::Render();
+}
+
+void x801::game::Launcher::readKeys() {
+
+}
+
+void x801::game::Launcher::onMouse(double xpos, double ypos) {
+  (void) xpos; (void) ypos;
+}
+
+x801::game::Launcher::~Launcher() {
+  ImGui_ImplGlfwGL3_Shutdown();
+}

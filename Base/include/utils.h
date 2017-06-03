@@ -125,5 +125,9 @@ namespace x801 {
     const char* getPointer(std::string s);
 
     std::string slurp(std::ifstream& fh);
+
+    // Simple way to get the path of the current exe.
+    // Doesn't work on ALL platforms, but it covers the big 3
+    std::string getPathOfCurrentExecutable();
   }
 }

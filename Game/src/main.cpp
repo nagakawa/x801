@@ -34,6 +34,7 @@ using namespace x801::game;
 #include "Client.h"
 #include "Credentials.h"
 #include "Server.h"
+#include "window/Launcher.h"
 
 static void handleTerminate() {
   try {
@@ -57,6 +58,11 @@ static void handleTerminate() {
 int lmain(int argc, char** argv) {
   setlocale(LC_ALL, "");
   std::set_terminate(handleTerminate);
+  if (argc == 1) {
+    Launcher launcher;
+    launcher.start();
+    return 0;
+  }
   CLineConfig c;
   int res = readSettings(c, argc, argv);
   if (res != 0) return res;

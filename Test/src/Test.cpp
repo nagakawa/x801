@@ -225,7 +225,7 @@ void testAreaIO() {
 
 
 void testDBAuth() {
-  boost::filesystem::path p = boost::filesystem::system_complete(currentEXE);
+  boost::filesystem::path p = x801::base::getPathOfCurrentExecutable();
   // Fun fact:
   // The original code said
   // boost::filesystem::remove_all(p);

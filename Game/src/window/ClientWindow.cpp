@@ -26,31 +26,21 @@ using namespace x801::game;
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
 #include "Server.h"
+#include "window/imgui_hooks.h"
 
 extern agl::GLFWApplication* agl::currentApp;
-
-static void customKeyCallback(
-    GLFWwindow* window, int key, int scancode, int action, int mode) {
-  ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mode);
-  ImGuiIO& io = ImGui::GetIO();
-  if (io.WantCaptureKeyboard) return;
-  if (action == GLFW_PRESS) agl::currentApp->setKey(key);
-	else if (action == GLFW_RELEASE) agl::currentApp->resetKey(key);
-}
-
-static const ImWchar range[] = { 0x20, 0xFFFF, 0 };
 
 void x801::game::ClientWindow::initialise() {
   std::cerr << "x801::game::ClientWindow::initialise();\n";
   glfwSetInputMode(underlying(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	glfwSetKeyCallback(underlying(), customKeyCallback);
+	glfwSetKeyCallback(underlying(), x801::game::customKeyCallback);
   glfwSetMouseButtonCallback(underlying(), ImGui_ImplGlfwGL3_MouseButtonCallback);
   glfwSetScrollCallback(underlying(), ImGui_ImplGlfwGL3_ScrollCallback);
   glfwSetCharCallback(underlying(), ImGui_ImplGlfwGL3_CharCallback);
   ImGui_ImplGlfwGL3_Init(underlying(), false);
   ImGuiIO& io = ImGui::GetIO();
   //io.Fonts->AddFontFromFileTTF("/home/uruwi/kiloji/kiloji_p.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-  io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, range);
+  io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, x801::game::range);
   chat = new ChatWindow(this);
   tr = new TerrainRenderer(this);
   terrain = new agl::Sprite2D(tr->fboTex);
