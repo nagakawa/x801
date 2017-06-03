@@ -34,7 +34,7 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
   p = c->patcher;
   tv = c->textureView;
   gs = &(c->g);
-  tex = std::move(tv->getTexture("textures/terrain/blocks.png"));
+  tex = tv->getTexture("textures/terrain/blocks.png");
   ModelView* mv = c->modelView;
   mai = mv->getMAI();
   mfi = mv->getMFI();
