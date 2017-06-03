@@ -47,6 +47,9 @@ void x801::game::Launcher::tick() {
   if (glfwWindowShouldClose(underlying())) {
     glfwSetWindowShouldClose(underlying(), true);
   }
+  ImGui_ImplGlfwGL3_NewFrame();
+  glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   ImGui::Begin("Experiment801");
   ImGui::End();
   ImGui::Render();

@@ -71,8 +71,10 @@ int lmain(int argc, char** argv) {
   setlocale(LC_ALL, "");
   std::set_terminate(handleTerminate);
   if (argc == 1) {
-    Launcher launcher;
+    glfwInit();
+    Launcher launcher(1280, 960, 0, 0, "Experiment801", 3, 3, false);
     launcher.start();
+    glfwTerminate();
     return 0;
   }
   CLineConfig c;
