@@ -22,8 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <iostream>
+#include <string>
+#include <thread>
 #include <GLFWApplication.h>
 #include <imgui.h>
+#include <boost/process.hpp>
 
 namespace x801 {
   namespace game {
@@ -39,6 +42,26 @@ namespace x801 {
       }
       ~Launcher();
     private:
+      int tabno = 0;
+      char addressToConnect[256] = "";
+      int portToConnect = 9001;
+      char username[256] = "";
+      char password[256] = "";
+      bool showPassword = false;
+      std::string currentEXE;
+      std::string clientLog;
+      boost::process::child client;
+      boost::process::ipstream clientOutput;
+      std::thread clientThread;
+      void feed(
+        boost::process::child& p,
+        boost::process::ipstream& out,
+        std::string& log);
+      std::thread feedThread(
+        boost::process::child& p,
+        boost::process::ipstream& out,
+        std::string& log);
+      void body();
     };
   }
 }

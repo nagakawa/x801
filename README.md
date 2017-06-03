@@ -32,6 +32,9 @@ files ask for the same libraries as TDR, plus a few other libraries. On Debian
 
 and build PortAudio yourself.
 
+*(Boost.Process is also needed, but since Ubuntu's repositories don't have
+Boost 1.64.0 yet, it's prepackaged in the repo for now.)*
+
 This project also depends on a custom version of RakNet, but this dependency
 is managed by the configuration files so no extra work for you.
 
