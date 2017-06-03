@@ -121,6 +121,14 @@ public:
         _terminated = true;
     }
 
+    void terminate(int code)
+    {
+        if (valid() && running())
+            boost::process::detail::api::terminate(_child_handle, code);
+
+        _terminated = true;
+    }
+
     void wait()
     {
         if (!_exited() && valid())

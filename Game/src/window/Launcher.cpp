@@ -46,6 +46,7 @@ void x801::game::Launcher::initialise() {
   io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, x801::game::range);
   currentEXE = x801::base::getPathOfCurrentExecutable();
   // blah blah blah
+  signal(SIGCHLD, SIG_DFL);
 }
 
 void x801::game::Launcher::tick() {
@@ -77,6 +78,7 @@ void x801::game::Launcher::body() {
       ImGui::InputText("Password", password, 256,
         showPassword ? 0 : ImGuiInputTextFlags_Password);
       ImGui::Checkbox("Show password", &showPassword);
+      ImGui::Checkbox("Use IPV6##client", &useIPV6Client);
       if (client.id() > 0) {
         ImGui::Text("Process running (ID = %d)", client.id());
       } else {
@@ -85,19 +87,52 @@ void x801::game::Launcher::body() {
           client = boost::process::child(
             currentEXE,
             "-c", std::string(addressToConnect), std::to_string(portToConnect),
+            useIPV6Client ? "-6" : "-4",
             "--username", std::string(username),
             "--password", std::string(password),
-            boost::process::std_out > clientOutput
+            boost::process::std_out > clientOutput,
+            boost::process::std_err > clientError
           );
-          clientThread = std::move(feedThread(client, clientOutput, clientLog));
+          if (clientThread.joinable()) clientThread.join();
+          clientThread = std::move(
+            feedThread(client, clientOutput, clientError, clientLog));
         }
       }
       ImGui::NextColumn();
-      ImGui::TextWrapped("%s", clientLog.c_str());
+      ImGui::Text("Log");
+      ImGui::InputTextMultiline("##client", (char*) clientLog.c_str(), clientLog.length(),
+        ImVec2(-20, 0), ImGuiInputTextFlags_ReadOnly);
+      if (ImGui::Button("Clear log##client")) clientLog = "";
       ImGui::Columns(1);
       break;
     }
     case 1: {
+      ImGui::Columns(2);
+      ImGui::InputInt("Port to serve", &portToServe);
+      ImGui::Checkbox("Use IPV6##server", &useIPV6Server);
+      if (server.id() > 0) {
+        ImGui::Text("Process running (ID = %d)", server.id());
+      } else {
+        if (ImGui::Button("Host")) {
+          // login
+          server = boost::process::child(
+            currentEXE,
+            "-s", std::to_string(portToConnect),
+            useIPV6Server ? "-6" : "-4",
+            boost::process::std_out > serverOutput,
+            boost::process::std_err > serverError
+          );
+          if (serverThread.joinable()) serverThread.join();
+          serverThread = std::move(
+            feedThread(server, serverOutput, serverError, serverLog));
+        }
+      }
+      ImGui::NextColumn();
+      ImGui::Text("Log");
+      ImGui::InputTextMultiline("##server", (char*) serverLog.c_str(), serverLog.length(),
+        ImVec2(-20, 0), ImGuiInputTextFlags_ReadOnly);
+      if (ImGui::Button("Clear log##server")) serverLog = "";
+      ImGui::Columns(1);
       break;
     }
     case 2: {
@@ -116,25 +151,38 @@ void x801::game::Launcher::onMouse(double xpos, double ypos) {
 
 x801::game::Launcher::~Launcher() {
   ImGui_ImplGlfwGL3_Shutdown();
+  client.terminate(SIGTERM);
+  server.terminate(SIGTERM);
   if (clientThread.joinable()) clientThread.join();
+  if (serverThread.joinable()) serverThread.join();
 }
 
 void x801::game::Launcher::feed(
     boost::process::child& p,
     boost::process::ipstream& out,
+    boost::process::ipstream& err,
     std::string& log) {
   std::string line;
-  while (p.running() && std::getline(out, line)) {
+  while (p.running() &&
+      (std::getline(out, line) || std::getline(err, line))) {
     log += line;
     log += '\n';
   }
-  // p.wait();
+  p.wait();
+  log += "Process returned with exit code ";
+  log += std::to_string(p.exit_code());
+  log += " \n";
   p = boost::process::child();
+  out = boost::process::ipstream();
+  err = boost::process::ipstream();
 }
 
 std::thread x801::game::Launcher::feedThread(
     boost::process::child& p,
     boost::process::ipstream& out,
+    boost::process::ipstream& err,
     std::string& log) {
-  return std::thread([this, &p, &out, &log]() { this->feed(p, out, log); });
+  return std::thread([this, &p, &out, &err, &log]() {
+    this->feed(p, out, err, log);
+  });
 }

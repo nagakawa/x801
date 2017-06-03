@@ -28,6 +28,14 @@ inline void terminate(const child_handle &p)
     ::waitpid(p.pid, &status, 0); //just to clean it up
 }
 
+inline void terminate(const child_handle &p, int sigcode)
+{
+    if (::kill(p.pid, sigcode) == -1)
+        boost::process::detail::throw_last_error("kill(2) failed");
+    int status;
+    ::waitpid(p.pid, &status, 0); //just to clean it up
+}
+
 inline void terminate(const child_handle &p, std::error_code &ec) noexcept
 {
     if (::kill(p.pid, SIGKILL) == -1)

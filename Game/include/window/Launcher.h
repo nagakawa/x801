@@ -48,18 +48,29 @@ namespace x801 {
       char username[256] = "";
       char password[256] = "";
       bool showPassword = false;
+      bool useIPV6Client = false;
+      int portToServe = 9001;
+      bool useIPV6Server = false;
       std::string currentEXE;
       std::string clientLog;
       boost::process::child client;
       boost::process::ipstream clientOutput;
+      boost::process::ipstream clientError;
       std::thread clientThread;
+      std::string serverLog;
+      boost::process::child server;
+      boost::process::ipstream serverOutput;
+      boost::process::ipstream serverError;
+      std::thread serverThread;
       void feed(
         boost::process::child& p,
         boost::process::ipstream& out,
+        boost::process::ipstream& err,
         std::string& log);
       std::thread feedThread(
         boost::process::child& p,
         boost::process::ipstream& out,
+        boost::process::ipstream& err,
         std::string& log);
       void body();
     };

@@ -112,6 +112,7 @@ const char* x801::game::USAGE =
   "  Game [-6] [-d] --client <address> <port>\n"
   "  Game [-6] --server <port>\n"
   "  -6 (--use-ipv6): use IPV6\n"
+  "  -4 (--use-ipv4): use IPV4\n"
   "  --client <address> <port> (-c): start a client\n"
   "  --server <port> (-s): start a server\n"
   "  -d (--debug): for clients, enable OpenGL live debugging\n"
@@ -151,6 +152,7 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
         if (!strcmp(name, "client") || !strcmp(name, "cheryl")) mode = CLIENT;
         else if (!strcmp(name, "server") || !strcmp(name, "samantha")) mode = SERVER;
         else if (!strcmp(name, "use-ipv6")) cn.useIPV6 = true;
+        else if (!strcmp(name, "use-ipv4")) cn.useIPV6 = false;
         else if (!strcmp(name, "debug")) cn.debug = true;
         else if (!strcmp(name, "username")) {
           if (i == argc - 1) ok = false;
@@ -177,6 +179,8 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
             mode = SERVER; break;
           case '6':
             cn.useIPV6 = true; break;
+          case '4':
+            cn.useIPV6 = false; break;
           case 'd':
             cn.debug = true; break;
           default:

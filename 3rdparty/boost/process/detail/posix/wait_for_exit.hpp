@@ -26,7 +26,7 @@ inline void wait(const child_handle &p, int & exit_code)
     do
     {
         ret = ::waitpid(p.pid, &status, 0);
-    } while (((ret == -1) && (errno == EINTR)) || (ret != -1 && !WIFEXITED(status)));
+    } while (((ret == -1) && (errno == EINTR))/* || (ret != -1 && !WIFEXITED(status))*/);
     if (ret == -1)
         boost::process::detail::throw_last_error("waitpid(2) failed");
      exit_code = status;
