@@ -497,7 +497,7 @@ void x801::game::Server::broadcastLocations() {
         int32_t xfix = (int32_t) (loc.x * 65536.0f);
         int32_t yfix = (int32_t) (loc.y * 65536.0f);
         uint32_t tfix =
-          (uint32_t) (fmod(loc.rot, 2 * M_PI) * 65536.0f * 65536.0f / (2 * M_PI));
+          (uint32_t) ((fmod(loc.rot, 2 * M_PI) / (2 * M_PI)) * 65536.0f * 65536.0f);
         output.Write(xfix);
         output.Write(yfix);
         output.Write(tfix);

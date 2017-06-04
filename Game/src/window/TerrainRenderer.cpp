@@ -38,7 +38,10 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
   ModelView* mv = c->modelView;
   mai = mv->getMAI();
   mfi = mv->getMFI();
-  assert(cw != nullptr && c != nullptr && p != nullptr && tv != nullptr && gs != nullptr && tex != nullptr);
+  assert(
+    cw != nullptr && c != nullptr &&
+    p != nullptr && tv != nullptr &&
+    gs != nullptr && tex != nullptr);
   agl::FBOTexMS ft = agl::makeFBOForMeMS(cw->getWidth(), cw->getHeight());
   fboTex = ft.ss.texture;
   fboTexMS = ft.ms.texture;
@@ -104,14 +107,12 @@ void x801::game::TerrainRenderer::draw() {
       }
     }
   }
-  (void) rendered;
   bool isChatWindowOpen = ImGui::Begin("Basic info");
   if (isChatWindowOpen) {
     ImGui::TextWrapped("%zu chunks rendered", rendered);
   }
   ImGui::End();
 #ifndef NDEBUG
-  //std::cerr << rendered << " chunks rendered\n";
   axes.render();
 #endif
 }
@@ -260,14 +261,14 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz, uint
   uint8_t oriNewNorthRaw = (ori >> 1) & 3;
   uint8_t oriNewNorth = oriNorthRawToCanonical[oriNewUp >> 1][oriNewNorthRaw];
   bool oriFlipped = (ori & 1) != 0;
-  //uint8_t oriNewEast = oriNorthRawToEast[oriNewUp >> 1][oriNewNorthRaw] ^ (oriNewUp & 1) ^ oriFlipped;
+  // uint8_t oriNewEast = oriNorthRawToEast[oriNewUp >> 1][oriNewNorthRaw] ^ (oriNewUp & 1) ^ oriFlipped;
   // Build rotation matrix
   glm::vec3 oriNewUpVec = oriDirections[oriNewUp];
   glm::vec3 oriNewNorthVec = oriDirections[oriNewNorth];
   glm::vec3 oriNewEastVec = oriFlipped ?
     glm::cross(oriNewUpVec, oriNewNorthVec) :
     glm::cross(oriNewNorthVec, oriNewUpVec);
-  //glm::vec3 oriNewEastVec = oriDirections[oriNewEast];
+  // glm::vec3 oriNewEastVec = oriDirections[oriNewEast];
   glm::mat3 oriMatrix(oriNewEastVec, oriNewNorthVec, oriNewUpVec);
   oriMatrix = glm::transpose(oriMatrix);
   // Get appropriate application and function
@@ -410,7 +411,7 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   } else {
     glDisable(GL_BLEND);
   }
-  //glDisable(GL_DEPTH_TEST);
+  // glDisable(GL_DEPTH_TEST);
   vao[layer].setActive();
   program[layer].use();
   glm::mat4 mvp;
@@ -447,13 +448,6 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
     glm::vec3(selfPos.x + cosf(theta), selfPos.y + sinf(theta), selfPos.z + 1.6f),
     glm::vec3(0.0f, 0.0f, 1.0f)
   );
-  /*
-  bool isChatWindowOpen = ImGui::Begin("Basic info");
-  if (isChatWindowOpen) {
-    //ImGui::TextWrapped("Self theta: %f", (double) theta);
-  }
-  ImGui::End();
-  */
 #ifndef NDEBUG
   tr->axes.setMVP(mvp);
 #endif

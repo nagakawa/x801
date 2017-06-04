@@ -43,5 +43,6 @@ bool x801::game::Location::applyKeyInput(KeyInput input, RakNet::Time last) {
   if (rot > 10 || rot < -10) {
     std::cout << "Shit\n";
   }
+  rot = fmod(rot, 2 * M_PI);
   return true;
 }

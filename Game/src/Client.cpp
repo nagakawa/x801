@@ -218,7 +218,6 @@ void x801::game::Client::listen() {
       if (p->data[0] == ID_TIMESTAMP) {
         RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
-        // fprintf(stderr, "Time: %llx ~ %llx\n", t, RakNet::GetTime());
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
