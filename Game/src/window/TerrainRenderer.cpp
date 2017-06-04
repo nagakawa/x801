@@ -234,7 +234,7 @@ void x801::game::ChunkMeshBuffer::createMesh() {
         ModelFunction dmf = tr->mfi->models[dma.modfnum];
         for (size_t i = 0; i < 6; ++i) {
           if ((dmf.opacityFlags & (1 << i)) == 0) continue;
-          size_t trueDir = oriTable[ori][i];
+          size_t trueDir = oriTableInverse[ori][i];
           opacity |= (1 << trueDir);
         }
         obuf[lx][ly][lz] = opacity;
@@ -260,14 +260,16 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz, uint
   uint8_t oriNewNorthRaw = (ori >> 1) & 3;
   uint8_t oriNewNorth = oriNorthRawToCanonical[oriNewUp >> 1][oriNewNorthRaw];
   bool oriFlipped = (ori & 1) != 0;
+  //uint8_t oriNewEast = oriNorthRawToEast[oriNewUp >> 1][oriNewNorthRaw] ^ (oriNewUp & 1) ^ oriFlipped;
   // Build rotation matrix
   glm::vec3 oriNewUpVec = oriDirections[oriNewUp];
   glm::vec3 oriNewNorthVec = oriDirections[oriNewNorth];
   glm::vec3 oriNewEastVec = oriFlipped ?
     glm::cross(oriNewUpVec, oriNewNorthVec) :
     glm::cross(oriNewNorthVec, oriNewUpVec);
+  //glm::vec3 oriNewEastVec = oriDirections[oriNewEast];
   glm::mat3 oriMatrix(oriNewEastVec, oriNewNorthVec, oriNewUpVec);
-  oriMatrix = transpose(oriMatrix);
+  oriMatrix = glm::transpose(oriMatrix);
   // Get appropriate application and function
   ModelApplication& ma = tr->mai->applications[id - 1];
   ModelFunction& mf = tr->mfi->models[ma.modfnum];
@@ -284,7 +286,7 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz, uint
       // This face is not hidden when occluded from this direction.
       if ((flags & (1 << i)) == 0) continue;
       // Get true direction of face (direction after rotation)
-      size_t trueDir = oriTable[ori][i];
+      size_t trueDir = oriTableInverse[ori][i];
       // If any of the coordinates are out of range,
       // they will either be 16 or the max value of size_t.
       // For now, we're not occluding faces based on those
