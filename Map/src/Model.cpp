@@ -141,3 +141,7 @@ void x801::map::ModelApplicationIndex::write(std::ostream& fh) {
     applications[i].write(fh);
   }
 }
+
+const char* x801::map::DIRECTION_NAMES[6] = {
+  "UP", "DOWN", "NORTH", "SOUTH", "EAST", "WEST"
+};

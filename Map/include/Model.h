@@ -50,6 +50,7 @@ namespace x801 {
       EAST,
       WEST
     };
+    extern const char* DIRECTION_NAMES[6];
     // XYZ are represented as follows:
     // 0 represents the center of the block.
     // +/- 64 represents 0.5 block units.

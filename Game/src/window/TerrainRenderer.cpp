@@ -137,6 +137,7 @@ static const uint8_t oriNorthRawToCanonical[3][4] = {
   { UP, DOWN, NORTH, SOUTH },
 };
 
+// This is the direction of -(newUp x newNorth).
 static const uint8_t oriNorthRawToEast[3][4] = {
   // UP (direct) or DOWN (inverted)
   { EAST, WEST, SOUTH, NORTH },
@@ -165,6 +166,7 @@ static uint8_t oriTableInverse[48][6];
   table[orientation][old] == direction.
 */
 static void generateTable(uint8_t table[48][6], uint8_t tableInv[48][6]) {
+  std::cerr << "generating orientation tables...\n";
   for (size_t i = 0; i < 48; ++i) {
     uint8_t up = i >> 3;
     uint8_t northRaw = (i >> 1) & 3;
@@ -184,6 +186,23 @@ static void generateTable(uint8_t table[48][6], uint8_t tableInv[48][6]) {
     tableInv[i][east] = EAST;
     tableInv[i][east ^ 1] = WEST;
   }
+  using x801::map::DIRECTION_NAMES;
+  std::cout << "ORI\t#\tUP\tDOWN\tNORTH\tSOUTH\tEAST\tWEST\n";
+  for (size_t i = 0; i < 48; ++i) {
+    uint8_t up = i >> 3;
+    uint8_t northRaw = (i >> 1) & 3;
+    uint8_t north = oriNorthRawToCanonical[up >> 1][northRaw];
+    bool isFlipped = (i & 1) != 0;
+    uint8_t east = oriNorthRawToEast[up >> 1][northRaw] ^ (up & 1) ^ isFlipped;
+    std::cout << DIRECTION_NAMES[up][0];
+    std::cout << DIRECTION_NAMES[north][0];
+    std::cout << DIRECTION_NAMES[east][0];
+    std::cout << '\t' << i;
+    for (size_t j = 0; j < 6; ++j) {
+      std::cout << '\t' << DIRECTION_NAMES[table[i][j]];
+    }
+    std::cout << '\n';
+  }
 }
 
 static_block {
@@ -195,21 +214,26 @@ void x801::game::ChunkMeshBuffer::createMesh() {
   transparentVertices.clear();
   using namespace x801::map;
   uint8_t obuf[16][16][16];
+  // obuf[lx][ly][lz] has bit i set iff
+  // the block at (lx, ly, lz) is opaque at
+  // the direction i
   for (size_t lx = 0; lx < 16; ++lx) {
     for (size_t ly = 0; ly < 16; ++ly) {
       for (size_t lz = 0; lz < 16; ++lz) {
         Block db = chunk->getMapBlockAt(lx, ly, lz);
-        // This is air.
+        // This is air, which is obviously transparent all over.
         if (db.label == 0) {
           obuf[lx][ly][lz] = 0;
           continue;
         }
+        // Otherwise, set the entry to the opacity flags
+        // rotated according to ori.
         uint8_t ori = db.getOrientation();
         uint8_t opacity = 0;
         ModelApplication& dma = tr->mai->applications[db.getBlockID() - 1];
         ModelFunction dmf = tr->mfi->models[dma.modfnum];
         for (size_t i = 0; i < 6; ++i) {
-          if ((dmf.opacityFlags & (1 << (i ^ 1))) == 0) continue;
+          if ((dmf.opacityFlags & (1 << i)) == 0) continue;
           size_t trueDir = oriTable[ori][i];
           opacity |= (1 << trueDir);
         }
@@ -257,33 +281,21 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz, uint
     uint8_t flags = face.occlusionFlags;
     bool occluded = false;
     for (size_t i = 0; i < 6; ++i) {
-      // Get true direction of face
-      size_t trueDir = oriTable[ori][i];
       // This face is not hidden when occluded from this direction.
-      if ((flags & (1 << trueDir)) == 0) continue;
-      // If any of them are out of range, they will either be 16 or the max value of size_t.
+      if ((flags & (1 << i)) == 0) continue;
+      // Get true direction of face (direction after rotation)
+      size_t trueDir = oriTable[ori][i];
+      // If any of the coordinates are out of range,
+      // they will either be 16 or the max value of size_t.
+      // For now, we're not occluding faces based on those
+      // in a different chunk.
       size_t dx = (size_t) disturbed[3 * trueDir];
       size_t dy = (size_t) disturbed[3 * trueDir + 1];
       size_t dz = (size_t) disturbed[3 * trueDir + 2];
       if (dx >= 16 || dy >= 16 || dz >= 16)
         continue;
-      /*Block db = chunk->getMapBlockAt(
-        (size_t) disturbed[3 * trueDir],
-        (size_t) disturbed[3 * trueDir + 1],
-        (size_t) disturbed[3 * trueDir + 2]
-      );
-      // This is air.
-      if (db.label == 0) continue;
-      uint8_t neighbourOri = db.getOrientation();
-      uint8_t neighbourDir = oriTableInverse[neighbourOri][trueDir];
-      ModelApplication& dma = tr->mai->applications[db.getBlockID() - 1];
-      ModelFunction dmf = tr->mfi->models[dma.modfnum];
-      if ((dmf.opacityFlags & (1 << (neighbourDir ^ 1))) != 0) {
-        occluded = true;
-        break;
-      }
-      */
-      if ((obuf[dx][dy][dz] & (1 << trueDir)) != 0) {
+      // Should this face be occluded?
+      if ((obuf[dx][dy][dz] & (1 << (trueDir ^ 1))) != 0) {
         occluded = true;
         break;
       }
