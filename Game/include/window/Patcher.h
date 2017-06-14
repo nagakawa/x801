@@ -39,7 +39,7 @@ namespace x801 {
     extern const char* PATCHER_DIR;
     class Patcher {
     public:
-      Patcher(std::string u);
+      Patcher(std::string u, std::string addressOfServer);
       ~Patcher();
       Patcher(const Patcher& other) = delete;
       Patcher& operator=(const Patcher& other) = delete;

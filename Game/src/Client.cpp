@@ -372,7 +372,7 @@ void x801::game::Client::processFilehostURIResponse(
     RakNet::Packet* p) {
   (void) p; (void) packetType;
   RakNet::BitStream input(body, length, false);
-  patcher = new Patcher(readStringFromBitstream16S(input));
+  patcher = new Patcher(readStringFromBitstream16S(input), ipAddress);
   patcher->startFetchThread();
   textureView = new TextureView(patcher);
   modelView = new ModelView(patcher);

@@ -27,13 +27,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/filesystem.hpp>
 #include <rapidjson/document.h>
 #include <RakNetTypes.h>
+
+#include <utils.h>
 #include "Database.h"
 
 using namespace x801::game;
 
 const char* x801::game::PATCHER_DIR = "gamedat/";
 
-x801::game::Patcher::Patcher(std::string u) {
+x801::game::Patcher::Patcher(std::string u, std::string addressOfServer) {
   if (!boost::filesystem::is_directory(PATCHER_DIR)) {
     std::cout <<
       "Warning: overwriting " << PATCHER_DIR <<
@@ -46,6 +48,12 @@ x801::game::Patcher::Patcher(std::string u) {
 #ifndef NDEBUG
   curl_easy_setopt(curl, CURLOPT_VERBOSE, true);
 #endif
+  if (x801::base::canBeConvertedToPositiveInt(u.c_str())) {
+    // Bare number.
+    // In this case, the address is the same as that of the server
+    // itself, except with a different port number.
+    u = std::string("http://") + addressOfServer + ":" + u;
+  }
   std::string urishadow = u;
   std::cout << urishadow.c_str() << '\n';
   size_t index = urishadow.find("://") + 3;
@@ -246,10 +254,7 @@ uint32_t x801::game::Patcher::getVersionFromServer(const char* fname) {
   long responseCode;
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
   if (responseCode != 200) return -1;
-  //std::cerr << "*** File " << fname << " ***\n";
-  //std::cerr << "Response code: " << responseCode << "\n";
   std::string s = ss.str();
-  //std::cerr << "Contents: " << s << "\n";
   return std::stoul(s);
 }
 

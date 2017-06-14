@@ -242,5 +242,15 @@ std::string x801::base::getPathOfCurrentExecutable() {
   return std::string(buf);
 }
 #else
-#error "your OS isn't supported"
+#error "your OS isn't supported; contact Uruwi for help"
 #endif
+
+bool x801::base::canBeConvertedToPositiveInt(const char* s, int* out) {
+  int numberOfDigits = strspn(s, "0123456789");
+  // there are more non-digit characters
+  if (s[numberOfDigits] != '\0') return false;
+  if (out != nullptr) {
+    *out = atoi(s);
+  }
+  return true;
+}

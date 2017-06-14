@@ -129,5 +129,7 @@ namespace x801 {
     // Simple way to get the path of the current exe.
     // Doesn't work on ALL platforms, but it covers the big 3
     std::string getPathOfCurrentExecutable();
+
+    bool canBeConvertedToPositiveInt(const char* s, int* out = nullptr);
   }
 }
