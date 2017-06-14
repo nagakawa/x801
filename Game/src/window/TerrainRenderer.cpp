@@ -187,6 +187,9 @@ static void generateTable(uint8_t table[48][6], uint8_t tableInv[48][6]) {
     tableInv[i][east] = EAST;
     tableInv[i][east ^ 1] = WEST;
   }
+}
+
+static void printTable(uint8_t table[48][6]) {
   using x801::map::DIRECTION_NAMES;
   std::cout << "ORI\t#\tUP\tDOWN\tNORTH\tSOUTH\tEAST\tWEST\n";
   for (size_t i = 0; i < 48; ++i) {
@@ -208,6 +211,7 @@ static void generateTable(uint8_t table[48][6], uint8_t tableInv[48][6]) {
 
 static_block {
   generateTable(oriTable, oriTableInverse);
+  printTable(oriTable);
 }
 
 void x801::game::ChunkMeshBuffer::createMesh() {
