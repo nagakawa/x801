@@ -55,11 +55,9 @@ x801::game::Patcher::Patcher(std::string u) {
   char aname[64];
   addr.ToString(true, aname, '_');
   if (!stat) throw "Address of connected server unknown";
-  std::stringstream dfnamein;
-  dfnamein << PATCHER_DIR << "gd_" << aname << ".dat";
   // This is to be a filename as such:
   // gd_127.0.0.1_9001.dat
-  std::string dfname = dfnamein.str();
+  std::string dfname = std::string(PATCHER_DIR) + "gd_" + aname + ".dat";
   open(conn, dfname.c_str());
   createFileTable();
   uri = u;
