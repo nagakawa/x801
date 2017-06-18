@@ -118,6 +118,7 @@ namespace x801 {
       void sendUnrecognisedCookiePacket(RakNet::Packet* p);
       void sendFileLocationPacket(RakNet::Packet* p);
       void broadcastLocations();
+      void broadcastLocationsTo(const std::unique_ptr<AreaWithPlayers>& area);
       void broadcastLocationsConcurrent();
       RakNet::RakPeerInterface* peer = nullptr;
       char* publicKey = nullptr;

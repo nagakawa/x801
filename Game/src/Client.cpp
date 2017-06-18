@@ -190,7 +190,7 @@ bool x801::game::Client::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
-  lcallbackLock.lock();
+  lCallbackLock.lock();
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != lPacketType) {

@@ -184,7 +184,7 @@ void x801::game::Server::handleLPacket(
     sendUnrecognisedCookiePacket(p);
   }
   uint32_t playerID = playersByCookie[cookieAsArray];
-  lcallbackLock.lock();
+  lCallbackLock.lock();
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != lPacketType) {
@@ -196,7 +196,7 @@ void x801::game::Server::handleLPacket(
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
   }
-  lcallbackLock.unlock();
+  lCallbackLock.unlock();
 }
 #include <stdio.h>
 void x801::game::Server::listen() {
@@ -477,6 +477,40 @@ void x801::game::Server::sendFileLocationPacket(RakNet::Packet* p) {
   );
 }
 
+void x801::game::Server::broadcastLocationsTo(
+    const std::unique_ptr<AreaWithPlayers>& area) {
+  RakNet::BitStream output;
+  output.Write(static_cast<uint8_t>(ID_TIMESTAMP));
+  output.Write(RakNet::GetTime());
+  output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  output.Write(static_cast<uint16_t>(LPACKET_MOVE));
+  auto begin = area->playerBegin();
+  auto end = area->playerEnd();
+  area->playerMutex.lock_shared();
+  uint32_t count = area->playerCount();
+  output.Write(count);
+  for (auto it = begin; it != end; ++it) {
+    uint32_t id = *it;
+    output.Write(id);
+    const Location& loc = g.allPlayers.at(id).getLocation();
+    int32_t xfix = (int32_t) (loc.x * 65536.0f);
+    int32_t yfix = (int32_t) (loc.y * 65536.0f);
+    uint32_t tfix =
+      (uint32_t) ((fmod(loc.rot, 2 * M_PI) / (2 * M_PI)) * 65536.0f * 65536.0f);
+    output.Write(xfix);
+    output.Write(yfix);
+    output.Write(tfix);
+  }
+  for (auto it = begin; it != end; ++it) {
+    // std::cerr << "* Sending to player #" << *it << "\n";
+    peer->Send(
+      &output, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 2,
+      addressesByPlayer[*it], false
+    );
+  }
+  area->playerMutex.unlock_shared();
+}
+
 void x801::game::Server::broadcastLocations() {
   using namespace std::chrono_literals;
   while (true) {
@@ -484,36 +518,7 @@ void x801::game::Server::broadcastLocations() {
     // Location packets should be sent only to those in the same area
     for (const auto& pair : g.areas) {
       const std::unique_ptr<AreaWithPlayers>& area = pair.second;
-      RakNet::BitStream output;
-      output.Write(static_cast<uint8_t>(ID_TIMESTAMP));
-      output.Write(RakNet::GetTime());
-      output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
-      output.Write(static_cast<uint16_t>(LPACKET_MOVE));
-      auto begin = area->playerBegin();
-      auto end = area->playerEnd();
-      area->playerMutex.lock_shared();
-      uint32_t count = area->playerCount();
-      output.Write(count);
-      for (auto it = begin; it != end; ++it) {
-        uint32_t id = *it;
-        output.Write(id);
-        const Location& loc = g.allPlayers.at(id).getLocation();
-        int32_t xfix = (int32_t) (loc.x * 65536.0f);
-        int32_t yfix = (int32_t) (loc.y * 65536.0f);
-        uint32_t tfix =
-          (uint32_t) ((fmod(loc.rot, 2 * M_PI) / (2 * M_PI)) * 65536.0f * 65536.0f);
-        output.Write(xfix);
-        output.Write(yfix);
-        output.Write(tfix);
-      }
-      for (auto it = begin; it != end; ++it) {
-        // std::cerr << "* Sending to player #" << *it << "\n";
-        peer->Send(
-          &output, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 2,
-          addressesByPlayer[*it], false
-        );
-      }
-      area->playerMutex.unlock_shared();
+      broadcastLocationsTo(area);
     }
     g.playerMutex.unlock_shared();
     std::this_thread::sleep_for(50ms);
