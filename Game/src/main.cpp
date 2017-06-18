@@ -149,11 +149,16 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
     } else if (arg[0] == '-') {
       if (arg[1] == '-') {
         const char* name = arg + 2;
-        if (!strcmp(name, "client") || !strcmp(name, "cheryl")) mode = CLIENT;
-        else if (!strcmp(name, "server") || !strcmp(name, "samantha")) mode = SERVER;
-        else if (!strcmp(name, "use-ipv6")) cn.useIPV6 = true;
-        else if (!strcmp(name, "use-ipv4")) cn.useIPV6 = false;
-        else if (!strcmp(name, "debug")) cn.debug = true;
+        if (!strcmp(name, "client") || !strcmp(name, "cheryl"))
+          mode = CLIENT;
+        else if (!strcmp(name, "server") || !strcmp(name, "samantha"))
+          mode = SERVER;
+        else if (!strcmp(name, "use-ipv6"))
+          cn.useIPV6 = true;
+        else if (!strcmp(name, "use-ipv4"))
+          cn.useIPV6 = false;
+        else if (!strcmp(name, "debug"))
+          cn.debug = true;
         else if (!strcmp(name, "username")) {
           if (i == argc - 1) ok = false;
           else {
