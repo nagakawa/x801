@@ -153,6 +153,7 @@ void x801::game::Server::handlePacket(
     uint8_t* body, size_t length,
     RakNet::Time t,
     RakNet::Packet* p) {
+  callbackLock.lock();
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != packetType) {
@@ -164,6 +165,7 @@ void x801::game::Server::handlePacket(
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
     else ++iterator;
   }
+  callbackLock.unlock();
 }
 void x801::game::Server::handleLPacket(
     uint16_t lPacketType, uint8_t* cookie,
@@ -182,6 +184,7 @@ void x801::game::Server::handleLPacket(
     sendUnrecognisedCookiePacket(p);
   }
   uint32_t playerID = playersByCookie[cookieAsArray];
+  lcallbackLock.lock();
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != lPacketType) {
@@ -193,6 +196,7 @@ void x801::game::Server::handleLPacket(
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
   }
+  lcallbackLock.unlock();
 }
 #include <stdio.h>
 void x801::game::Server::listen() {

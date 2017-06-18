@@ -136,6 +136,8 @@ namespace x801 {
       > cookiesByPlayer;
       std::multimap<uint8_t, PacketCallback> callbacks;
       std::multimap<uint16_t, LPacketCallback> lCallbacks;
+      mutable std::mutex callbackLock;
+      mutable std::mutex lCallbackLock;
       std::thread broadcastLocationThread;
       std::string filehost;
       std::string motd;

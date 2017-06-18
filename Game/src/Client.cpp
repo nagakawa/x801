@@ -168,6 +168,7 @@ bool x801::game::Client::handlePacket(
     std::cout << "Failed to connect to server.\n";
     return false;
   }
+  callbackLock.lock();
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != packetType) {
@@ -179,6 +180,7 @@ bool x801::game::Client::handlePacket(
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
     else ++iterator;
   }
+  callbackLock.unlock();
   return true;
 }
 bool x801::game::Client::handleLPacket(
@@ -188,6 +190,7 @@ bool x801::game::Client::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
+  lcallbackLock.lock();
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != lPacketType) {
@@ -199,6 +202,7 @@ bool x801::game::Client::handleLPacket(
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
   }
+  lCallbackLock.unlock();
   return true;
 }
 
