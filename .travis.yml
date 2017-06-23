@@ -1,0 +1,35 @@
+language: cpp
+sudo: enabled
+dist: trusty
+before_install:
+  - pip3 install numpy simpleeval
+  - chmod +x install-dependencies.sh
+  - sudo ./install-dependencies.sh
+install:
+  - cmake .
+  - make
+  - make -f make-assets
+  - chmod +x test
+  - ./test
+addons:
+  apt:
+    sources:
+      - sourceline: "deb http://ftp.us.debian.org/debian unstable main"
+    packages:
+      - libglfw3-dev
+      - libglew-dev
+      - libsoil-dev
+      - libglm-dev
+      - libcairo2-dev
+      - libpango1.0-dev
+      - libglib2.0-dev
+      - zlib1g-dev
+      - libboost-dev
+      - libsqlite3-dev
+      - libboost-filesystem-dev
+      - libboost-random-dev
+      - libasound2-dev
+      - libogg-dev
+      - libvorbis-dev
+      - cmake
+      - python3-pip

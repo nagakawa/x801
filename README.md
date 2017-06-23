@@ -1,5 +1,7 @@
 ## Experiment801
 
+[*Join our discord!*](https://discord.gg/sDbNH5N)
+
 > Thousands of candles can be lit from a single candle, and the life of the
 > candle will not be shortened. Happiness never decreases by being shared.
 > ~ Wizard101
@@ -31,6 +33,9 @@ files ask for the same libraries as TDR, plus a few other libraries. On Debian
       libasound2-dev libogg-dev libvorbis-dev cmake
 
 and build PortAudio yourself.
+
+*(Boost.Process is also needed, but since Ubuntu's repositories don't have
+Boost 1.64.0 yet, it's prepackaged in the repo for now.)*
 
 This project also depends on a custom version of RakNet, but this dependency
 is managed by the configuration files so no extra work for you.
@@ -68,6 +73,14 @@ And to actually build the project:
 To run tests:
 
     ./test # a shell script that runs make to build the test executable
+
+To start a server:
+
+    build/x801 -s 9001
+
+To start a client:
+
+    build/x801 -c localhost 9001
 
 ### Other Links
 

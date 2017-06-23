@@ -78,7 +78,7 @@ namespace x801 {
       void setUpRender(bool layer);
       void render(bool layer);
     private:
-      void addBlock(size_t lx, size_t ly, size_t lz);
+      void addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]);
       x801::map::ChunkXYZ xyz;
       TerrainRenderer* tr;
       x801::map::Chunk* chunk;

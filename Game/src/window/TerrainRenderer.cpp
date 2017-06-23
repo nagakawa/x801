@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <imgui.h>
 
+#include <static_block.h>
+
 using namespace x801::game;
 
 x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
@@ -32,11 +34,14 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
   p = c->patcher;
   tv = c->textureView;
   gs = &(c->g);
-  tex = std::move(tv->getTexture("textures/terrain/blocks.png"));
+  tex = tv->getTexture("textures/terrain/blocks.png");
   ModelView* mv = c->modelView;
   mai = mv->getMAI();
   mfi = mv->getMFI();
-  assert(cw != nullptr && c != nullptr && p != nullptr && tv != nullptr && gs != nullptr && tex != nullptr);
+  assert(
+    cw != nullptr && c != nullptr &&
+    p != nullptr && tv != nullptr &&
+    gs != nullptr && tex != nullptr);
   agl::FBOTexMS ft = agl::makeFBOForMeMS(cw->getWidth(), cw->getHeight());
   fboTex = ft.ss.texture;
   fboTexMS = ft.ms.texture;
@@ -102,34 +107,176 @@ void x801::game::TerrainRenderer::draw() {
       }
     }
   }
-  (void) rendered;
   bool isChatWindowOpen = ImGui::Begin("Basic info");
   if (isChatWindowOpen) {
     ImGui::TextWrapped("%zu chunks rendered", rendered);
   }
   ImGui::End();
 #ifndef NDEBUG
-  //std::cerr << rendered << " chunks rendered\n";
   axes.render();
 #endif
+}
+
+/*
+  See "Data Format Specifications", "Map Format", "Data", "TIL3 section"
+  for more details about how orientation is represented in x801.
+*/
+
+using x801::map::Direction::UP;
+using x801::map::Direction::DOWN;
+using x801::map::Direction::NORTH;
+using x801::map::Direction::SOUTH;
+using x801::map::Direction::EAST;
+using x801::map::Direction::WEST;
+
+static const uint8_t oriNorthRawToCanonical[3][4] = {
+  // UP or DOWN
+  { NORTH, SOUTH, EAST, WEST },
+  // NORTH or SOUTH
+  { UP, DOWN, EAST, WEST },
+  // EAST or WEST
+  { UP, DOWN, NORTH, SOUTH },
+};
+
+// This is the direction of -(newUp x newNorth).
+static const uint8_t oriNorthRawToEast[3][4] = {
+  // UP (direct) or DOWN (inverted)
+  { EAST, WEST, SOUTH, NORTH },
+  // NORTH or SOUTH
+  { WEST, EAST, UP, DOWN },
+  // EAST or WEST
+  { NORTH, SOUTH, DOWN, UP },
+};
+
+static const glm::vec3 oriDirections[6] = {
+  {0, 0, 1}, {0, 0, -1},
+  {0, 1, 0}, {0, -1, 0},
+  {1, 0, 0}, {-1, 0, 0},
+};
+
+static uint8_t oriTable[48][6];
+static uint8_t oriTableInverse[48][6];
+
+/*
+  Computes two lookup tables:
+  after the function is called:
+  table will contain the direct orientation table. That is,
+  table[orientation][direction] will be the direction transformed by
+  that orientation.
+  tableInv[orientation][direction] == old iff
+  table[orientation][old] == direction.
+*/
+static void generateTable(uint8_t table[48][6], uint8_t tableInv[48][6]) {
+  std::cerr << "generating orientation tables...\n";
+  for (size_t i = 0; i < 48; ++i) {
+    uint8_t up = i >> 3;
+    uint8_t northRaw = (i >> 1) & 3;
+    uint8_t north = oriNorthRawToCanonical[up >> 1][northRaw];
+    bool isFlipped = (i & 1) != 0;
+    uint8_t east = oriNorthRawToEast[up >> 1][northRaw] ^ (up & 1) ^ isFlipped;
+    table[i][UP] = up;
+    table[i][DOWN] = up ^ 1;
+    table[i][NORTH] = north;
+    table[i][SOUTH] = north ^ 1;
+    table[i][EAST] = east;
+    table[i][WEST] = east ^ 1;
+    tableInv[i][up] = UP;
+    tableInv[i][up ^ 1] = DOWN;
+    tableInv[i][north] = NORTH;
+    tableInv[i][north ^ 1] = SOUTH;
+    tableInv[i][east] = EAST;
+    tableInv[i][east ^ 1] = WEST;
+  }
+}
+
+static void printTable(uint8_t table[48][6]) {
+  using x801::map::DIRECTION_NAMES;
+  std::cout << "ORI\t#\tUP\tDOWN\tNORTH\tSOUTH\tEAST\tWEST\n";
+  for (size_t i = 0; i < 48; ++i) {
+    uint8_t up = i >> 3;
+    uint8_t northRaw = (i >> 1) & 3;
+    uint8_t north = oriNorthRawToCanonical[up >> 1][northRaw];
+    bool isFlipped = (i & 1) != 0;
+    uint8_t east = oriNorthRawToEast[up >> 1][northRaw] ^ (up & 1) ^ isFlipped;
+    std::cout << DIRECTION_NAMES[up][0];
+    std::cout << DIRECTION_NAMES[north][0];
+    std::cout << DIRECTION_NAMES[east][0];
+    std::cout << '\t' << i;
+    for (size_t j = 0; j < 6; ++j) {
+      std::cout << '\t' << DIRECTION_NAMES[table[i][j]];
+    }
+    std::cout << '\n';
+  }
+}
+
+static_block {
+  generateTable(oriTable, oriTableInverse);
+  printTable(oriTable);
 }
 
 void x801::game::ChunkMeshBuffer::createMesh() {
   opaqueVertices.clear();
   transparentVertices.clear();
+  using namespace x801::map;
+  uint8_t obuf[16][16][16];
+  // obuf[lx][ly][lz] has bit i set iff
+  // the block at (lx, ly, lz) is opaque at
+  // the direction i
+  for (size_t lx = 0; lx < 16; ++lx) {
+    for (size_t ly = 0; ly < 16; ++ly) {
+      for (size_t lz = 0; lz < 16; ++lz) {
+        Block db = chunk->getMapBlockAt(lx, ly, lz);
+        // This is air, which is obviously transparent all over.
+        if (db.label == 0) {
+          obuf[lx][ly][lz] = 0;
+          continue;
+        }
+        // Otherwise, set the entry to the opacity flags
+        // rotated according to ori.
+        uint8_t ori = db.getOrientation();
+        uint8_t opacity = 0;
+        ModelApplication& dma = tr->mai->applications[db.getBlockID() - 1];
+        ModelFunction dmf = tr->mfi->models[dma.modfnum];
+        for (size_t i = 0; i < 6; ++i) {
+          if ((dmf.opacityFlags & (1 << i)) == 0) continue;
+          size_t trueDir = oriTableInverse[ori][i];
+          opacity |= (1 << trueDir);
+        }
+        obuf[lx][ly][lz] = opacity;
+      }
+    }
+  }
   for (size_t lx = 0; lx < 16; ++lx) {
     for (size_t ly = 0; ly < 16; ++ly) {
       for (size_t lz = 0; lz < 16; ++lz)
-        addBlock(lx, ly, lz);
+        addBlock(lx, ly, lz, obuf);
     }
   }
 }
 
-void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
+void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]) {
   using namespace x801::map;
   Block b = chunk->getMapBlockAt(lx, ly, lz);
   if (b.label == 0) return; // it is air
-  ModelApplication& ma = tr->mai->applications[b.label - 1];
+  uint32_t id = b.getBlockID();
+  // Extract orientation bits
+  uint8_t ori = b.getOrientation();
+  uint8_t oriNewUp = ori >> 3;
+  uint8_t oriNewNorthRaw = (ori >> 1) & 3;
+  uint8_t oriNewNorth = oriNorthRawToCanonical[oriNewUp >> 1][oriNewNorthRaw];
+  bool oriFlipped = (ori & 1) != 0;
+  // uint8_t oriNewEast = oriNorthRawToEast[oriNewUp >> 1][oriNewNorthRaw] ^ (oriNewUp & 1) ^ oriFlipped;
+  // Build rotation matrix
+  glm::vec3 oriNewUpVec = oriDirections[oriNewUp];
+  glm::vec3 oriNewNorthVec = oriDirections[oriNewNorth];
+  glm::vec3 oriNewEastVec = oriFlipped ?
+    glm::cross(oriNewUpVec, oriNewNorthVec) :
+    glm::cross(oriNewNorthVec, oriNewUpVec);
+  // glm::vec3 oriNewEastVec = oriDirections[oriNewEast];
+  glm::mat3 oriMatrix(oriNewEastVec, oriNewNorthVec, oriNewUpVec);
+  oriMatrix = glm::transpose(oriMatrix);
+  // Get appropriate application and function
+  ModelApplication& ma = tr->mai->applications[id - 1];
   ModelFunction& mf = tr->mfi->models[ma.modfnum];
   CMVertex triangle[3];
   size_t disturbed[18] = {
@@ -141,32 +288,37 @@ void x801::game::ChunkMeshBuffer::addBlock(size_t lx, size_t ly, size_t lz) {
     uint8_t flags = face.occlusionFlags;
     bool occluded = false;
     for (size_t i = 0; i < 6; ++i) {
+      // This face is not hidden when occluded from this direction.
       if ((flags & (1 << i)) == 0) continue;
-      // If any of them are out of range, they will either be 16 or the max value of size_t.
-      if (disturbed[3 * i] >= 16 || disturbed[3 * i + 1] >= 16 || disturbed[3 * i + 2] >= 16)
+      // Get true direction of face (direction after rotation)
+      size_t trueDir = oriTableInverse[ori][i];
+      // If any of the coordinates are out of range,
+      // they will either be 16 or the max value of size_t.
+      // For now, we're not occluding faces based on those
+      // in a different chunk.
+      size_t dx = (size_t) disturbed[3 * trueDir];
+      size_t dy = (size_t) disturbed[3 * trueDir + 1];
+      size_t dz = (size_t) disturbed[3 * trueDir + 2];
+      if (dx >= 16 || dy >= 16 || dz >= 16)
         continue;
-      Block db = chunk->getMapBlockAt(
-        (size_t) disturbed[3 * i],
-        (size_t) disturbed[3 * i + 1],
-        (size_t) disturbed[3 * i + 2]
-      );
-      if (db.label == 0) continue;
-      // TODO maybe cache the opacity flags?
-      ModelApplication& dma = tr->mai->applications[db.label - 1];
-      ModelFunction dmf = tr->mfi->models[dma.modfnum];
-      if ((dmf.opacityFlags & (1 << (i ^ 1))) == 0) {
+      // Should this face be occluded?
+      if ((obuf[dx][dy][dz] & (1 << (trueDir ^ 1))) != 0) {
         occluded = true;
         break;
       }
     }
+    // Don't show this face if it's occluded.
     if (occluded) continue;
+    // Add the face to the vertex buffer.
     size_t textureIndex = ma.textures[face.texture];
     for (size_t j = 0; j < 3; ++j) {
       uint16_t index = face.vertices[j].index;
       VertexXYZ& blvertex = mf.vertices[index];
-      triangle[j].x = (lx << 7) + blvertex.x;
-      triangle[j].y = (ly << 7) + blvertex.y;
-      triangle[j].z = (lz << 7) + blvertex.z;
+      glm::vec3 rotatedVertex =
+        oriMatrix * glm::vec3(blvertex.x, blvertex.y, blvertex.z);
+      triangle[j].x = (lx << 7) + rotatedVertex.x;
+      triangle[j].y = (ly << 7) + rotatedVertex.y;
+      triangle[j].z = (lz << 7) + rotatedVertex.z;
       triangle[j].u = face.vertices[j].u;
       triangle[j].v = face.vertices[j].v;
       triangle[j].w = textureIndex;
@@ -212,8 +364,8 @@ static const char* FRAGMENT_SOURCE =
   // How many times taller the texture is than wide.
   "uniform float dim; \n"
   "void main() { \n"
-  "vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(0, W)) / vec2(1.0f, dim); \n"
-  "colour = texture(tex, realtc); \n"
+  "  vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(0, W)) / vec2(1.0f, dim); \n"
+  "  colour = texture(tex, realtc); \n"
   "} \n"
   ;
 
@@ -263,7 +415,7 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
   } else {
     glDisable(GL_BLEND);
   }
-  //glDisable(GL_DEPTH_TEST);
+  // glDisable(GL_DEPTH_TEST);
   vao[layer].setActive();
   program[layer].use();
   glm::mat4 mvp;
@@ -300,13 +452,6 @@ void x801::game::ChunkMeshBuffer::render(bool layer) {
     glm::vec3(selfPos.x + cosf(theta), selfPos.y + sinf(theta), selfPos.z + 1.6f),
     glm::vec3(0.0f, 0.0f, 1.0f)
   );
-  /*
-  bool isChatWindowOpen = ImGui::Begin("Basic info");
-  if (isChatWindowOpen) {
-    //ImGui::TextWrapped("Self theta: %f", (double) theta);
-  }
-  ImGui::End();
-  */
 #ifndef NDEBUG
   tr->axes.setMVP(mvp);
 #endif

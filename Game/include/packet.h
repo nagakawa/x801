@@ -79,6 +79,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    enum LoginStatus {
+      LOGIN_OK = 0,
+      LOGIN_INVALID_CREDENTIALS = 1,
+      LOGIN_SERVER_FULL = 2,
+      LOGIN_BANNED = 3,
+      LOGIN_ALREADY_LOGGED_IN = 4,
+      LOGIN_FAILED = 5,
+      LOGIN_NOT_ENOUGH_DATA = 6,
+      // Insert new status codes before this comment
+      LOGIN_NUNBER_OF_MESSAGES
+    };
     enum PacketIDs {
       PACKET_MOTD = 175,
       PACKET_LOGIN,
@@ -99,6 +110,11 @@ namespace x801 {
       CHAT_NO_PERMISSION,
       CHAT_MUTED,
     };
+    /*
+      If this assert fails, then some of our own packet IDs will conflict with
+      RakNet's predefined packet IDs, and we will be fucked.
+      If things go well, this shouldn't happen, at least not for a long time.
+    */
     static_assert((RakNet::MessageID) PACKET_MOTD > ID_USER_PACKET_ENUM,
         "RakNet defined too many pre-defined packet types!");
     uint8_t getPacketType(RakNet::Packet* p);

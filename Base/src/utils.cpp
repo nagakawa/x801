@@ -200,3 +200,57 @@ std::string x801::base::slurp(std::ifstream& fh) {
   fh.read(&res[0], e - b);
   return res;
 }
+
+// Seriously, what the fuck.
+#ifdef __WIN32
+#include <windows.h>
+std::string x801::base::getPathOfCurrentExecutable() {
+  char buf[1024];
+  uint32_t len = GetModuleFileName(nullptr, buf, 1024);
+  if (len == 0) {
+    std::cerr << "could not get exe path.\n"
+        << "error code: " << GetLastError()
+        << "\nalso use a better os\n";
+    return "";
+  }
+  buf[len] = '\0';
+  return std::string(buf);
+}
+#elif defined(__APPLE__) && defined(__MACH__) // OS X
+#include <mach-o/dyld.h>
+std::string x801::base::getPathOfCurrentExecutable() {
+  char buf[1024];
+  size_t size = 1024;
+  int stat = _NSGetExecutablePath(buf, &size);
+  if (stat != 0) {
+    std::cerr << "could not get exe path\n";
+    return "";
+  }
+  buf[size] = '\0';
+  return std::string(buf);
+}
+#elif defined(__gnu_linux__)
+#include <unistd.h>
+std::string x801::base::getPathOfCurrentExecutable() {
+  char buf[1024];
+  ssize_t len = readlink("/proc/self/exe", buf, 1023);
+  if (len == -1) {
+    perror("readlink");
+    return 0;
+  }
+  buf[len] = '\0';
+  return std::string(buf);
+}
+#else
+#error "your OS isn't supported; contact Uruwi for help"
+#endif
+
+bool x801::base::canBeConvertedToPositiveInt(const char* s, int* out) {
+  int numberOfDigits = strspn(s, "0123456789");
+  // there are more non-digit characters
+  if (s[numberOfDigits] != '\0') return false;
+  if (out != nullptr) {
+    *out = atoi(s);
+  }
+  return true;
+}

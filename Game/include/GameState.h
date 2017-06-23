@@ -35,18 +35,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QualifiedAreaID.h>
 #include "Database.h"
 #include "Player.h"
+#include "packet.h"
 
 namespace x801 {
   namespace game {
-    enum LoginStatus {
-      LOGIN_OK = 0,
-      LOGIN_INVALID_CREDENTIALS = 1,
-      LOGIN_SERVER_FULL = 2,
-      LOGIN_BANNED = 3,
-      LOGIN_ALREADY_LOGGED_IN = 4,
-      LOGIN_FAILED = 5,
-      LOGIN_NOT_ENOUGH_DATA = 6,
-    };
     class GameState;
     class ClientGameState;
     class AreaWithPlayers {

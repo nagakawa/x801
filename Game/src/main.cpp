@@ -30,10 +30,12 @@ using namespace x801::game;
 #include <iostream>
 #include <string>
 #include <curl/curl.h>
+#include <boost/filesystem.hpp>
 #include <portable_endian.h>
 #include "Client.h"
 #include "Credentials.h"
 #include "Server.h"
+#include "window/Launcher.h"
 
 static void handleTerminate() {
   try {
@@ -54,9 +56,27 @@ static void handleTerminate() {
   exit(-2);
 }
 
+static boost::filesystem::path oldPath;
+
+void handleExit() {
+  boost::filesystem::current_path(oldPath);
+}
+
 int lmain(int argc, char** argv) {
+  oldPath = boost::filesystem::current_path();
+  boost::filesystem::path ofEXE = x801::base::getPathOfCurrentExecutable();
+  boost::filesystem::current_path(ofEXE.parent_path());
+  atexit(handleExit);
+  at_quick_exit(handleExit);
   setlocale(LC_ALL, "");
   std::set_terminate(handleTerminate);
+  if (argc == 1) {
+    glfwInit();
+    Launcher launcher(1280, 960, 0, 0, "Experiment801", 3, 3, false);
+    launcher.start();
+    glfwTerminate();
+    return 0;
+  }
   CLineConfig c;
   int res = readSettings(c, argc, argv);
   if (res != 0) return res;
@@ -92,6 +112,7 @@ const char* x801::game::USAGE =
   "  Game [-6] [-d] --client <address> <port>\n"
   "  Game [-6] --server <port>\n"
   "  -6 (--use-ipv6): use IPV6\n"
+  "  -4 (--use-ipv4): use IPV4\n"
   "  --client <address> <port> (-c): start a client\n"
   "  --server <port> (-s): start a server\n"
   "  -d (--debug): for clients, enable OpenGL live debugging\n"
@@ -128,10 +149,16 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
     } else if (arg[0] == '-') {
       if (arg[1] == '-') {
         const char* name = arg + 2;
-        if (!strcmp(name, "client") || !strcmp(name, "cheryl")) mode = CLIENT;
-        else if (!strcmp(name, "server") || !strcmp(name, "samantha")) mode = SERVER;
-        else if (!strcmp(name, "use-ipv6")) cn.useIPV6 = true;
-        else if (!strcmp(name, "debug")) cn.debug = true;
+        if (!strcmp(name, "client") || !strcmp(name, "cheryl"))
+          mode = CLIENT;
+        else if (!strcmp(name, "server") || !strcmp(name, "samantha"))
+          mode = SERVER;
+        else if (!strcmp(name, "use-ipv6"))
+          cn.useIPV6 = true;
+        else if (!strcmp(name, "use-ipv4"))
+          cn.useIPV6 = false;
+        else if (!strcmp(name, "debug"))
+          cn.debug = true;
         else if (!strcmp(name, "username")) {
           if (i == argc - 1) ok = false;
           else {
@@ -157,6 +184,8 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
             mode = SERVER; break;
           case '6':
             cn.useIPV6 = true; break;
+          case '4':
+            cn.useIPV6 = false; break;
           case 'd':
             cn.debug = true; break;
           default:

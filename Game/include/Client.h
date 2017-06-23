@@ -126,6 +126,8 @@ namespace x801 {
       bool useIPV6;
       std::multimap<uint8_t, PacketCallback> callbacks;
       std::multimap<uint16_t, LPacketCallback> lCallbacks;
+      mutable std::mutex callbackLock;
+      mutable std::mutex lCallbackLock;
       char* publicKey = nullptr;
       // GameState g;
       ClientWindow* cw = nullptr;

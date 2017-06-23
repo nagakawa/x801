@@ -156,7 +156,6 @@ bool x801::game::Client::handlePacket(
     RakNet::Time t,
     RakNet::Packet* p) {
   (void) body; (void) length; (void) p;
-  std::cerr << "It's a packet! ID = " << (int) packetType << "\n";
   switch (packetType) {
   case ID_NO_FREE_INCOMING_CONNECTIONS:
     std::cout << "The server is full.\n";
@@ -169,6 +168,7 @@ bool x801::game::Client::handlePacket(
     std::cout << "Failed to connect to server.\n";
     return false;
   }
+  callbackLock.lock();
   auto range = callbacks.equal_range(packetType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != packetType) {
@@ -180,6 +180,7 @@ bool x801::game::Client::handlePacket(
     if (iterator->second.timesLeft == 0) iterator = callbacks.erase(iterator);
     else ++iterator;
   }
+  callbackLock.unlock();
   return true;
 }
 bool x801::game::Client::handleLPacket(
@@ -189,10 +190,7 @@ bool x801::game::Client::handleLPacket(
     RakNet::Packet* p) {
   // TODO implement
   (void) lbody; (void) llength; (void) p;
-  std::cerr << "It's an lpacket! ID = " << lPacketType << "\n";
-  switch (lPacketType) {
-    //
-  }
+  lCallbackLock.lock();
   auto range = lCallbacks.equal_range(lPacketType);
   for (auto iterator = range.first; iterator != range.second;) {
     if (iterator->first != lPacketType) {
@@ -204,6 +202,7 @@ bool x801::game::Client::handleLPacket(
     if (iterator->second.timesLeft == 0) iterator = lCallbacks.erase(iterator);
     else ++iterator;
   }
+  lCallbackLock.unlock();
   return true;
 }
 
@@ -223,7 +222,6 @@ void x801::game::Client::listen() {
       if (p->data[0] == ID_TIMESTAMP) {
         RakNet::BitStream s(p->data + 1, sizeof(RakNet::Time), false);
         s.Read(t);
-        // fprintf(stderr, "Time: %llx ~ %llx\n", t, RakNet::GetTime());
       }
       uint8_t packetType = getPacketType(p);
       size_t offset = getPacketOffset(p);
@@ -378,7 +376,7 @@ void x801::game::Client::processFilehostURIResponse(
     RakNet::Packet* p) {
   (void) p; (void) packetType;
   RakNet::BitStream input(body, length, false);
-  patcher = new Patcher(readStringFromBitstream16S(input));
+  patcher = new Patcher(readStringFromBitstream16S(input), ipAddress);
   patcher->startFetchThread();
   textureView = new TextureView(patcher);
   modelView = new ModelView(patcher);

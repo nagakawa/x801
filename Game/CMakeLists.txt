@@ -32,6 +32,8 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/window/TerrainRenderer.cpp
   ${PROJECT_SOURCE_DIR}/window/Patcher.cpp
   ${PROJECT_SOURCE_DIR}/window/Axes.cpp
+  ${PROJECT_SOURCE_DIR}/window/Launcher.cpp
+  ${PROJECT_SOURCE_DIR}/window/imgui_hooks.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/TextureView.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/ModelView.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/MapView.cpp
