@@ -1,5 +1,7 @@
 ## Experiment801
 
+[*Join our discord!*](https://discord.gg/sDbNH5N)
+
 > Thousands of candles can be lit from a single candle, and the life of the
 > candle will not be shortened. Happiness never decreases by being shared.
 > ~ Wizard101
@@ -71,6 +73,14 @@ And to actually build the project:
 To run tests:
 
     ./test # a shell script that runs make to build the test executable
+
+To start a server:
+
+    build/x801 -s 9001
+
+To start a client:
+
+    build/x801 -c localhost 9001
 
 ### Other Links
 
