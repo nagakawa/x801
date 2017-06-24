@@ -15,7 +15,6 @@ addons:
   apt:
     sources:
       - sourceline: "deb http://ftp.us.debian.org/debian unstable main"
-      - ubuntu-toolchain-r-test
     packages:
       - libglfw3-dev
       - libglew-dev
@@ -35,4 +34,9 @@ addons:
       - libvorbis-dev
       - cmake
       - python3-pip
+matrix:
+  include:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
       - g++-6
