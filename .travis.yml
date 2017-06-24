@@ -28,6 +28,7 @@ addons:
       - libsqlite3-dev
       - libboost-filesystem-dev
       - libboost-random-dev
+      - libboost-thread-dev
       - libasound2-dev
       - libogg-dev
       - libvorbis-dev
