@@ -5,6 +5,7 @@ before_install:
   - pip3 install numpy simpleeval
   - chmod +x install-dependencies.sh
   - sudo ./install-dependencies.sh
+  - eval "${MATRIX_EVAL}"
 install:
   - cmake .
   - make
@@ -36,7 +37,21 @@ addons:
       - python3-pip
 matrix:
   include:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty
+          packages:
+            - clang-5.0
+      env:
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
