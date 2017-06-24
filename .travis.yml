@@ -7,6 +7,7 @@ before_install:
   - sudo ./install-dependencies.sh
   - eval "${MATRIX_EVAL}"
   - cmake --version
+  - cmake --help-module-list
 install:
   - cmake .
   - make
