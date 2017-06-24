@@ -1,0 +1,99 @@
+# components section -- defines the components of the model
+@Components
+=Component The human's torso.
+Name: "torso"
+Parent: "ground"
+# The "ground" component is centred at the ground and has its axes at
+# straight-east, straight-north and straight-up.
+# To have our component face a different direction, we need to specify
+# an offset angle.
+# Since we're fine with the same axes anyway, we can just specify...
+OffsetAngle: "identity"
+# in terms of the parent component's axes
+OffsetCoordinates: 0 0 0.6
+# scale the xyz axes by some factor. This is absolute regardless of
+# the parent component, and provided for convenience.
+AxisScale: 0.4 0.15 0.6
+=Component The left leg.
+Name: "leftLeg"
+Parent: "torso"
+# Point the leg in the opposite direction by default.
+# Angles are in degrees CCW, looking from the origin toward
+# the positive end of the axis you're rotating around.
+OffsetAngle: "aroundXAxis" 180
+# Origin is at the bottom of the torso, but a little higher to
+# minimise gaps.
+OffsetCoordinates: -0.25 0 0.1
+# Scale axes to span the leg.
+AxisScale: 0.15 0.15 0.4
+# Control angle.
+# This doesn't need to be unique.
+# Net angle of child component =
+#   net angle of parent component * offset angle * control angle
+Control: "leftLeg"
+=Component The right leg.
+Name: "rightLeg"
+Parent: "torso"
+OffsetAngle: "aroundXAxis" 180
+OffsetCoordinates: 0.25 0 0.1
+AxisScale: 0.15 0.15 0.4
+Control: "rightLeg"
+=Component The left arm.
+Name: "leftArm"
+Parent: "torso"
+OffsetAngle: "aroundYAxis" 180
+# This means that our x ranges from 0 to 1 here.
+OffsetCoordinates: -0.4 0 1.2
+AxisScale: 0.15 0.15 1
+Control: "LeftArm"
+=Component The right arm.
+Name: "rightArm"
+Parent: "torso"
+OffsetAngle: "aroundYAxis" -180 "invertX"
+# This means that our x ranges from 0 to 1 here.
+OffsetCoordinates: 0.4 0 1.2
+AxisScale: 0.15 0.15 1
+Control: "rightArm"
+=Component The head.
+Name: "head"
+Parent: "torso"
+OffsetAngle: "identity"
+OffsetCoordinates: 0 0 1.2
+AxisScale: 0.25 0.25 0.25
+Control: "head"
+# faces section -- defines faces that this model has
+@Faces
+# This is equivalent to 12 Triangle declarations, or 6 Quads.
+# With this sugar, we can declare well-behaved cuboids lying within
+# one component easily.
+=CubeRanged torso
+# Specify ranges for component-local xyz.
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 1
+Component: "torso"
+=CubeRanged left leg
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 1
+Component: "leftLeg"
+=CubeRanged right leg
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 1
+Component: "rightLeg"
+=CubeRanged left arm
+XRange: 0 1
+YRange: -1 1
+ZRange: 0 1
+Component: "leftArm"
+=CubeRanged right arm
+XRange: 0 1
+YRange: -1 1
+ZRange: 0 1
+Component: "rightArm"
+=CubeRanged head
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 2
+Component: "head"
