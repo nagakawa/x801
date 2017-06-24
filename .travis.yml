@@ -1,11 +1,12 @@
 language: cpp
 sudo: enabled
-dist: precise
+dist: trusty
 before_install:
   - pip3 install numpy simpleeval
   - chmod +x install-dependencies.sh
   - sudo ./install-dependencies.sh
   - eval "${MATRIX_EVAL}"
+  - cmake --version
 install:
   - cmake .
   - make
