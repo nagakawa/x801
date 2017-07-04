@@ -198,8 +198,6 @@ args = parser.parse_args()
 
 emp = fparser.parse(open(args.sourcePart[0]))
 
-pp = pprint.PrettyPrinter(indent=1, compact=True)
-
 empComponents = emp[1]['Components'][0]['Component']
 empFaces = emp[1]['Faces'][0]
 
@@ -215,8 +213,6 @@ for i in range(len(empComponents)):
   comp = empComponents[i]
   name = comp['Name'][0][0]
   componentIndicesByName[name] = i
-
-pp.pprint(componentIndicesByName)
 
 # Fill in components
 for i in range(len(empComponents)):
@@ -235,9 +231,6 @@ for i in range(len(empComponents)):
     for control in control1:
       controlAngles[control].append(i)
 
-pp.pprint(components)
-pp.pprint(controlAngles)
-
 for q in empFaces['Quad']:
   parseQuad(q, triangles)
 for t in empFaces['Triangle']:
@@ -248,8 +241,6 @@ for c in empFaces['Cube']:
   parseCube(c, faces)
 
 divisor = empFaces['UVDivisor'][0][0]
-
-pp.pprint(faces)
 
 hitboxSize = emp[0]['HitboxSize'][0]
 

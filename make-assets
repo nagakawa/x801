@@ -8,7 +8,7 @@ substDirListTs1 = $(foreach dir, $(1), \
 	$(patsubst %.$(2), %.$(3), \
 	$(patsubst asset-src/models/functions/%, asset-temp/models/%, $(wildcard $(dir)/*.$(2)))))
 
-all: maps terrain models
+all: maps terrain models entity-models
 	python3 tools/rebuild-index.py
 
 maps: $(call substDirList,asset-src/maps,msf,map)
@@ -50,6 +50,14 @@ modapps: modfuncs $(call substDirListT,asset-src/models/applications,mda,cma)
 asset-temp/models/applications/%.cma: asset-src/models/applications/%.mda
 	mkdir -p asset-temp/models/applications
 	python3 tools/model-app-compiler.py $< asset-temp/models/functions.tab asset-temp/models/ftables/ assets/textures/terrain/blocks.tti $@
+
+entity-models: entity-parts
+
+entity-parts: $(call substDirList,asset-src/entity-models/osat,emp,osa)
+
+assets/entity-models/osat/%.osa: asset-src/entity-models/osat/%.emp
+	mkdir -p assets/entity-models/osat
+	python3 tools/part-compiler.py $< $@
 
 yukkuri:
 	@echo "ゆっくりしていってね！"
