@@ -25,14 +25,16 @@ def getDirectionFlags(ls):
 evaluator = simpleeval.SimpleEval()
 
 def resolve(vertex, offset):
-  vertex[3] += offset[0]
-  vertex[4] += offset[1]
+  v[0] = componentIndicesByName[v[0]]
+  vertex[4] += offset[0]
+  vertex[5] += offset[1]
 
 def parseTri(section, triangles):
   v1 = section['Vertex1'][0]
   v2 = section['Vertex2'][0]
   v3 = section['Vertex3'][0]
-  offset = section['UVoffset'][0]
+  offsetl = section['UVoffset']
+  offset = offsetl[0] if offsetl else [0, 0]
   resolve(v1, offset)
   resolve(v2, offset)
   resolve(v3, offset)
@@ -51,7 +53,8 @@ def parseQuad(section, triangles):
   v2 = section['Vertex2'][0]
   v3 = section['Vertex3'][0]
   v4 = section['Vertex4'][0]
-  offset = section['UVoffset'][0]
+  offsetl = section['UVoffset']
+  offset = offsetl[0] if offsetl else [0, 0]
   resolve(v1, offset)
   resolve(v2, offset)
   resolve(v3, offset)
@@ -59,7 +62,7 @@ def parseQuad(section, triangles):
   insertQuad(triangles, v1, v2, v3, v4)
 
 def cvertex(vertexXYZ, uvAxes, a, i, j, k):
-  v = vertexXYZ[a][0:-1]
+  v = vertexXYZ[a][:]
   v.append(uvAxes[i][2 * j])
   v.append(uvAxes[i][1 + 2 * k])
   return v
@@ -95,8 +98,42 @@ def parseCubeHelper(triangles, vertexXYZ, offset, uvAxes):
   # south face 0154
   insertCubeFace(triangles, vertexXYZ, uvAxes, 0, 1, 5, 4, 3)
 
+anames = ['xp', 'xm', 'yp', 'ym', 'zp', 'zm']
+
 def parseCube(section, triangles):
-  pass
+  vertexXYZ = []
+  for i in range(8):
+    v = section['Vertex' + str(i)][0]
+    v[0] = componentIndicesByName[v[0]]
+    vertexXYZ.append(v)
+  offsetl = section['UVoffset']
+  offset = offsetl[0] if offsetl else [0, 0]
+  uvAxes = []
+  for s in anames:
+    axis = section['UV' + s][0]
+    uvAxes += axis
+  parseCubeHelper(triangles, vertexXYZ, offset, uvAxes)
+
+def parseCubeRanged(section, triangles, componentIndicesByName):
+  xr = section['XRange'][0]
+  yr = section['YRange'][0]
+  zr = section['ZRange'][0]
+  componentName = section['Component'][0][0]
+  componentIndex = componentIndicesByName[componentName]
+  vertexXYZ = []
+  for i in range(8):
+    b0 = (i & 1) != 0
+    b1 = (i & 2) != 0
+    b2 = (i & 4) != 0
+    v = [componentIndex, xr[b0], yr[b1], zr[b2]]
+    vertexXYZ.append(v)
+  offsetl = section['UVoffset']
+  offset = offsetl[0] if offsetl else [0, 0]
+  uvAxes = []
+  for s in anames:
+    axis = section['UV' + s][0]
+    uvAxes.append(axis)
+  parseCubeHelper(triangles, vertexXYZ, offset, uvAxes)
 
 def quaternionFromCommands(comm):
   i = 0
@@ -151,9 +188,7 @@ out = open(args.output[0], "wb")
 pp = pprint.PrettyPrinter(indent=1, compact=True)
 
 empComponents = emp[1]['Components'][0]['Component']
-#pp.pprint(empComponents)
-empFaces = emp[1]['Faces']
-pp.pprint(empFaces)
+empFaces = emp[1]['Faces'][0]
 
 components = []
 componentIndicesByName = {}
@@ -190,8 +225,12 @@ for i in range(len(empComponents)):
 pp.pprint(components)
 pp.pprint(controlAngles)
 
-for c in mdfFaces['CubeRanged']:
-  pass
+for c in empFaces['CubeRanged']:
+  parseCubeRanged(c, faces, componentIndicesByName)
+
+divisor = empFaces['UVDivisor'][0][0]
+
+pp.pprint(faces)
 
 exit()
 
