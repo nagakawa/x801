@@ -10,6 +10,7 @@ import pprint
 from pyquaternion import Quaternion
 import re
 import simpleeval
+import struct
 from PIL import Image
 
 def error(msg):
@@ -29,7 +30,7 @@ def resolve(vertex, offset):
   vertex[4] += offset[0]
   vertex[5] += offset[1]
 
-def parseTri(section, triangles):
+def parseTriangle(section, triangles):
   v1 = section['Vertex1'][0]
   v2 = section['Vertex2'][0]
   v3 = section['Vertex3'][0]
@@ -173,6 +174,20 @@ def quaternionFromCommands(comm):
     q = (rotation * q).normalised
   return q
 
+def writeInt(f, n, b):
+  f.write((n % (1 << 8 * b)).to_bytes(b, byteorder='little'))
+
+def writeIntSigned(f, n, b):
+  f.write((n).to_bytes(b, byteorder='little', signed=True))
+
+def writeFloat(f, x):
+  f.write(struct.pack('>f', x))
+
+def writeString16(f, s):
+  b = s.encode()
+  writeInt(f, len(b), 2)
+  f.write(b)
+
 parser = argparse.ArgumentParser(description='Compile entity parts for x801.')
 parser.add_argument('sourcePart', metavar='sf', type=str, nargs=1,
     help='the part source')
@@ -182,8 +197,6 @@ parser.add_argument('output', metavar='out', type=str, nargs=1,
 args = parser.parse_args()
 
 emp = fparser.parse(open(args.sourcePart[0]))
-
-out = open(args.output[0], "wb")
 
 pp = pprint.PrettyPrinter(indent=1, compact=True)
 
@@ -225,71 +238,58 @@ for i in range(len(empComponents)):
 pp.pprint(components)
 pp.pprint(controlAngles)
 
+for q in empFaces['Quad']:
+  parseQuad(q, triangles)
+for t in empFaces['Triangle']:
+  parseTriangle(t, triangles)
 for c in empFaces['CubeRanged']:
   parseCubeRanged(c, faces, componentIndicesByName)
+for c in empFaces['Cube']:
+  parseCube(c, faces)
 
 divisor = empFaces['UVDivisor'][0][0]
 
 pp.pprint(faces)
 
-exit()
+hitboxSize = emp[0]['HitboxSize'][0]
 
-hitboxType = hitboxTypes[mdf[0]['Hitbox'][0][0]]
-opacityFlags = getDirectionFlags(mdf[0]['Opaque'][0])
+out = open(args.output[0], "wb")
 
-vertices = []
-verticesByName = {}
-mdfVertices = mdf[1]['Vertices'][0]['Vertex']
+# Header
+for i in range(3):
+  writeFloat(out, hitboxSize[i])
+writeInt(out, len(components), 4)
+writeInt(out, len(faces), 4)
+writeInt(out, len(controlAngles), 4)
 
-for i in range(len(mdfVertices)):
-  v = mdfVertices[i]
-  name = v[0]
-  vertex = v[1:]
-  resolve(vertex)
-  vertices += [vertex]
-  verticesByName[name] = i
-
-triangles = []
-mdfFaces = mdf[1]['Faces'][0]
-
-texlookup = {}
-
-for q in mdfFaces['Quad']:
-  parseQuad(q, triangles, verticesByName, texlookup)
-for t in mdfFaces['Triangle']:
-  parseTriangle(t, triangles, verticesByName, texlookup)
-
-def writeInt(f, n, b):
-  f.write((n % (1 << 8 * b)).to_bytes(b, byteorder='little'))
-
-def writeIntSigned(f, n, b):
-  f.write((n).to_bytes(b, byteorder='little', signed=True))
-
-writeInt(out, hitboxType, 2)
-writeInt(out, opacityFlags, 1)
-writeInt(out, len(texlookup), 1)
-writeInt(out, len(vertices), 2)
-writeInt(out, len(triangles), 2)
-
-for v in vertices:
-  writeIntSigned(out, int(v[0] * 128), 1)
-  writeIntSigned(out, int(v[1] * 128), 1)
-  writeIntSigned(out, int(v[2] * 128), 1)
-
-for t in triangles:
+# Components
+for component in components:
+  writeInt(out, component[1], 4)
+  for i in range(4):
+    writeFloat(out, component[4][i])
   for i in range(3):
-    writeInt(out, t[i][0], 2)
+    writeFloat(out, component[2][i])
   for i in range(3):
-    writeInt(out, int(t[i][1] * 128), 1)
-    writeInt(out, int(t[i][2] * 128), 1)
-  writeInt(out, t[3], 1)
-  writeInt(out, t[4] | (t[5] << 1), 1)
+    writeFloat(out, component[3][i])
 
-out.close()
+# Faces
+for face in faces:
+  for i in range(3):
+    vertex = face[i]
+    writeInt(out, vertex[0], 4)
+    writeFloat(out, vertex[1])
+    writeFloat(out, vertex[2])
+    writeFloat(out, vertex[3])
+    writeFloat(out, vertex[4] / divisor)
+    writeFloat(out, vertex[5] / divisor)
 
-out2 = open(args.outputTab[0], "w")
+# Components (again)
+for component in components:
+  writeString16(out, component[0])
 
-for name, index in texlookup.items():
-  out2.write(name + " " + str(index) + "\n")
-
-out2.close()
+# Control angles
+for (name, comps) in controlAngles.items():
+  writeString16(out, name)
+  writeInt(out, len(comps), 2)
+  for c in comps:
+    writeInt(out, c, 4)
