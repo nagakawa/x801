@@ -43,7 +43,7 @@ is managed by the configuration files so no extra work for you.
 In addition, the Python scripts depend on a few packages.
 
     sudo apt install python3-pip
-    pip3 install numpy simpleeval
+    pip3 install numpy simpleeval pyquaternion
 
 In addition, there are programs used to build assets:
 
