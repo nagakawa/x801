@@ -24,57 +24,79 @@ def getDirectionFlags(ls):
 
 evaluator = simpleeval.SimpleEval()
 
-def resolve(vertex):
-  for i in range(len(vertex)):
-    if type(vertex[i]) is str:
-      vertex[i] = evaluator.eval(vertex[i])
-
-def resolve2(vertex, vlookup):
-  for i in range(len(vertex)):
-    if i == 0:
-      vertex[i] = vlookup[vertex[i]]
-    elif type(vertex[i]) is str:
-      vertex[i] = evaluator.eval(vertex[i])
+def resolve(vertex, offset):
+  vertex[3] += offset[0]
+  vertex[4] += offset[1]
 
 def parseTri(section, triangles):
   v1 = section['Vertex1'][0]
   v2 = section['Vertex2'][0]
   v3 = section['Vertex3'][0]
-  resolve2(v1, vlookup)
-  resolve2(v2, vlookup)
-  resolve2(v3, vlookup)
+  offset = section['UVoffset'][0]
+  resolve(v1, offset)
+  resolve(v2, offset)
+  resolve(v3, offset)
   triangles += [
     (v1, v2, v3),
   ]
 
-def parseQuad(section, triangles, vlookup, texlookup):
-  occlusionFlags = getDirectionFlags(section['Occlusion'][0])
-  pt = False
-  try:
-    pt = section['PartiallyTransparent'][0][0]
-  except KeyError:
-    pass
-  except IndexError:
-    pass
-  texSym = section['Texture'][0][0]
-  ti = -1
-  if texSym in texlookup:
-    ti = texlookup[texSym]
-  else:
-    ti = len(texlookup)
-    texlookup[texSym] = ti
+def insertQuad(triangles, v1, v2, v3, v4):
+  triangles += [
+    (v1, v2, v3,),
+    (v3, v4, v1,),
+  ]
+
+def parseQuad(section, triangles):
   v1 = section['Vertex1'][0]
   v2 = section['Vertex2'][0]
   v3 = section['Vertex3'][0]
   v4 = section['Vertex4'][0]
-  resolve2(v1, vlookup)
-  resolve2(v2, vlookup)
-  resolve2(v3, vlookup)
-  resolve2(v4, vlookup)
-  triangles += [
-    (v1, v2, v3, ti, occlusionFlags, pt),
-    (v3, v4, v1, ti, occlusionFlags, pt),
-  ]
+  offset = section['UVoffset'][0]
+  resolve(v1, offset)
+  resolve(v2, offset)
+  resolve(v3, offset)
+  resolve(v4, offset)
+  insertQuad(triangles, v1, v2, v3, v4)
+
+def cvertex(vertexXYZ, uvAxes, a, i, j, k):
+  v = vertexXYZ[a][0:-1]
+  v.append(uvAxes[i][2 * j])
+  v.append(uvAxes[i][1 + 2 * k])
+  return v
+
+def insertCubeFace(triangles, vertexXYZ, uvAxes, a, b, c, d, i):
+  v1 = cvertex(vertexXYZ, uvAxes, a, i, 0, 0)
+  v2 = cvertex(vertexXYZ, uvAxes, b, i, 1, 0)
+  v3 = cvertex(vertexXYZ, uvAxes, c, i, 1, 1)
+  v4 = cvertex(vertexXYZ, uvAxes, d, i, 0, 1)
+  insertQuad(triangles, v1, v2, v3, v4)
+
+# vertexXYZ is in the order 01234567 (obviously)
+# bit 0 is set for x+, reset for x-
+# bit 1 is set for y+, reset for y-
+# bit 2 is set for z+, reset for z-
+# uvAxes is in the order x+ x- y+ y- z+ z-
+def parseCubeHelper(triangles, vertexXYZ, offset, uvAxes):
+  for uv in uvAxes:
+    uv[0] += offset[0]
+    uv[1] += offset[1]
+    uv[2] += offset[0]
+    uv[3] += offset[1]
+  # top face 4576
+  insertCubeFace(triangles, vertexXYZ, uvAxes, 4, 5, 7, 6, 4)
+  # bottom face 0132
+  insertCubeFace(triangles, vertexXYZ, uvAxes, 0, 1, 3, 2, 5)
+  # east face 1375
+  insertCubeFace(triangles, vertexXYZ, uvAxes, 1, 3, 7, 5, 0)
+  # west face 0264
+  insertCubeFace(triangles, vertexXYZ, uvAxes, 0, 2, 6, 4, 1)
+  # north face 2376
+  insertCubeFace(triangles, vertexXYZ, uvAxes, 2, 3, 7, 6, 2)
+  # south face 0154
+  insertCubeFace(triangles, vertexXYZ, uvAxes, 0, 1, 5, 4, 3)
+
+def parseCube(section, triangles):
+  pass
 
 def quaternionFromCommands(comm):
   i = 0
