@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <zlib.h>
 #include <boost/functional/hash.hpp>
 #include "portable_endian.h"
@@ -73,6 +74,24 @@ namespace x801 {
     template<typename T> void writeInt(std::ostream& fh, T val) {
       val = convLEW(val);
       fh.write(reinterpret_cast<char*> (&val), sizeof(T));
+    }
+    float readFloat(std::istream& fh);
+    void writeFloat(std::ostream& fh, float x);
+    template<typename T> std::string readString(std::istream& fh) {
+      T len = readInt<T>(fh);
+      std::string s(len, '\0'); // empty string with len characters
+      fh.read(&s[0], len);
+      return s;
+    }
+    template<typename T> void writeString(std::ostream& fh, std::string s) {
+      intmax_t len = s.length();
+      if (len > std::numeric_limits<T>::max()) {
+        throw std::string("Length exceeds limit: max is ") +
+          std::numeric_limits<T>::max() +
+          " but given " + len;
+      }
+      writeInt<T>(fh, static_cast<T> (len));
+      fh.write(&s[0], len);
     }
     std::stringstream fromCharArray(char* array, unsigned int size);
     template<int len> std::string construct(

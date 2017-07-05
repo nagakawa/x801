@@ -40,6 +40,18 @@ template<> int16_t x801::base::convLEW<int16_t>(int16_t x) { return htole16(x); 
 template<> int32_t x801::base::convLEW<int32_t>(int32_t x) { return htole32(x); }
 template<> int64_t x801::base::convLEW<int64_t>(int64_t x) { return htole64(x); }
 
+static_assert(std::numeric_limits<float>::is_iec559, "Float is not IEEE 754!");
+
+float x801::base::readFloat(std::istream& fh) {
+  float val;
+  fh.read(reinterpret_cast<char*> (&val), sizeof(float));
+  return val;
+}
+
+void x801::base::writeFloat(std::ostream& fh, float x) {
+  fh.write(reinterpret_cast<char*> (&x), sizeof(float));
+}
+
 std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
   std::string s{array, size};
   return std::stringstream(s);
