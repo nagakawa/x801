@@ -52,6 +52,48 @@ void x801::base::writeFloat(std::ostream& fh, float x) {
   fh.write(reinterpret_cast<char*> (&x), sizeof(float));
 }
 
+glm::quat&& x801::base::readQuaternion(std::istream& fh) {
+  glm::quat q;
+  q.x = readFloat(fh);
+  q.y = readFloat(fh);
+  q.z = readFloat(fh);
+  q.w = readFloat(fh);
+  return std::move(q);
+}
+
+void x801::base::writeQuaternion(std::ostream& fh, const glm::quat& q) {
+  writeFloat(fh, q.x);
+  writeFloat(fh, q.y);
+  writeFloat(fh, q.z);
+  writeFloat(fh, q.w);
+}
+
+glm::vec3&& readVec3(std::istream& fh) {
+  glm::vec3 v;
+  v.x = readFloat(fh);
+  v.y = readFloat(fh);
+  v.z = readFloat(fh);
+  return std::move(v);
+}
+
+void writeVec3(std::ostream& fh, const glm::vec3& v) {
+  writeFloat(fh, v.x);
+  writeFloat(fh, v.y);
+  writeFloat(fh, v.z);
+}
+
+glm::vec2&& readVec2(std::istream& fh) {
+  glm::vec2 v;
+  v.x = readFloat(fh);
+  v.y = readFloat(fh);
+  return std::move(v);
+}
+
+void writeVec2(std::ostream& fh, const glm::vec2& v) {
+  writeFloat(fh, v.x);
+  writeFloat(fh, v.y);
+}
+
 std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
   std::string s{array, size};
   return std::stringstream(s);

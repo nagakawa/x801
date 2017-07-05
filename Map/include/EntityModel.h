@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <functional>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -38,17 +39,41 @@ namespace x801 {
     class Component {
     public:
       Component(std::istream& fh);
+      void write(std::ostream& fh) const;
       size_t parent;
       glm::quat offsetAngle;
       glm::vec3 offsetCoordinates;
       glm::vec3 axisScale;
-    }
+    };
+    class PFace;
+    class PFaceVertex {
+    public:
+      PFaceVertex(std::istream& fh);
+      void write(std::ostream& fh) const;
+      size_t cindex;
+      glm::vec3 offset;
+      glm::vec2 uv;
+    private:
+      PFaceVertex() {}
+      friend class PFace;
+    };
+    class PFace {
+    public:
+      PFace(std::istream& fh);
+      void write(std::ostream& fh) const;
+      PFaceVertex vertices[3];
+    };
     class Part {
     public:
       Part(std::istream& fh);
+      void write(std::ostream& fh) const;
     private:
       glm::vec3 hitboxSize;
-      //
-    }
+      std::vector<Component> components;
+      std::vector<PFace> faces;
+      std::vector<std::string> componentNames;
+      std::unordered_map<std::string, size_t> componentIndicesByName;
+      std::unordered_map<std::string, std::vector<size_t>> controlAngles;
+    };
   }
 }

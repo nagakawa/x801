@@ -28,6 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <limits>
 #include <zlib.h>
 #include <boost/functional/hash.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include "portable_endian.h"
 
 // Since I expect Int and UInt to be used frequently,
@@ -77,22 +79,28 @@ namespace x801 {
     }
     float readFloat(std::istream& fh);
     void writeFloat(std::ostream& fh, float x);
-    template<typename T> std::string readString(std::istream& fh) {
+    template<typename T> std::string&& readString(std::istream& fh) {
       T len = readInt<T>(fh);
       std::string s(len, '\0'); // empty string with len characters
       fh.read(&s[0], len);
-      return s;
+      return std::move(s);
     }
-    template<typename T> void writeString(std::ostream& fh, std::string s) {
+    template<typename T> void writeString(std::ostream& fh, const std::string& s) {
       intmax_t len = s.length();
       if (len > std::numeric_limits<T>::max()) {
         throw std::string("Length exceeds limit: max is ") +
-          std::numeric_limits<T>::max() +
-          " but given " + len;
+          std::to_string(std::numeric_limits<T>::max()) +
+          " but given " + std::to_string(len);
       }
       writeInt<T>(fh, static_cast<T> (len));
       fh.write(&s[0], len);
     }
+    glm::quat&& readQuaternion(std::istream& fh);
+    void writeQuaternion(std::ostream& fh, const glm::quat& q);
+    glm::vec3&& readVec3(std::istream& fh);
+    void writeVec3(std::ostream& fh, const glm::vec3& v);
+    glm::vec2&& readVec2(std::istream& fh);
+    void writeVec2(std::ostream& fh, const glm::vec2& v);
     std::stringstream fromCharArray(char* array, unsigned int size);
     template<int len> std::string construct(
         const char (&s)[len],
