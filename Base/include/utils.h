@@ -56,6 +56,16 @@ namespace x801 {
         "convLEW has not been specialised for this type");
       return 0;
     }
+    template<typename T> T convBER(T) {
+      static_assert(assert_false<T>::value,
+        "convBER has not been specialised for this type");
+      return 0;
+    }
+    template<typename T> T convBEW(T) {
+      static_assert(assert_false<T>::value,
+        "convBEW has not been specialised for this type");
+      return 0;
+    }
     template<> uint16_t convLER<uint16_t>(uint16_t x);
     template<> uint32_t convLER<uint32_t>(uint32_t x);
     template<> uint64_t convLER<uint64_t>(uint64_t x);
@@ -68,6 +78,18 @@ namespace x801 {
     template<> int16_t convLEW<int16_t>(int16_t x);
     template<> int32_t convLEW<int32_t>(int32_t x);
     template<> int64_t convLEW<int64_t>(int64_t x);
+    template<> uint16_t convBER<uint16_t>(uint16_t x);
+    template<> uint32_t convBER<uint32_t>(uint32_t x);
+    template<> uint64_t convBER<uint64_t>(uint64_t x);
+    template<> uint16_t convBEW<uint16_t>(uint16_t x);
+    template<> uint32_t convBEW<uint32_t>(uint32_t x);
+    template<> uint64_t convBEW<uint64_t>(uint64_t x);
+    template<> int16_t convBER<int16_t>(int16_t x);
+    template<> int32_t convBER<int32_t>(int32_t x);
+    template<> int64_t convBER<int64_t>(int64_t x);
+    template<> int16_t convBEW<int16_t>(int16_t x);
+    template<> int32_t convBEW<int32_t>(int32_t x);
+    template<> int64_t convBEW<int64_t>(int64_t x);
     template<typename T> T readInt(std::istream& fh) {
       T val;
       fh.read(reinterpret_cast<char*> (&val), sizeof(T));
@@ -79,11 +101,11 @@ namespace x801 {
     }
     float readFloat(std::istream& fh);
     void writeFloat(std::ostream& fh, float x);
-    template<typename T> std::string&& readString(std::istream& fh) {
+    template<typename T> std::string readString(std::istream& fh) {
       T len = readInt<T>(fh);
       std::string s(len, '\0'); // empty string with len characters
       fh.read(&s[0], len);
-      return std::move(s);
+      return s;
     }
     template<typename T> void writeString(std::ostream& fh, const std::string& s) {
       intmax_t len = s.length();
@@ -95,11 +117,11 @@ namespace x801 {
       writeInt<T>(fh, static_cast<T> (len));
       fh.write(&s[0], len);
     }
-    glm::quat&& readQuaternion(std::istream& fh);
+    glm::quat readQuaternion(std::istream& fh);
     void writeQuaternion(std::ostream& fh, const glm::quat& q);
-    glm::vec3&& readVec3(std::istream& fh);
+    glm::vec3 readVec3(std::istream& fh);
     void writeVec3(std::ostream& fh, const glm::vec3& v);
-    glm::vec2&& readVec2(std::istream& fh);
+    glm::vec2 readVec2(std::istream& fh);
     void writeVec2(std::ostream& fh, const glm::vec2& v);
     std::stringstream fromCharArray(char* array, unsigned int size);
     template<int len> std::string construct(

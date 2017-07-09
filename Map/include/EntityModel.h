@@ -67,7 +67,6 @@ namespace x801 {
     public:
       Part(std::istream& fh);
       void write(std::ostream& fh) const;
-    private:
       glm::vec3 hitboxSize;
       std::vector<Component> components;
       std::vector<PFace> faces;

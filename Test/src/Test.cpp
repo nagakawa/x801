@@ -27,6 +27,7 @@ using namespace x801::test;
 #include <stdlib.h>
 #include <string.h>
 #include <exception>
+#include <fstream>
 #include <sstream>
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -34,6 +35,7 @@ using namespace x801::test;
 #include <Chunk.h>
 #include <CircularQueue.h>
 #include <Database.h>
+#include <EntityModel.h>
 #include <Location.h>
 #include <Model.h>
 #include <TileSec.h>
@@ -54,6 +56,8 @@ int main(int argc, char** argv) {
     return 0;
   } else runAll(parts, partCount, arg, isDefault);
   summary();
+  return (TestDiag::current.passedTests == TestDiag::current.totalTests)
+    ? 0 : -1;
 }
 
 void testSystem() {
@@ -389,6 +393,28 @@ void testModelFunctionIndexIO() {
   assertEqual(outData, adata, "Input and output are equal");
 }
 
+#include "humanPart.h"
+void testEntityPartIO() {
+  std::stringstream input(binaries::humanPart);
+  x801::map::Part part(input);
+  assertApproximate(part.hitboxSize.x, 0.9f, 1e-4f, "Hitbox size is working");
+  assertEqual(part.components.size(), 6u, "Has 6 components");
+  size_t rightLegIndex = part.componentIndicesByName["rightLeg"];
+  size_t torsoIndex = part.componentIndicesByName["torso"];
+  assertEqual(part.componentNames[rightLegIndex], "rightLeg",
+    "rightLeg is rightLeg");
+  x801::map::Component& rightLeg = part.components[rightLegIndex];
+  assertEqual(rightLeg.parent, torsoIndex, "Parent of right leg is torso");
+  assertApproximate(rightLeg.offsetCoordinates.z, 0.1f, 1e-4f,
+    "Offset coordinate is correct");
+  // faces are pretty hard to test... ._.
+  // but we can test control angles
+  std::vector<size_t> expectedControls { rightLegIndex };
+  std::vector<size_t>& actualControls = part.controlAngles["rightLeg"];
+  assertEqual(expectedControls, actualControls,
+    "Right leg control angle controls correct components");
+}
+
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
@@ -404,6 +430,7 @@ const Test x801::test::parts[] = {
   {"circularQueue", testCircularQueue, true},
   {"modelFunctionIO", testModelFunctionIO, true},
   {"modelFunctionIndexIO", testModelFunctionIndexIO, true},
+  {"entityPartIO", testEntityPartIO, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 
