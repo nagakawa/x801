@@ -73,6 +73,7 @@ namespace x801 {
       std::vector<std::string> componentNames;
       std::unordered_map<std::string, size_t> componentIndicesByName;
       std::unordered_map<std::string, std::vector<size_t>> controlAngles;
+      std::string name;
     };
   }
 }

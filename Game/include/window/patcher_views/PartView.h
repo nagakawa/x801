@@ -26,25 +26,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unordered_map>
 #include <boost/thread/shared_mutex.hpp>
 
-#include <Texture.h>
+#include <EntityModel.h>
 
 namespace x801 {
   namespace game {
-    class TextureView;
+    class PartView;
   }
 }
 #include "window/Patcher.h"
 
 namespace x801 {
   namespace game {
-    class TextureView {
+    class PartView {
     public:
-      TextureView(Patcher* underlying) : underlying(underlying) {}
-      agl::Texture* getTexture(const std::string& name);
+      PartView(Patcher* underlying) : underlying(underlying) {}
+      const x801::map::Part* getPart(const std::string& name);
     private:
       Patcher* underlying;
       mutable boost::shared_mutex mapMutex;
-      std::unordered_map<std::string, agl::Texture> textures;
+      std::unordered_map<std::string, x801::map::Part> parts;
     };
     inline void bindTextureFromPointer(agl::Texture* t) {
       if (t != nullptr) t->bind();

@@ -43,7 +43,7 @@ void x801::game::ClientWindow::initialise() {
   io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, x801::game::range);
   chat = new ChatWindow(this);
   tr = new TerrainRenderer(this);
-  terrain = new agl::Sprite2D(tr->fboTex);
+  terrain = new agl::Sprite2D(&*tr->fboTex);
   terrain->setApp(this);
   terrain->addSprite({
     0, 0, (float) getWidth(), (float) getHeight(),

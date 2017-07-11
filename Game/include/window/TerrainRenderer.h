@@ -102,7 +102,7 @@ namespace x801 {
       Patcher* p;
       TextureView* tv;
       ClientGameState* gs;
-      std::shared_ptr<agl::Texture> tex;
+      agl::Texture* tex;
       x801::map::ModelApplicationIndex* mai;
       x801::map::ModelFunctionIndex* mfi;
       std::shared_ptr<agl::FBO> fboMS;
