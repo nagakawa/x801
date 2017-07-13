@@ -381,6 +381,7 @@ void x801::game::Client::processFilehostURIResponse(
   textureView = new TextureView(patcher);
   modelView = new ModelView(patcher);
   mapView = new MapView(patcher);
+  partView = new PartView(patcher);
 }
 
 static const char* statusMessages[] = {
@@ -561,4 +562,5 @@ x801::game::Client::~Client() {
   delete patcher;
   delete textureView;
   delete modelView;
+  delete partView;
 }

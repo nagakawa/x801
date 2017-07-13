@@ -80,7 +80,9 @@ x801::map::Part::Part(std::istream& fh) {
     size_t affectedCount = readInt<uint16_t>(fh);
     std::vector<size_t> affected;
     for (size_t j = 0; j < affectedCount; ++j) {
-      affected.push_back(readInt<uint32_t>(fh));
+      size_t cid = readInt<uint32_t>(fh);
+      affected.push_back(cid);
+      controlAnglesByComponent[cid].push_back(name);
     }
     controlAngles[name] = std::move(affected);
   }
