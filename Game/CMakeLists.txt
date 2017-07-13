@@ -37,6 +37,7 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/window/patcher_views/TextureView.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/ModelView.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/MapView.cpp
+  ${PROJECT_SOURCE_DIR}/window/patcher_views/PartView.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

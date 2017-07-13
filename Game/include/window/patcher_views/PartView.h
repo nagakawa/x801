@@ -46,9 +46,5 @@ namespace x801 {
       mutable boost::shared_mutex mapMutex;
       std::unordered_map<std::string, x801::map::Part> parts;
     };
-    inline void bindTextureFromPointer(agl::Texture* t) {
-      if (t != nullptr) t->bind();
-      else glBindTexture(GL_TEXTURE_2D, 0);
-    }
   }
 }
