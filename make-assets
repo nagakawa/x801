@@ -51,13 +51,19 @@ asset-temp/models/applications/%.cma: asset-src/models/applications/%.mda
 	mkdir -p asset-temp/models/applications
 	python3 tools/model-app-compiler.py $< asset-temp/models/functions.tab asset-temp/models/ftables/ assets/textures/terrain/blocks.tti $@
 
-entity-models: entity-parts
+entity-models: entity-parts entity-pngs
 
 entity-parts: $(call substDirList,asset-src/entity-models/osat,emp,osa)
 
 assets/entity-models/osat/%.osa: asset-src/entity-models/osat/%.emp
 	mkdir -p assets/entity-models/osat
 	python3 tools/part-compiler.py $< $@
+
+entity-pngs: $(call substDirList,asset-src/textures/entity,xcf,png)
+
+assets/textures/entity/%.png: asset-src/textures/entity/%.xcf
+	mkdir -p assets/textures/entity
+	xcf2png $< > $@
 
 yukkuri:
 	@echo "ゆっくりしていってね！"

@@ -64,7 +64,7 @@ AxisScale: 0.25 0.25 0.25
 Control: "head"
 # faces section -- defines faces that this model has
 @Faces
-UVDivisor: 256
+UVDivisor: 64
 # This is equivalent to 12 Triangle declarations, or 6 Quads.
 # With this sugar, we can declare well-behaved cuboids lying within
 # one component easily.
