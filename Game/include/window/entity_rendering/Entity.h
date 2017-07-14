@@ -40,48 +40,6 @@ namespace x801 {
       glm::quat orientation;
     };
     class Entity {
-      /* REFERENCE:
-        class Component {
-        public:
-          Component(std::istream& fh);
-          void write(std::ostream& fh) const;
-          size_t parent;
-          glm::quat offsetAngle;
-          glm::vec3 offsetCoordinates;
-          glm::vec3 axisScale;
-        };
-        class PFace;
-        class PFaceVertex {
-        public:
-          PFaceVertex(std::istream& fh);
-          void write(std::ostream& fh) const;
-          size_t cindex;
-          glm::vec3 offset;
-          glm::vec2 uv;
-        private:
-          PFaceVertex() {}
-          friend class PFace;
-        };
-        class PFace {
-        public:
-          PFace(std::istream& fh);
-          void write(std::ostream& fh) const;
-          PFaceVertex vertices[3];
-        };
-        class Part {
-        public:
-          Part(std::istream& fh);
-          void write(std::ostream& fh) const;
-          glm::vec3 hitboxSize;
-          std::vector<Component> components;
-          std::vector<PFace> faces;
-          std::vector<std::string> componentNames;
-          std::unordered_map<std::string, size_t> componentIndicesByName;
-          std::unordered_map<std::string, std::vector<size_t>> controlAngles;
-          std::unordered_map<size_t, std::vector<std::string>> controlAnglesByComponent;
-          std::string name;
-        };
-      */
     public:
       /*
         Invariants:
