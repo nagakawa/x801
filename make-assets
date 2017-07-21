@@ -51,7 +51,7 @@ asset-temp/models/applications/%.cma: asset-src/models/applications/%.mda
 	mkdir -p asset-temp/models/applications
 	python3 tools/model-app-compiler.py $< asset-temp/models/functions.tab asset-temp/models/ftables/ assets/textures/terrain/blocks.tti $@
 
-entity-models: entity-parts entity-pngs
+entity-models: entity-parts entity-pngs entity-blueprints
 
 entity-parts: $(call substDirList,asset-src/entity-models/osat,emp,osa)
 
@@ -64,6 +64,12 @@ entity-pngs: $(call substDirList,asset-src/textures/entity,xcf,png)
 assets/textures/entity/%.png: asset-src/textures/entity/%.xcf
 	mkdir -p assets/textures/entity
 	xcf2png $< > $@
+
+entity-blueprints: $(call substDirList,asset-src/entity-models/blueprints,emc,ebp)
+
+assets/entity-models/blueprints/%.ebp: asset-src/entity-models/blueprints/%.emc
+	mkdir -p assets/entity-models/blueprints
+	python3 tools/blueprint-compiler.py $< $@
 
 yukkuri:
 	@echo "ゆっくりしていってね！"
