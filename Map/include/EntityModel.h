@@ -76,5 +76,19 @@ namespace x801 {
       std::unordered_map<size_t, std::vector<std::string>> controlAnglesByComponent;
       std::string name;
     };
+    class Blueprint {
+    public:
+      struct Elem {
+        std::string partName;
+        std::string name, id;
+        std::string textureName;
+        size_t parent;
+        glm::quat angle;
+        glm::vec3 offset;
+        Elem(std::istream& fh);
+        void write(std::ostream& fh);
+      };
+      std::vector<Elem> elems;
+    };
   }
 }
