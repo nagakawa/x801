@@ -79,15 +79,16 @@ namespace x801 {
     class Blueprint {
     public:
       struct Elem {
-        std::string partName;
         std::string name, id;
         std::string textureName;
         size_t parent;
         glm::quat angle;
         glm::vec3 offset;
         Elem(std::istream& fh);
-        void write(std::ostream& fh);
+        void write(std::ostream& fh) const;
       };
+      Blueprint(std::istream& fh);
+      void write(std::ostream& fh) const;
       std::vector<Elem> elems;
     };
   }
