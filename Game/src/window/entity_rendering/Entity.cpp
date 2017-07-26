@@ -32,8 +32,8 @@ namespace x801 {
         absoluteComponentPositions[partID];
       std::vector<glm::quat>& orientations =
         absoluteComponentOrientations[partID];
-      x801::map::Part& part = *(usedParts[partID]);
-      x801::map::Component& comp = part.components[componentID];
+      const x801::map::Part& part = *(usedParts[partID]);
+      const x801::map::Component& comp = part.components.at(componentID);
       size_t parentID = comp.parent;
       // Update the component's parent first
       if (parentID != -1U) {
@@ -51,8 +51,8 @@ namespace x801 {
       positions[componentID] = positions[parentID] + absoluteOffset;
       // The absolute orientation is the orientation of a parent
       // influenced by control angles.
-      std::vector<std::string>& controlNames =
-        part.controlAnglesByComponent[componentID];
+      const std::vector<std::string>& controlNames =
+        part.controlAnglesByComponent.at(componentID);
       glm::quat absoluteOrientation = orientations[parentID];
       for (const std::string& name : controlNames) {
         auto it = controlAngles.find(name);
@@ -63,7 +63,7 @@ namespace x801 {
     } // What a breather!
     // Update all of the components of a part
     void Entity::updateComponentsOfPart(size_t partID) {
-      x801::map::Part& part = *(usedParts[partID]);
+      const x801::map::Part& part = *(usedParts[partID]);
       std::vector<bool> isUpdated(part.components.size(), false);
       for (size_t i = 0; i < part.components.size(); ++i) {
         updateComponentOfPart(partID, i, isUpdated);
@@ -109,8 +109,8 @@ namespace x801 {
 }
 
 x801::game::Entity::Entity(
-    const TextureView& tv,
-    const PartView& pv,
+    TextureView& tv,
+    PartView& pv,
     const x801::map::Blueprint& bp) {
   size_t i = 0;
   for (const x801::map::Blueprint::Elem& elem : bp.elems) {
@@ -118,8 +118,12 @@ x801::game::Entity::Entity(
     indicesByID[elem.id] = i;
     usedTextures.push_back(tv.getTexture(elem.textureName));
     PartLink link = {
-      //
-    }
+      elem.parent,
+      elem.component,
+      elem.offset,
+      elem.angle
+    };
+    links.push_back(link);
     ++i;
   }
 }

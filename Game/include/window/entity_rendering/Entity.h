@@ -45,8 +45,8 @@ namespace x801 {
     class Entity {
     public:
       Entity(
-        const TextureView& tv,
-        const PartView& pv,
+        TextureView& tv,
+        PartView& pv,
         const x801::map::Blueprint& bp
       );
       /*
@@ -63,8 +63,8 @@ namespace x801 {
           absoluteComponentOrientations[i].size() ==
             usedParts[i]->components.size()
       */
-      std::vector<x801::map::Part*> usedParts;
-      std::vector<agl::Texture*> usedTextures;
+      std::vector<const x801::map::Part*> usedParts;
+      std::vector<const agl::Texture*> usedTextures;
       std::unordered_map<std::string, glm::quat> controlAngles;
       std::vector<PartLink> links;
       std::unordered_map<std::string, size_t> indicesByID;
