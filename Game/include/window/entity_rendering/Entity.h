@@ -32,6 +32,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <EntityModel.h>
 
+#include "window/patcher_views/PartView.h"
+#include "window/patcher_views/TextureView.h"
+
 namespace x801 {
   namespace game {
     struct PartLink {
@@ -41,6 +44,11 @@ namespace x801 {
     };
     class Entity {
     public:
+      Entity(
+        const TextureView& tv,
+        const PartView& pv,
+        const x801::map::Blueprint& bp
+      );
       /*
         Invariants:
         usedParts.size() == usedTextures.size()
@@ -59,6 +67,7 @@ namespace x801 {
       std::vector<agl::Texture*> usedTextures;
       std::unordered_map<std::string, glm::quat> controlAngles;
       std::vector<PartLink> links;
+      std::unordered_map<std::string, size_t> indicesByID;
       void update();
     private:
       std::vector<glm::vec3> absolutePartPositions;

@@ -82,6 +82,7 @@ namespace x801 {
         std::string name, id;
         std::string textureName;
         size_t parent;
+        size_t component;
         glm::quat angle;
         glm::vec3 offset;
         Elem(std::istream& fh);

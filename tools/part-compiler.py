@@ -156,6 +156,8 @@ parser.add_argument('sourcePart', metavar='sf', type=str, nargs=1,
     help='the part source')
 parser.add_argument('output', metavar='out', type=str, nargs=1,
     help='the path of the part')
+parser.add_argument('table', metavar='tab', type=str, nargs=1,
+    help='the path where the table between component names and IDs should be output')
 
 args = parser.parse_args()
 
@@ -247,3 +249,13 @@ for (name, comps) in controlAngles.items():
   writeInt(out, len(comps), 2)
   for c in comps:
     writeInt(out, c, 4)
+
+out.close()
+
+tab = open(args.table[0], "w")
+
+for (name, iden) in componentIndicesByName.items():
+  if name != 'ground':
+    tab.write(name + " " + str(iden) + "\n")
+
+tab.close()

@@ -107,3 +107,19 @@ namespace x801 {
     }
   }
 }
+
+x801::game::Entity::Entity(
+    const TextureView& tv,
+    const PartView& pv,
+    const x801::map::Blueprint& bp) {
+  size_t i = 0;
+  for (const x801::map::Blueprint::Elem& elem : bp.elems) {
+    usedParts.push_back(pv.getPart(elem.name));
+    indicesByID[elem.id] = i;
+    usedTextures.push_back(tv.getTexture(elem.textureName));
+    PartLink link = {
+      //
+    }
+    ++i;
+  }
+}

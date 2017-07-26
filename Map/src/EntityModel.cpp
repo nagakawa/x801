@@ -117,6 +117,7 @@ x801::map::Blueprint::Elem::Elem(std::istream& fh) {
   id = readString<uint16_t>(fh);
   textureName = readString<uint16_t>(fh);
   parent = readInt<uint32_t>(fh);
+  component = readInt<uint32_t>(fh);
   angle = readQuaternion(fh);
   offset = readVec3(fh);
 }
@@ -126,6 +127,7 @@ void x801::map::Blueprint::Elem::write(std::ostream& fh) const {
   writeString<uint16_t>(fh, id);
   writeString<uint16_t>(fh, textureName);
   writeInt<uint32_t>(fh, parent);
+  writeInt<uint32_t>(fh, component);
   writeQuaternion(fh, angle);
   writeVec3(fh, offset);
 }
