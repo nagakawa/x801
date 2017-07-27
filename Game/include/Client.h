@@ -44,6 +44,7 @@ namespace x801 {
 #include "window/patcher_views/ModelView.h"
 #include "window/patcher_views/TextureView.h"
 #include "window/patcher_views/PartView.h"
+#include "window/patcher_views/BlueprintView.h"
 
 namespace x801 {
   namespace game {
@@ -144,6 +145,7 @@ namespace x801 {
       ModelView* modelView = nullptr;
       MapView* mapView = nullptr;
       PartView* partView = nullptr;
+      BlueprintView* blueprintView = nullptr;
       bool debug = false;
       int width = 1280;
       int height = 960;
