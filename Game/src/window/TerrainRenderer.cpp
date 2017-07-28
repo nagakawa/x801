@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
-x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
+x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft) {
   this->cw = cw;
   c = cw->c;
   p = c->patcher;
@@ -42,10 +42,7 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw) {
     cw != nullptr && c != nullptr &&
     p != nullptr && tv != nullptr &&
     gs != nullptr && tex != nullptr);
-  agl::FBOTexMS ft = agl::makeFBOForMeMS(cw->getWidth(), cw->getHeight());
-  fboTex = ft.ss.texture;
-  fboTexMS = ft.ms.texture;
-  fboSS = ft.ss.fbo;
+  // agl::FBOTexMS ft = agl::makeFBOForMeMS(cw->getWidth(), cw->getHeight());
   fboMS = ft.ms.fbo;
 #ifndef NDEBUG
   axes.setUpRender();

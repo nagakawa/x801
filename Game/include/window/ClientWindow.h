@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <iostream>
+
+#include <FBO.h>
 #include <GLFWApplication.h>
 #include <Sprite2D.h>
 namespace x801 {
@@ -57,6 +59,7 @@ namespace x801 {
       static constexpr size_t FTIMES_TO_STORE = 128;
       float ftimes[FTIMES_TO_STORE];
       size_t curr = 0;
+      agl::FBOTexMS ft;
     };
   }
 }

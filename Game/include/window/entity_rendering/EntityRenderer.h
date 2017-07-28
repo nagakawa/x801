@@ -41,12 +41,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Area.h>
 #include <Chunk.h>
-#include <Model.h>
+#include <EntityModel.h>
 
 namespace x801 {
   namespace game {
     class ClientWindow;
-    class TerrainRenderer;
+    class EntityRenderer;
   }
 }
 #include "Client.h"
@@ -54,11 +54,13 @@ namespace x801 {
 #include "window/Axes.h"
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
-#include "window/patcher_views/ModelView.h"
+#include "window/patcher_views/BlueprintView.h"
+#include "window/patcher_views/PartView.h"
 #include "window/patcher_views/TextureView.h"
 
 namespace x801 {
   namespace game {
+    /*
     struct CMVertex {
       // The vertex coordinates are chunk-local and are expressed
       // as signed 9.7's.
@@ -90,25 +92,22 @@ namespace x801 {
 #ifndef NDEBUG
       bool setup[2] = {false, false};
 #endif
-      friend class TerrainRenderer;
+      friend class EntityRenderer;
     };
-    class TerrainRenderer {
+    */
+    class EntityRenderer {
     public:
-      TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
+      EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
       void draw();
       ChunkMeshBuffer* summon(const x801::map::ChunkXYZ& pos);
       ClientWindow* cw;
       Client* c;
       Patcher* p;
       TextureView* tv;
+      BlueprintView* bv;
+      PartView* pv;
       ClientGameState* gs;
-      agl::Texture* tex;
-      x801::map::ModelApplicationIndex* mai;
-      x801::map::ModelFunctionIndex* mfi;
-      std::shared_ptr<agl::FBO> fboMS;
-#ifndef NDEBUG
-      Axes axes;
-#endif
+      std::shared_ptr<agl::Texture> fboTexMS;
     private:
       std::unordered_map<
           x801::map::ChunkXYZ,

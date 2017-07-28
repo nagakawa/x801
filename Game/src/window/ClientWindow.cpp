@@ -42,8 +42,9 @@ void x801::game::ClientWindow::initialise() {
   //io.Fonts->AddFontFromFileTTF("/home/uruwi/kiloji/kiloji_p.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
   io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, x801::game::range);
   chat = new ChatWindow(this);
-  tr = new TerrainRenderer(this);
-  terrain = new agl::Sprite2D(&*tr->fboTex);
+  ft = agl::makeFBOForMeMS(getWidth(), getHeight());
+  tr = new TerrainRenderer(this, ft);
+  terrain = new agl::Sprite2D(&*(ft.ss.texture));
   terrain->setApp(this);
   terrain->addSprite({
     0, 0, (float) getWidth(), (float) getHeight(),
@@ -92,7 +93,7 @@ void x801::game::ClientWindow::tick() {
   glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   tr->draw();
-  tr->fboMS->blitTo(*(tr->fboSS), getWidth(), getHeight());
+  ft.ms.fbo->blitTo(*(ft.ss.fbo), getWidth(), getHeight());
   agl::setDefaultFBOAsActive();
   terrain->tick();
   fuck->tick();
