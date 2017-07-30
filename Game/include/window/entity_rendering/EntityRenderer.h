@@ -113,8 +113,6 @@ namespace x801 {
           x801::map::ChunkXYZ,
           ChunkMeshBuffer,
           x801::map::ChunkHasher> cmbs;
-      x801::map::Chunk* getChunk(const x801::map::ChunkXYZ& pos);
-      friend class ChunkMeshBuffer;
     };
   }
 }

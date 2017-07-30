@@ -42,7 +42,6 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft
     cw != nullptr && c != nullptr &&
     p != nullptr && tv != nullptr &&
     gs != nullptr && tex != nullptr);
-  // agl::FBOTexMS ft = agl::makeFBOForMeMS(cw->getWidth(), cw->getHeight());
   fboMS = ft.ms.fbo;
 #ifndef NDEBUG
   axes.setUpRender();
