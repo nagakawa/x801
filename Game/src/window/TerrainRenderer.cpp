@@ -34,7 +34,7 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft
   p = c->patcher;
   tv = c->textureView;
   gs = &(c->g);
-  tex = tv->getTexture("textures/terrain/blocks.png");
+  tex = tv->getTexture("textures/terrain/blocks.0.png");
   ModelView* mv = c->modelView;
   mai = mv->getMAI();
   mfi = mv->getMFI();
@@ -357,10 +357,9 @@ static const char* FRAGMENT_SOURCE =
   "flat in uint W; \n"
   "out vec4 colour; \n"
   "uniform sampler2D tex; \n"
-  // How many times taller the texture is than wide.
-  "uniform float dim; \n"
+  "#define DIVISOR 128u \n" // 4096 / 32
   "void main() { \n"
-  "  vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(0, W)) / vec2(1.0f, dim); \n"
+  "  vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(W % DIVISOR, W / DIVISOR)) / DIVISOR; \n"
   "  colour = texture(tex, realtc); \n"
   "} \n"
   ;
@@ -393,7 +392,6 @@ void x801::game::ChunkMeshBuffer::setUpRender(bool layer) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   SETUNSP(program[layer], 1i, "tex", 0);
-  SETUNSP(program[layer], 1f, "dim", ((float) tr->tex->getHeight()) / tr->tex->getWidth());
 #ifndef NDEBUG
   setup[layer] = true;
 #endif
