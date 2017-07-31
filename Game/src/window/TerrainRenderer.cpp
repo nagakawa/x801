@@ -359,7 +359,10 @@ static const char* FRAGMENT_SOURCE =
   "uniform sampler2D tex; \n"
   "#define DIVISOR 128u \n" // 4096 / 32
   "void main() { \n"
-  "  vec2 realtc = (mod(TexCoord, vec2(1.0f, 1.0f)) + vec2(W % DIVISOR, W / DIVISOR)) / DIVISOR; \n"
+  "  vec2 uvstart = vec2(W % DIVISOR, W / DIVISOR); \n" // or (W / DIVISOR) % DIVISOR
+  // (if we need to use multiple textures)
+  "  vec2 local = mod(TexCoord, vec2(1.0f, 1.0f));"
+  "  vec2 realtc = (local + uvstart) / DIVISOR; \n"
   "  colour = texture(tex, realtc); \n"
   "} \n"
   ;
