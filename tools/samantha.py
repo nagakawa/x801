@@ -1,9 +1,9 @@
 import argparse
 import builtins as bi
 import array
-import importlib
 import io
 import numpy as np
+import pathlib
 from PIL import Image
 from typing import Optional, Tuple
 
@@ -15,9 +15,9 @@ class Rectangle:
     self.y1 = y1
     self.x2 = x2
     self.y2 = y2
-  def can_fit(w: int, h: int) -> int:
-    rw = x2 - x1
-    rh = y2 - y1
+  def can_fit(self, w: int, h: int) -> int:
+    rw = self.x2 - self.x1
+    rh = self.y2 - self.y1
     if rw < w or rh < h: return 0
     if rw == w and rh == h: return 1
     return 2
@@ -40,6 +40,7 @@ class Node:
       if fit_score == 0: return None
       if fit_score == 1:
         self.image = image
+        self.image_name = name
         return self
       # Split into 2 nodes
       rect_width = self.rect.x2 - self.rect.x1
@@ -58,7 +59,7 @@ class Node:
       else:
         self.child0 = Node(Rectangle(
           self.rect.x1, self.rect.y1,
-          self.rect.x1, self.rect.y1 + image.height
+          self.rect.x2, self.rect.y1 + image.height
         ))
         self.child1 = Node(Rectangle(
           self.rect.x1, self.rect.y1 + image.height,
@@ -101,21 +102,32 @@ def new_image():
 image = new_image()
 pageno = 0
 atlas = Node(Rectangle(0, 0, asize, asize))
-fh = open(args.destinationTable[0], "w")
+fh = open(args.destinationTable, "w")
 
 def save():
   image.save(destinationPrefix + "." + str(pageno) + ".png")
 
+name_and_size = []
+
 for fn in pathlib.Path(sourceImagesDir).glob("*.png"):
+  newImage = Image.open(str(fn))
+  name_and_size.append((fn, newImage.width * newImage.height))
+
+name_and_size.sort(key=lambda s: s[1], reverse=True)
+
+for (fn, s) in name_and_size:
   newImage = Image.open(str(fn))
   if newImage.width > asize or newImage.height > asize:
     error("Image is too big! %d x %d with asize = %d" %
       (newImage.width, newImage.height, asize))
   shortname = fn.name
   shortname = shortname[0:shortname.rfind('.')]
-  while true:
+  location = None
+  while True:
     location = atlas.insert(newImage, shortname)
     if location: break
+    print("Page " + str(pageno) + " is full")
+    input()
     save()
     image = new_image()
     pageno += 1
@@ -125,11 +137,8 @@ for fn in pathlib.Path(sourceImagesDir).glob("*.png"):
     location.rect.x1, location.rect.y1,
     location.rect.x2, location.rect.y2
   ))
+  image.paste(newImage, (location.rect.x1, location.rect.y1))
+  print("Pasted image " + shortname)
 
 save()
 fh.close()
-
-exit()
-
-for (name, index) in table.items():
-  fh.write(name + " " + str(index) + "\n")
