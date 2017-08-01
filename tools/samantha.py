@@ -7,6 +7,17 @@ import pathlib
 from PIL import Image
 from typing import Optional, Tuple
 
+def writeInt(f, n, b):
+  f.write((n % (1 << 8 * b)).to_bytes(b, byteorder='little'))
+
+def writeIntSigned(f, n, b):
+  f.write((n).to_bytes(b, byteorder='little', signed=True))
+
+def writeString16(f, s):
+  b = s.encode()
+  writeInt(f, len(b), 2)
+  f.write(b)
+
 # Thanks http://blackpawn.com/texts/lightmaps/default.html for the algo
 
 class Rectangle:
@@ -87,6 +98,9 @@ parser.add_argument('--size', metavar='size', type=int, default=4096,
 parser.add_argument('--verbose', metavar='verbose',
     action='store_const', const=True, default=False,
     help='enables verbose output')
+parser.add_argument('--binary', metavar='binary',
+    action='store_const', const=True, default=False,
+    help='use binary instead of text output')
 
 args = parser.parse_args()
 
@@ -95,6 +109,7 @@ destinationTable = args.destinationTable
 sourceImagesDir = args.images
 asize = args.size
 verbose = args.verbose
+binary = args.binary
 
 def new_image():
   return Image.new(
@@ -106,7 +121,7 @@ def new_image():
 image = new_image()
 pageno = 0
 atlas = Node(Rectangle(0, 0, asize, asize))
-fh = open(args.destinationTable, "w")
+fh = open(args.destinationTable, "wb" if binary else "w")
 
 def save():
   image.save(destinationPrefix + "." + str(pageno) + ".png")
@@ -133,11 +148,19 @@ while remaining > 0:
     shortname = shortname[0:shortname.rfind('.')]
     location = atlas.insert(newImage, shortname)
     if not location: continue
-    fh.write("%s %d %d %d %d %d\n" % (
-      shortname, pageno,
-      location.rect.x1, location.rect.y1,
-      location.rect.x2, location.rect.y2
-    ))
+    if binary:
+      writeString16(fh, shortname)
+      writeInt(fh, pageno, 2)
+      writeInt(fh, location.rect.x1, 2)
+      writeInt(fh, location.rect.y1, 2)
+      writeInt(fh, location.rect.x2, 2)
+      writeInt(fh, location.rect.y2, 2)
+    else:
+      fh.write("%s %d %d %d %d %d\n" % (
+        shortname, pageno,
+        location.rect.x1, location.rect.y1,
+        location.rect.x2, location.rect.y2
+      ))
     image.paste(newImage, (location.rect.x1, location.rect.y1))
     if verbose: print("Pasted image " + shortname)
     remaining -= 1
