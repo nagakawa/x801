@@ -84,6 +84,9 @@ parser.add_argument('images', metavar='images', type=str,
     help='the path with the appropriate images')
 parser.add_argument('--size', metavar='size', type=int, default=4096,
     help='how big to make the atlas')
+parser.add_argument('--verbose', metavar='verbose',
+    action='store_const', const=True, default=False,
+    help='enables verbose output')
 
 args = parser.parse_args()
 
@@ -91,6 +94,7 @@ destinationPrefix = args.destinationImage
 destinationTable = args.destinationTable
 sourceImagesDir = args.images
 asize = args.size
+verbose = args.verbose
 
 def new_image():
   return Image.new(
@@ -111,34 +115,38 @@ name_and_size = []
 
 for fn in pathlib.Path(sourceImagesDir).glob("*.png"):
   newImage = Image.open(str(fn))
-  name_and_size.append((fn, newImage.width * newImage.height))
+  name_and_size.append([fn, min(newImage.width, newImage.height), False])
 
 name_and_size.sort(key=lambda s: s[1], reverse=True)
+remaining = len(name_and_size)
 
-for (fn, s) in name_and_size:
-  newImage = Image.open(str(fn))
-  if newImage.width > asize or newImage.height > asize:
-    error("Image is too big! %d x %d with asize = %d" %
-      (newImage.width, newImage.height, asize))
-  shortname = fn.name
-  shortname = shortname[0:shortname.rfind('.')]
-  location = None
-  while True:
+while remaining > 0:
+  # Insert everything that fits
+  for entry in name_and_size:
+    fn, size, used = entry
+    if used: continue
+    newImage = Image.open(str(fn))
+    if newImage.width > asize or newImage.height > asize:
+      error("Image is too big! %d x %d with asize = %d" %
+        (newImage.width, newImage.height, asize))
+    shortname = fn.name
+    shortname = shortname[0:shortname.rfind('.')]
     location = atlas.insert(newImage, shortname)
-    if location: break
-    print("Page " + str(pageno) + " is full")
-    input()
-    save()
-    image = new_image()
-    pageno += 1
-    atlas = Node(Rectangle(0, 0, asize, asize))
-  fh.write("%s %d %d %d %d %d\n" % (
-    shortname, pageno,
-    location.rect.x1, location.rect.y1,
-    location.rect.x2, location.rect.y2
-  ))
-  image.paste(newImage, (location.rect.x1, location.rect.y1))
-  print("Pasted image " + shortname)
+    if not location: continue
+    fh.write("%s %d %d %d %d %d\n" % (
+      shortname, pageno,
+      location.rect.x1, location.rect.y1,
+      location.rect.x2, location.rect.y2
+    ))
+    image.paste(newImage, (location.rect.x1, location.rect.y1))
+    if verbose: print("Pasted image " + shortname)
+    remaining -= 1
+    entry[2] = True
+  if verbose: print("Page " + str(pageno) + " is full")
+  save()
+  image = new_image()
+  pageno += 1
+  atlas = Node(Rectangle(0, 0, asize, asize))
 
 save()
 fh.close()
