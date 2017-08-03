@@ -40,14 +40,16 @@ class Node:
     self.image = None
     self.image_name = None
     self.rect = rect
-  def insert(self, image, name):
+  def insert(self, image, name, margin=0):
     if self.child0 or self.child1: # Not a leaf
-      new_node = self.child0.insert(image, name)
+      new_node = self.child0.insert(image, name, margin)
       if new_node: return new_node
-      return self.child1.insert(image, name)
+      return self.child1.insert(image, name, margin)
     else: # Leaf
+      netwidth = image.width + margin
+      netheight = image.height + margin
       if self.image: return None # Already occupied
-      fit_score = self.rect.can_fit(image.width, image.height)
+      fit_score = self.rect.can_fit(netwidth, netheight)
       if fit_score == 0: return None
       if fit_score == 1:
         self.image = image
@@ -56,27 +58,27 @@ class Node:
       # Split into 2 nodes
       rect_width = self.rect.x2 - self.rect.x1
       rect_height = self.rect.y2 - self.rect.y1
-      dw = rect_width - image.width
-      dh = rect_height - image.height
+      dw = rect_width - netwidth
+      dh = rect_height - netheight
       if dw > dh:
         self.child0 = Node(Rectangle(
           self.rect.x1, self.rect.y1,
-          self.rect.x1 + image.width, self.rect.y2
+          self.rect.x1 + netwidth, self.rect.y2
         ))
         self.child1 = Node(Rectangle(
-          self.rect.x1 + image.width, self.rect.y1,
+          self.rect.x1 + netwidth, self.rect.y1,
           self.rect.x2, self.rect.y2
         ))
       else:
         self.child0 = Node(Rectangle(
           self.rect.x1, self.rect.y1,
-          self.rect.x2, self.rect.y1 + image.height
+          self.rect.x2, self.rect.y1 + netheight
         ))
         self.child1 = Node(Rectangle(
-          self.rect.x1, self.rect.y1 + image.height,
+          self.rect.x1, self.rect.y1 + netheight,
           self.rect.x2, self.rect.y2
         ))
-      return self.child0.insert(image, name)
+      return self.child0.insert(image, name, margin)
 
 
 class InputException(Exception):
@@ -94,7 +96,9 @@ parser.add_argument('destinationTable', metavar='dd', type=str,
 parser.add_argument('images', metavar='images', type=str,
     help='the path with the appropriate images')
 parser.add_argument('--size', metavar='size', type=int, default=4096,
-    help='how big to make the atlas')
+    help='how big to make the atlas (default=4096)')
+parser.add_argument('--margin', metavar='size', type=int, default=0,
+    help='width of margins (default=0)')
 parser.add_argument('--verbose', metavar='verbose',
     action='store_const', const=True, default=False,
     help='enables verbose output')
@@ -108,6 +112,7 @@ destinationPrefix = args.destinationImage
 destinationTable = args.destinationTable
 sourceImagesDir = args.images
 asize = args.size
+margin = args.margin
 verbose = args.verbose
 binary = args.binary
 
@@ -146,7 +151,7 @@ while remaining > 0:
         (newImage.width, newImage.height, asize))
     shortname = fn.name
     shortname = shortname[0:shortname.rfind('.')]
-    location = atlas.insert(newImage, shortname)
+    location = atlas.insert(newImage, shortname, margin)
     if not location: continue
     if binary:
       writeString16(fh, shortname)
