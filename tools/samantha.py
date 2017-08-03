@@ -176,5 +176,4 @@ while remaining > 0:
   pageno += 1
   atlas = Node(Rectangle(0, 0, asize, asize))
 
-save()
 fh.close()
