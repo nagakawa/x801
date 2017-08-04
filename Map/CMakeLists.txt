@@ -18,6 +18,7 @@ SET(Map_library_SRCS
   ${PROJECT_SOURCE_DIR}/TileSec.cpp
   ${PROJECT_SOURCE_DIR}/Model.cpp
   ${PROJECT_SOURCE_DIR}/EntityModel.cpp
+  ${PROJECT_SOURCE_DIR}/Atlas.cpp
 )
 
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})

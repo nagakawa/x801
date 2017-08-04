@@ -108,6 +108,7 @@ namespace x801 {
       PartView* pv;
       ClientGameState* gs;
       std::shared_ptr<agl::Texture> fboTexMS;
+      // std::vector<agl::Texture*> atlases;
     private:
       std::unordered_map<
           x801::map::ChunkXYZ,
