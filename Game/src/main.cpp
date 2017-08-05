@@ -116,7 +116,7 @@ const char* x801::game::USAGE =
   "  --client <address> <port> (-c): start a client\n"
   "  --server <port> (-s): start a server\n"
   "  -d (--debug): for clients, enable OpenGL live debugging\n"
-  "    (requires OpenGL 4.5 or later)\n"
+  "    (requires OpenGL 4.3 or later)\n"
   "  --username <username>: pass in username from command line\n"
   "  --password <password>: pass in password from command line\n"
   "    The above two options are intended for compatibility with\n"

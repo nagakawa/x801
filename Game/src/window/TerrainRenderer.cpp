@@ -207,7 +207,7 @@ static void printTable(uint8_t table[48][6]) {
 
 static_block {
   generateTable(oriTable, oriTableInverse);
-  printTable(oriTable);
+  // printTable(oriTable);
 }
 
 void x801::game::ChunkMeshBuffer::createMesh() {

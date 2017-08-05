@@ -539,7 +539,7 @@ void x801::game::Client::sendKeyInput(const KeyInput& input) {
 void x801::game::Client::openWindow() {
   glfwInit();
   if (debug)
-    cw = new ClientWindow(width, height, 0, 0, "Experiment801 (live debug)", 4, 5, true);
+    cw = new ClientWindow(width, height, 0, 0, "Experiment801 (live debug)", 4, 3, true);
   else
     cw = new ClientWindow(width, height, 0, 0, "Experiment801", 3, 3, false);
   cw->c = this;
