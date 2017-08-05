@@ -2,7 +2,8 @@
 
 Thank you for contributing to Experiment801!
 
-This document will explain how to contribute in a way...
+This document will explain how to contribute in a way that makes the development
+team save time and want to work with you.
 
 Experiment801 is an open-source project that *you* can contribute to!
 We are looking for bug reports, feature requests, documentation changes and
@@ -22,6 +23,17 @@ instead.
   (https://docs.google.com/document/d/1XcE7H5GtrZIlj6qKXPGBSr0KNMsfeWh0oBGjSW0jTNI/edit?usp=sharing) for specifications on file and network formats.
 * Usually, you should have one class per file. Multiple classes in one file are okay if they're related to each other and one of them is small.
 
+### Philosophy
+
+The goals of Experiment801 are:
+
+* to give people like *you* the ability to create content and game enhancements as easily as possible
+  (even if this means that the game doesn't look like a high-budget game)
+* to perform well, especially on servers, so more people can host their own
+* to improve on what Wizard101 has failed
+
+Keep these in mind when you request or develop new features.
+
 ## Getting started
 
 First, fork the repository (make your own copy) by pressing the "Fork" button.
@@ -34,7 +46,7 @@ your own copy):
 
 (Consult README.md for building instructions.)
 
-If you'd like to see your change in our project, create a pull request.
+If you'd like to see your change in our project, then please create a pull request.
 Click [here](http://makeapullrequest.com/) to learn how!
 
 ## Reporting a bug
@@ -45,7 +57,8 @@ or send a Discord PM to Uruwi. If you're not sure, contact Uruwi privately anywa
 \* These include (but are not limited to):
 
 * any client action that can reliably cause the server to crash or become unresponsive
-* anything that causes the client to write to or delete files outside of Experiment801
+* anything that causes the client or server to write to or delete files outside of Experiment801
+* anything that causes the server's save data to become corrupted
 * anything that gives access to someone else's private information
 
 Otherwise, you can file a bug report at our repo.
@@ -63,4 +76,9 @@ When filing an issue, make sure to answer the following questions:
 7. What did you expect to happen?
 8. What actually happened?
 9. If you encounter a crash, then try running the program under `gdb` and repeating the steps to reproduce the bug in question. After the program crashes, type in `bt` into the `gdb` prompt to get a stack trace, and attach this with the bug report.
-10. If you encounter a graphical error and you have a GPU driver that supports OpenGL 4.3 or later, or that has the `ARB_debug_outupt` extension, run the client with the `-d` flag. 
+10. If you encounter a graphical error and you have a GPU driver that supports OpenGL 4.3 or later, or that has the `ARB_debug_outupt` extension, run the client with the `-d` flag and look for any output that wasn't there before.
+
+## Suggesting enhancements
+
+If you want to see a feature implemented, open an issue on GitHub!
+(Please consult the Philosophy section to find out whether a feature request is in the scope of this project.)
