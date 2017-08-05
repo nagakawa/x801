@@ -37,7 +37,7 @@ files ask for the same libraries as TDR, plus a few other libraries. On Debian
       libsqlite3-dev libboost-filesystem-dev libboost-random-dev \
       libasound2-dev libogg-dev libvorbis-dev cmake
 
-and build PortAudio yourself.
+and build PortAudio yourself. (Consult the `install-dependencies.sh` script.)
 
 *(Boost.Process is also needed, but since Ubuntu's repositories don't have
 Boost 1.64.0 yet, it's prepackaged in the repo for now.)*
@@ -86,13 +86,15 @@ To start a server:
 
     build/x801 -s 9001
 
+To start the filehost server (also needed):
+
+    nodejs gun\?/app.js
+
+This needs to be restarted whenever files are updated.
+
 To start a client:
 
     build/x801 -c localhost 9001
-
-### Other Links
-
-* [The One and Only Style Guide](https://docs.google.com/document/d/1AskEPaRCH0A6xCgIYerogpheiXyx4UT886UwIGPR-vU/edit?usp=sharing)
 
 ### Licence
 
