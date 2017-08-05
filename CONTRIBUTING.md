@@ -17,10 +17,8 @@ instead.
 * Follow our code of conduct.
 * Make sure that output files (e. g. executable and object files, compiled asset binaries)
   don't creep into the repository. Update the `.gitignore` file if necessary.
-* Follow our [code style]
-  (https://docs.google.com/document/d/1AskEPaRCH0A6xCgIYerogpheiXyx4UT886UwIGPR-vU/edit?usp=sharing).
-* Consult [this document]
-  (https://docs.google.com/document/d/1XcE7H5GtrZIlj6qKXPGBSr0KNMsfeWh0oBGjSW0jTNI/edit?usp=sharing) for specifications on file and network formats.
+* Follow our [code style](https://docs.google.com/document/d/1AskEPaRCH0A6xCgIYerogpheiXyx4UT886UwIGPR-vU/edit?usp=sharing).
+* Consult [this document](https://docs.google.com/document/d/1XcE7H5GtrZIlj6qKXPGBSr0KNMsfeWh0oBGjSW0jTNI/edit?usp=sharing) for specifications on file and network formats.
 * Usually, you should have one class per file. Multiple classes in one file are okay if they're related to each other and one of them is small.
 
 ### Philosophy
