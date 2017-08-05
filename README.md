@@ -13,6 +13,11 @@ run a server for.
 
 At this moment, compiling will likely work only on POSIX-based systems.
 
+You also need a `--recursive` clone of this repository due to the prescence of
+submodules. Use this command to get one:
+
+    git clone --recursive https://github.com/nagakawa/x801.git
+
 #### Note about compilers
 
 If you are using g++, then at least use a new version. 7.0.0 is known to work,
@@ -43,9 +48,13 @@ is managed by the configuration files so no extra work for you.
 In addition, the Python scripts depend on a few packages.
 
     sudo apt install python3-pip
-    pip3 install numpy simpleeval pyquaternion
+    pip3 install numpy simpleeval pyquaternion Pillow
 
 In addition, there are programs used to build assets:
+
+* XCFTools (`xcftools`).
+
+(These aren't needed yet but probably will be in the future:)
 
 * MuseScore 2.0.2 or later. You can get the package in the official repositories,
   but if you want the most up-to-date version, there's also a
@@ -53,7 +62,6 @@ In addition, there are programs used to build assets:
   Other distributions might have their own ways to get the program.
 * FluidSynth (used to convert .mid files to .wav). The package name is,
   unsurprisingly, `fluidsynth`.
-* XCFTools (`xcftools`).
 
 There is a bug with older versions of Valgrind that will prevent it from running
 some tests. Valgrind 3.12.0 should resolve the issue, but you'll probably have
