@@ -58,6 +58,14 @@ namespace x801 {
           Node(size_t left, size_t top, size_t right, size_t bottom) :
             left(left), top(top), right(right), bottom(bottom) {}
           Node(const Node& other) = delete;
+          Node(Node&& other) :
+              child0(other.child0), child1(other.child1),
+              left(other.left), top(other.top),
+              right(other.right), bottom(other.bottom),
+              occupied(other.occupied) {
+            other.child0 = nullptr;
+            other.child1 = nullptr;
+          }
           Node& operator=(const Node& other) = delete;
           ~Node();
           Node* child0 = nullptr;
@@ -69,6 +77,9 @@ namespace x801 {
         Page() :
           fbo(agl::makeFBOForMe(texsize, texsize)),
           node(0, 0, texsize, texsize) {}
+        Page(const Page& other) = delete;
+        Page(Page&& other) :
+          fbo(std::move(other.fbo)), node(std::move(other.node)) {}
         agl::FBOTex fbo;
         Node node;
         void burn(Node& node, const agl::Texture& tex);

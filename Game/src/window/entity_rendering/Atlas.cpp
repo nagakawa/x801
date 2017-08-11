@@ -126,6 +126,9 @@ namespace x801 {
         node = pages[i].node.insert(tex.getWidth(), tex.getHeight());
         if (node != nullptr) break;
       }
+      if (i == pages.size()) {
+        pages.emplace_back();
+      }
       pages[i].burn(*node, tex);
       locations[name] =
         { i, node->left, node->top, node->right, node->bottom };

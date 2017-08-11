@@ -42,7 +42,7 @@ void x801::game::ClientWindow::initialise() {
   //io.Fonts->AddFontFromFileTTF("/home/uruwi/kiloji/kiloji_p.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
   io.Fonts->AddFontFromFileTTF("intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf", 18.0f, nullptr, x801::game::range);
   chat = new ChatWindow(this);
-  ft = agl::makeFBOForMeMS(getWidth(), getHeight());
+  ft = std::move(agl::makeFBOForMeMS(getWidth(), getHeight()));
   tr = new TerrainRenderer(this, ft);
   terrain = new agl::Sprite2D(&*(ft.ss.texture));
   terrain->setApp(this);
