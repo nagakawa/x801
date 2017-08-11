@@ -107,7 +107,7 @@ namespace x801 {
       BlueprintView* bv;
       PartView* pv;
       ClientGameState* gs;
-      std::shared_ptr<agl::Texture> fboTexMS;
+      std::shared_ptr<agl::FBO> fboMS;
       // std::vector<agl::Texture*> atlases;
     private:
       std::unordered_map<

@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    // Here be dragons
     void Entity::updateComponentOfPart(
         size_t partID, size_t componentID,
         std::vector<bool>& isUpdated

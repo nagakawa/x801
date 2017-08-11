@@ -47,7 +47,10 @@
     "functional": "cpp",
     "tuple": "cpp",
     "utility": "cpp",
-    "system_error": "cpp"
+    "system_error": "cpp",
+    "bitset": "cpp",
+    "string_view": "cpp",
+    "valarray": "cpp"
   },
   "python.linting.pylintEnabled": false
 }

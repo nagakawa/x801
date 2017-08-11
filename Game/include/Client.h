@@ -151,6 +151,7 @@ namespace x801 {
       int height = 960;
       friend class ClientWindow;
       friend class TerrainRenderer;
+      friend class EntityRenderer;
     };
   }
 }

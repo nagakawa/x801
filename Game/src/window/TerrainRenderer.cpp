@@ -185,6 +185,7 @@ static void generateTable(uint8_t table[48][6], uint8_t tableInv[48][6]) {
   }
 }
 
+/*
 static void printTable(uint8_t table[48][6]) {
   using x801::map::DIRECTION_NAMES;
   std::cout << "ORI\t#\tUP\tDOWN\tNORTH\tSOUTH\tEAST\tWEST\n";
@@ -204,6 +205,7 @@ static void printTable(uint8_t table[48][6]) {
     std::cout << '\n';
   }
 }
+*/
 
 static_block {
   generateTable(oriTable, oriTableInverse);
