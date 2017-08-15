@@ -38,5 +38,11 @@ namespace x801 {
         tv != nullptr);
       fboMS = ft.ms.fbo;
     }
+    void EntityRenderer::setUpRender() {
+      a.setUpRender();
+#ifndef NDEBUG
+      issetup = true;
+#endif
+    }
   }
 }

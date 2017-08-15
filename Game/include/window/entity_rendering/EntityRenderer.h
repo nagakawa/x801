@@ -57,6 +57,8 @@ namespace x801 {
 #include "window/patcher_views/BlueprintView.h"
 #include "window/patcher_views/PartView.h"
 #include "window/patcher_views/TextureView.h"
+#include "window/entity_rendering/Atlas.h"
+#include "window/entity_rendering/Entity.h"
 
 namespace x801 {
   namespace game {
@@ -98,6 +100,7 @@ namespace x801 {
     class EntityRenderer {
     public:
       EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
+      void setUpRender();
       void draw();
       ChunkMeshBuffer* summon(const x801::map::ChunkXYZ& pos);
       ClientWindow* cw;
@@ -108,12 +111,16 @@ namespace x801 {
       PartView* pv;
       ClientGameState* gs;
       std::shared_ptr<agl::FBO> fboMS;
+      Atlas a;
       // std::vector<agl::Texture*> atlases;
     private:
       std::unordered_map<
           x801::map::ChunkXYZ,
           ChunkMeshBuffer,
           x801::map::ChunkHasher> cmbs;
+#ifndef NDEBUG
+      bool issetup = false;
+#endif
     };
   }
 }
