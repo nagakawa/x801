@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <boost/optional.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
 #include <Texture.h>
@@ -40,7 +41,10 @@ namespace x801 {
     class TextureView {
     public:
       TextureView(Patcher* underlying) : underlying(underlying) {}
+      boost::optional<agl::Texture>
+          getTextureTransient(const std::string& name);
       agl::Texture* getTexture(const std::string& name);
+      void purge(const std::string& name);
     private:
       Patcher* underlying;
       mutable boost::shared_mutex mapMutex;

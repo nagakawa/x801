@@ -22,31 +22,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
-using namespace x801::game;
-
-agl::Texture* x801::game::TextureView::getTexture(const std::string& name) {
-  mapMutex.lock_shared();
-  auto iterator = textures.find(name);
-  if (iterator != textures.end()) {
-    mapMutex.unlock_shared();
-    return &(iterator->second);
-  }
-  underlying->fetchFile(name.c_str());
-  uint32_t version, contentLength;
-  uint8_t* contents = nullptr;
-  bool status = underlying->getFileEntry(
-    name.c_str(),
-    version, contentLength, contents
-  );
-  mapMutex.unlock_shared();
-  if (status) {
-    boost::unique_lock<boost::shared_mutex> guard(mapMutex);
-    agl::Texture tex(contents, (int) contentLength);
-    textures[name] = std::move(tex);
-    return &(textures[name]);
-  } else {
-    std::cerr << "Requesting file " << name << "\n";
-    underlying->requestFile(name.c_str());
-    return nullptr;
+namespace x801 {
+  namespace game {
+    boost::optional<agl::Texture>
+        TextureView::getTextureTransient(const std::string& name) {
+      underlying->fetchFile(name.c_str());
+      uint32_t version, contentLength;
+      uint8_t* contents = nullptr;
+      bool status = underlying->getFileEntry(
+        name.c_str(),
+        version, contentLength, contents
+      );
+      if (status)
+        return agl::Texture(contents, (int) contentLength);
+      return boost::none;
+    }
+    agl::Texture* TextureView::getTexture(const std::string& name) {
+      mapMutex.lock_shared();
+      auto iterator = textures.find(name);
+      if (iterator != textures.end()) {
+        mapMutex.unlock_shared();
+        return &(iterator->second);
+      }
+      mapMutex.unlock_shared();
+      auto texopt = getTextureTransient(name);
+      if (texopt) {
+        boost::unique_lock<boost::shared_mutex> guard(mapMutex);
+        textures[name] = std::move(*texopt);
+        return &(textures[name]);
+      } else {
+        std::cerr << "Requesting file " << name << "\n";
+        underlying->requestFile(name.c_str());
+        return nullptr;
+      }
+    }
+    void TextureView::purge(const std::string& name) {
+      textures.erase(name);
+    }
   }
 }
