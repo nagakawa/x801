@@ -118,6 +118,7 @@ namespace x801 {
           x801::map::ChunkXYZ,
           ChunkMeshBuffer,
           x801::map::ChunkHasher> cmbs;
+      bool addTexture(const std::string& id);
 #ifndef NDEBUG
       bool issetup = false;
 #endif

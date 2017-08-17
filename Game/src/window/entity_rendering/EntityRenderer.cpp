@@ -20,6 +20,10 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <boost/optional.hpp>
+
+#include <utils.h>
+
 namespace x801 {
   namespace game {
     EntityRenderer::EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft) {
@@ -43,6 +47,21 @@ namespace x801 {
 #ifndef NDEBUG
       issetup = true;
 #endif
+    }
+    bool EntityRenderer::addTexture(const std::string& id) {
+      if (a.locations.count(id) != 0) {
+        XTRACE("Texture ", id, " is already in the atlas");
+        return true;
+      }
+      boost::optional<agl::Texture> tex =
+        tv->getTextureTransient("textures/entity" + id + ".png");
+      if (!tex) {
+        XTRACE("Texture ", id, " does not exist");
+        return false;
+      }
+      a.insert(id, *tex);
+      XTRACE("Texture ", id, " inserted into atlas");
+      return true;
     }
   }
 }

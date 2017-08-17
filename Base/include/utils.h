@@ -180,5 +180,25 @@ namespace x801 {
     std::string getPathOfCurrentExecutable();
 
     bool canBeConvertedToPositiveInt(const char* s, int* out = nullptr);
+#ifndef NDEBUG
+#define XTRACE(...) ::x801::base::ftrace(__FILE__, __LINE__, __VA_ARGS__)
+    inline void trace() {
+      std::cout << '\n';
+    }
+    template<typename T, typename... U>
+    inline void trace(T arg0, U... args) {
+      std::cout << arg0;
+      trace(args...);
+    }
+    template<typename... T>
+    inline void ftrace(const char* file, int line, T... args) {
+      std::cout << file << ":" << line << ": ";
+      trace(args...);
+    }
+#else
+#define XTRACE(...)
+    template<typename... T>
+    inline void trace(T... /*args*/) {}
+#endif
   }
 }
