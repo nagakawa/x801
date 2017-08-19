@@ -45,7 +45,6 @@ namespace x801 {
     class Entity {
     public:
       Entity(
-        TextureView& tv,
         PartView& pv,
         const x801::map::Blueprint& bp
       );
@@ -64,7 +63,7 @@ namespace x801 {
             usedParts[i]->components.size()
       */
       std::vector<const x801::map::Part*> usedParts;
-      std::vector<const agl::Texture*> usedTextures;
+      std::vector<std::string> usedTextures;
       std::unordered_map<std::string, glm::quat> controlAngles;
       std::vector<PartLink> links;
       std::unordered_map<std::string, size_t> indicesByID;

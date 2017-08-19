@@ -62,41 +62,39 @@ namespace x801 {
 
 namespace x801 {
   namespace game {
-    /*
-    struct CMVertex {
-      // The vertex coordinates are chunk-local and are expressed
-      // as signed 9.7's.
-      uint32_t w;
-      int16_t x, y, z;
-      uint8_t u, v;
+    struct EMVertex {
+      float x, y, z;
+      float u, v;
     };
-    static_assert(offsetof(CMVertex, x) + 2 == offsetof(CMVertex, y) && offsetof(CMVertex, y) + 2 == offsetof(CMVertex, z) && offsetof(CMVertex, u) + 1 == offsetof(CMVertex, v), "Basic offset checks");
-    class ChunkMeshBuffer {
+    static_assert(
+      offsetof(EMVertex, x) + 4 == offsetof(EMVertex, y)
+        && offsetof(EMVertex, y) + 4 == offsetof(EMVertex, z)
+        && offsetof(EMVertex, u) + 4 == offsetof(EMVertex, v),
+      "Basic offset checks");
+    class EntityMeshBuffer {
     public:
-      ChunkMeshBuffer(
-          const x801::map::ChunkXYZ& xyz,
-          TerrainRenderer* tr,
-          x801::map::Chunk* chunk) :
-          xyz(xyz), tr(tr), chunk(chunk) {}
+      EntityMeshBuffer(EntityRenderer* er, size_t i) :
+          er(er), i(i) {}
       void createMesh();
       void setUpRender(bool layer);
       void render(bool layer);
     private:
-      void addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]);
+      /*void addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]);
       x801::map::ChunkXYZ xyz;
       TerrainRenderer* tr;
       x801::map::Chunk* chunk;
-      std::vector<CMVertex> opaqueVertices;
-      std::vector<CMVertex> transparentVertices;
-      agl::VBO vbo[2];
-      agl::VAO vao[2];
-      agl::ShaderProgram program[2];
+      std::vector<EMVertex> opaqueVertices;
+      std::vector<EMVertex> transparentVertices;*/
+      EntityRenderer* er;
+      agl::VBO vbo;
+      agl::VAO vao;
+      agl::ShaderProgram program;
+      size_t i;
 #ifndef NDEBUG
-      bool setup[2] = {false, false};
+      bool setup = false;
 #endif
       friend class EntityRenderer;
     };
-    */
     class EntityRenderer {
     public:
       EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
@@ -112,12 +110,12 @@ namespace x801 {
       ClientGameState* gs;
       std::shared_ptr<agl::FBO> fboMS;
       Atlas a;
-      // std::vector<agl::Texture*> atlases;
     private:
-      std::unordered_map<
+      /*std::unordered_map<
           x801::map::ChunkXYZ,
           ChunkMeshBuffer,
-          x801::map::ChunkHasher> cmbs;
+          x801::map::ChunkHasher> cmbs;*/
+      std::vector<EntityMeshBuffer> embs;
       bool addTexture(const std::string& id);
 #ifndef NDEBUG
       bool issetup = false;
