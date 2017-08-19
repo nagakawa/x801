@@ -76,8 +76,8 @@ namespace x801 {
       EntityMeshBuffer(EntityRenderer* er, size_t i) :
           er(er), i(i) {}
       void createMesh();
-      void setUpRender(bool layer);
-      void render(bool layer);
+      void setUpRender();
+      void render();
     private:
       /*void addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]);
       x801::map::ChunkXYZ xyz;
@@ -99,8 +99,11 @@ namespace x801 {
     public:
       EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
       void setUpRender();
-      void draw();
-      ChunkMeshBuffer* summon(const x801::map::ChunkXYZ& pos);
+      void render();
+      // Currently not threadsafe (race condition on nextID).
+      // May make these methods so if circumstances demand it.
+      uint32_t addEntity(Entity&& e);
+      uint32_t addEntity(const std::string& name);
       ClientWindow* cw;
       Client* c;
       Patcher* p;
@@ -115,6 +118,8 @@ namespace x801 {
           x801::map::ChunkXYZ,
           ChunkMeshBuffer,
           x801::map::ChunkHasher> cmbs;*/
+      std::unordered_map<uint32_t, Entity> entities;
+      uint32_t nextID = 0;
       std::vector<EntityMeshBuffer> embs;
       bool addTexture(const std::string& id);
 #ifndef NDEBUG

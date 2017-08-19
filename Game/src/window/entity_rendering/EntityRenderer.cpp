@@ -63,5 +63,13 @@ namespace x801 {
       XTRACE("Texture ", id, " inserted into atlas");
       return true;
     }
+    uint32_t EntityRenderer::addEntity(Entity&& e) {
+      entities[nextID] = std::move(e);
+      return nextID++;
+    }
+    uint32_t EntityRenderer::addEntity(const std::string& name) {
+      Entity e(*pv, *(bv->getBlueprint(name)));
+      return addEntity(std::move(e));
+    }
   }
 }

@@ -44,10 +44,38 @@ namespace x801 {
     };
     class Entity {
     public:
+      Entity() {}
       Entity(
         PartView& pv,
         const x801::map::Blueprint& bp
       );
+
+#define XAPP \
+  X(usedParts), \
+  X(usedTextures), \
+  X(controlAngles), \
+  X(links), \
+  X(indicesByID), \
+  X(absolutePartPositions), \
+  X(absolutePartOrientations), \
+  X(absoluteComponentPositions), \
+  X(absoluteComponentOrientations)
+#define X(n) n(std::move(e.n))
+
+      Entity(Entity&& e) :
+        XAPP {}
+
+#undef X
+#define X(n) n = std::move(e.n)
+
+      Entity& operator=(Entity&& e) {
+        XAPP;
+        return *this;
+      }
+
+#undef X
+#undef XAPP
+
       /*
         Invariants:
         usedParts.size() == usedTextures.size()
