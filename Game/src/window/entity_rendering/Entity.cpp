@@ -100,11 +100,14 @@ namespace x801 {
         updatePartTraits(i, isUpdated);
       }
     }
-    void Entity::update() {
+    bool Entity::update() {
+      bool dirtyOld = dirty;
+      dirty = false;
       // Update part positions and orientations
       for (size_t i = 0; i < usedParts.size(); ++i)
         updateComponentsOfPart(i);
       updatePartTraits();
+      return dirtyOld;
     }
   }
 }
@@ -112,18 +115,13 @@ namespace x801 {
 x801::game::Entity::Entity(
     PartView& pv,
     const x801::map::Blueprint& bp) {
-  size_t i = 0;
   for (const x801::map::Blueprint::Elem& elem : bp.elems) {
-    usedParts.push_back(pv.getPart(elem.name));
-    indicesByID[elem.id] = i;
-    usedTextures.push_back(elem.textureName);
     PartLink link = {
       elem.parent,
       elem.component,
       elem.offset,
       elem.angle
     };
-    links.push_back(link);
-    ++i;
+    addPart(pv.getPart(elem.name), elem.textureName, link, elem.id);
   }
 }

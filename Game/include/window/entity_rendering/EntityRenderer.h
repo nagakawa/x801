@@ -66,6 +66,12 @@ namespace x801 {
       float x, y, z;
       float u, v;
     };
+    struct EMLocation {
+      size_t pageno; // Page number of part
+      size_t start; // Start index of part
+      size_t count; // How many vertices this part takes
+      std::vector<EMVertex> vertices; // The vertices
+    };
     static_assert(
       offsetof(EMVertex, x) + 4 == offsetof(EMVertex, y)
         && offsetof(EMVertex, y) + 4 == offsetof(EMVertex, z)
@@ -79,16 +85,14 @@ namespace x801 {
       void setUpRender();
       void render();
     private:
-      /*void addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]);
-      x801::map::ChunkXYZ xyz;
-      TerrainRenderer* tr;
-      x801::map::Chunk* chunk;
-      std::vector<EMVertex> opaqueVertices;
-      std::vector<EMVertex> transparentVertices;*/
+      // std::vector<EMVertex> vertices;
       EntityRenderer* er;
       agl::VBO vbo;
       agl::VAO vao;
       agl::ShaderProgram program;
+      // Ranges of vacancies.
+      // key = start, value = end (half-open interval)
+      std::map<size_t, size_t> vacancies;
       size_t i;
 #ifndef NDEBUG
       bool setup = false;
@@ -119,6 +123,7 @@ namespace x801 {
           ChunkMeshBuffer,
           x801::map::ChunkHasher> cmbs;*/
       std::unordered_map<uint32_t, Entity> entities;
+      std::unordered_map<uint32_t, EMLocation> locations;
       uint32_t nextID = 0;
       std::vector<EntityMeshBuffer> embs;
       bool addTexture(const std::string& id);

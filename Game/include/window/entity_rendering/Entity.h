@@ -90,13 +90,36 @@ namespace x801 {
           absoluteComponentOrientations[i].size() ==
             usedParts[i]->components.size()
       */
+      bool update();
+      bool isDirty() { return dirty; }
+      void addPart(
+          const x801::map::Part* part,
+          const std::string& tex,
+          const PartLink& link,
+          const std::string& partID) {
+        size_t i = usedParts.size();
+        indicesByID[partID] = i;
+        usedParts.push_back(part);
+        usedTextures.push_back(tex);
+        links.push_back(link);
+        absolutePartPositions.emplace_back();
+        absolutePartOrientations.emplace_back();
+        size_t nComponents = part->components.size();
+        absoluteComponentPositions.emplace_back(nComponents);
+        absoluteComponentOrientations.emplace_back(nComponents);
+        dirty = true;
+      }
+      void setControlAngle(const std::string& name, glm::quat angle) {
+        controlAngles[name] = angle;
+        dirty = true;
+      }
+    private:
+      bool dirty = false;
       std::vector<const x801::map::Part*> usedParts;
       std::vector<std::string> usedTextures;
       std::unordered_map<std::string, glm::quat> controlAngles;
       std::vector<PartLink> links;
       std::unordered_map<std::string, size_t> indicesByID;
-      void update();
-    private:
       std::vector<glm::vec3> absolutePartPositions;
       std::vector<glm::quat> absolutePartOrientations;
       // Not quite absolute: these are relative to their grounds
