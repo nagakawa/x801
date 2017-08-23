@@ -20,12 +20,71 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <assert.h>
+#include <utility>
+
 #include <boost/optional.hpp>
 
 #include <utils.h>
 
 namespace x801 {
   namespace game {
+    size_t EntityMeshBuffer::allocate(size_t size) {
+      auto end = vacancies.right.end();
+      // Search for the smallest vacancy that will hold a block this big
+      auto it = vacancies.right.lower_bound(size);
+      if (it == end) {
+        // No such vacancy; make room
+        size_t oldSize = vertices.size();
+        vertices.resize(oldSize + size);
+        return oldSize;
+      }
+      // There is a vacancy.
+      size_t binSize = it->first;
+      size_t binStart = it->second;
+      if (binSize == size) {
+        // No extra room
+        vacancies.right.erase(it);
+        return binStart;
+      }
+      // There is extra room
+      size_t newBinSize = binSize - size;
+      size_t newBinStart = binStart + size;
+      vacancies.right.erase(it);
+      vacancies.left.insert(
+        std::pair<size_t, size_t>(newBinStart, newBinSize));
+      return binStart;
+    }
+    void EntityMeshBuffer::free(size_t start, size_t size) {
+      // Determine where to coalesce
+      bool shouldCoalesceLeft = false;
+      auto ileft = vacancies.left.lower_bound(start);
+      auto iright = ileft;
+      assert(iright->first > start);
+      if (ileft != vacancies.left.begin()) {
+        --ileft; // Now ileft is at the last key less than start
+        if (ileft->first + ileft->second == start)
+          shouldCoalesceLeft = true;
+      }
+      bool shouldCoalesceRight = start + size == iright->first;
+      // Determine the start point and the size of the new free block
+      size_t newStart = start;
+      size_t newSize = size;
+      if (shouldCoalesceLeft) {
+        newStart = ileft->first;
+        newSize += ileft->second;
+      }
+      if (shouldCoalesceRight) {
+        // newStart is unchanged
+        newSize += iright->second;
+      }
+      if (shouldCoalesceLeft)
+        iright = vacancies.left.erase(ileft);
+      if (shouldCoalesceRight)
+        vacancies.left.erase(iright);
+      vacancies.left.insert(
+        std::pair<size_t, size_t>(newStart, newSize));
+    }
     EntityRenderer::EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft) {
       this->cw = cw;
       c = cw->c;

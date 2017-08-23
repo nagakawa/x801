@@ -31,6 +31,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <boost/bimap.hpp>
+#include <boost/bimap/multiset_of.hpp>
+#include <boost/bimap/set_of.hpp>
+
 #include <EBO.h>
 #include <FBO.h>
 #include <Shader.h>
@@ -62,6 +66,13 @@ namespace x801 {
 
 namespace x801 {
   namespace game {
+    // Ranges of vacancies.
+    // key = start, value = size (i. e. end - start)
+    // (half-open interval)
+    // Start locations are unique; sizes might repeat.
+    using VacancyList = boost::bimap<
+        boost::bimaps::set_of<size_t>,
+        boost::bimaps::multiset_of<size_t>>;
     struct EMVertex {
       float x, y, z;
       float u, v;
@@ -85,14 +96,14 @@ namespace x801 {
       void setUpRender();
       void render();
     private:
-      // std::vector<EMVertex> vertices;
+      std::vector<EMVertex> vertices;
       EntityRenderer* er;
       agl::VBO vbo;
       agl::VAO vao;
       agl::ShaderProgram program;
-      // Ranges of vacancies.
-      // key = start, value = end (half-open interval)
-      std::map<size_t, size_t> vacancies;
+      VacancyList vacancies;
+      size_t allocate(size_t size);
+      void free(size_t start, size_t size);
       size_t i;
 #ifndef NDEBUG
       bool setup = false;
