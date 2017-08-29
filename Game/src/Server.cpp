@@ -426,6 +426,7 @@ void x801::game::Server::processChatRequest(
   output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
   output.Write(static_cast<uint16_t>(LPACKET_CHAT));
   output.Write(static_cast<uint8_t>(stat));
+  output.Write(static_cast<uint16_t>(0));
   peer->Send(
     &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     p->systemAddress, false
