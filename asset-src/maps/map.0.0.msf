@@ -1,10 +1,10 @@
 # This is a comment
 WorldID: 0
 AreaID: 0
-@TIL3
+@TIL2
 Code: to END
-_.fill(0, 0, 0, 79, 79, 0, "mahou", lambda x, y, z: (x + y) % 48)
+_.fill(0, 0, 0, 79, 79, 0, _.getid("grass"))
 for x in range(40):
   for y in range(40):
-    _.put(2 * x, 2 * y, 0, "air")
+    _.put(2 * x, 2 * y, 0, 0)
 END

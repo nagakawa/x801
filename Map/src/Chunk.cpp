@@ -17,71 +17,87 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-using namespace x801::map;
-
 #include <assert.h>
 #include <stdint.h>
+#include <limits>
 
-x801::map::Chunk::~Chunk() {
-  delete[] map;
-}
-
-Block x801::map::Chunk::getMapBlockAt(size_t ix, size_t iy, size_t iz) const {
-  if (empty) return Block();
-  size_t index = (iz << 8) | (ix << 4) | iy;
-  assert(index < BLOCKS_IN_CHUNK);
-  return map[index];
-}
-
-void x801::map::Chunk::setMapBlockAt(size_t ix, size_t iy, size_t iz, Block b) {
-  if (empty) {
-    empty = false;
-    map = new Block[BLOCKS_IN_CHUNK];
+namespace x801 {
+  namespace map {
+    Chunk::~Chunk() {
+      delete[] map;
+    }
+    
+    Block Chunk::getMapBlockAt(size_t ix, size_t iy) const {
+      if (empty) return Block();
+      size_t index = (ix << 4) | iy;
+      assert(index < BLOCKS_IN_CHUNK);
+      return map[index];
+    }
+    
+    void Chunk::setMapBlockAt(size_t ix, size_t iy, Block b) {
+      if (empty) {
+        empty = false;
+        map = new Block[BLOCKS_IN_CHUNK];
+      }
+      size_t index = (ix << 4) | iy;
+      assert(index < BLOCKS_IN_CHUNK);
+      map[index] = b;
+    }
+    
+    /*Chunk::Chunk(std::istream& handle) {
+      width = x801::base::readInt<uint16_t>(handle);
+      height = x801::base::readInt<uint16_t>(handle);
+      xoff = x801::base::readInt<int16_t>(handle);
+      yoff = x801::base::readInt<int16_t>(handle);
+      allocateBlocks();
+      for (int i = 0; i < width * height; ++i) {
+        map[i] = Block(x801::base::readInt<uint32_t>(handle));
+      }
+    }*/
+    
+    void Chunk::write(std::ostream& handle) const {
+      x801::base::writeInt<int16_t>(handle, xyz.x);
+      x801::base::writeInt<int16_t>(handle, xyz.y);
+      x801::base::writeInt<int16_t>(handle, xyz.z);
+      x801::base::writeInt<uint16_t>(handle, empty);
+      for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
+        x801::base::writeInt<uint32_t>(handle, map[i].label);
+      }
+    }
+    
+    Chunk& Chunk::operator=(const Chunk& that) {
+      xyz = that.xyz;
+      empty = that.empty;
+      if (!empty && map == nullptr) map = new Block[BLOCKS_IN_CHUNK];
+      else {
+        delete[] map;
+        map = nullptr;
+      }
+      if (!empty)
+        memcpy(map, that.map, BLOCKS_IN_CHUNK * sizeof(Block));
+      return *this;
+    }
+    
+    Chunk& Chunk::operator=(Chunk&& that) {
+      xyz = that.xyz;
+      empty = that.empty;
+      map = that.map;
+      that.map = nullptr;
+      that.empty = true;
+      return *this;
+    }
+    
+    BlockTextureBindings::BlockTextureBindings(std::istream& fh) {
+      unsigned int key, value;
+      while (!fh.eof() && !fh.bad()) {
+        fh >> key >> value;
+        if (fh.fail()) {
+          fh.clear();
+          fh.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        texIDsByBlockID.resize(key + 1);
+        texIDsByBlockID[key] = value;
+      }
+    }
   }
-  size_t index = (iz << 8) | (ix << 4) | iy;
-  assert(index < BLOCKS_IN_CHUNK);
-  map[index] = b;
-}
-
-/*x801::map::Chunk::Chunk(std::istream& handle) {
-  width = x801::base::readInt<uint16_t>(handle);
-  height = x801::base::readInt<uint16_t>(handle);
-  xoff = x801::base::readInt<int16_t>(handle);
-  yoff = x801::base::readInt<int16_t>(handle);
-  allocateBlocks();
-  for (int i = 0; i < width * height; ++i) {
-    map[i] = Block(x801::base::readInt<uint32_t>(handle));
-  }
-}*/
-
-void x801::map::Chunk::write(std::ostream& handle) const {
-  x801::base::writeInt<int16_t>(handle, xyz.x);
-  x801::base::writeInt<int16_t>(handle, xyz.y);
-  x801::base::writeInt<int16_t>(handle, xyz.z);
-  x801::base::writeInt<uint16_t>(handle, empty);
-  for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
-    x801::base::writeInt<uint32_t>(handle, map[i].label);
-  }
-}
-
-Chunk& x801::map::Chunk::operator=(const Chunk& that) {
-  xyz = that.xyz;
-  empty = that.empty;
-  if (!empty && map == nullptr) map = new Block[BLOCKS_IN_CHUNK];
-  else {
-    delete[] map;
-    map = nullptr;
-  }
-  if (!empty)
-    memcpy(map, that.map, BLOCKS_IN_CHUNK * sizeof(Block));
-  return *this;
-}
-
-Chunk& x801::map::Chunk::operator=(Chunk&& that) {
-  xyz = that.xyz;
-  empty = that.empty;
-  map = that.map;
-  that.map = nullptr;
-  that.empty = true;
-  return *this;
 }

@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::game;
 
+#include <sstream>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
@@ -61,6 +62,9 @@ void x801::game::ClientWindow::initialise() {
   for (size_t i = 0; i < FTIMES_TO_STORE; ++i) {
     ftimes[i] = 100.0f;
   }
+  std::stringstream bFile =
+    c->patcher->getSStream("textures/terrain/blocks.tti");
+  bindings = new x801::map::BlockTextureBindings(bFile);
 }
 
 static const int keycodes[] = {
@@ -152,4 +156,5 @@ x801::game::ClientWindow::~ClientWindow() {
   delete tr;
   delete terrain;
   delete fuck;
+  delete bindings;
 }

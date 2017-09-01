@@ -15,7 +15,7 @@ maps: $(call substDirList,asset-src/maps,msf,map)
 
 assets/maps/%.map: asset-src/maps/%.msf models
 	mkdir -p assets/maps
-	python3 tools/compile-map.py --level=9 $< asset-temp/models/applications.tab $@
+	python3 tools/compile-map.py --level=9 $< asset-src/textures/terrain/gimpfiles/blocknames.tti $@
 
 terrain: assets/textures/terrain/blocks.0.png
 
@@ -27,7 +27,7 @@ asset-temp/textures/terrain/gimpfiles/%.png: asset-src/textures/terrain/gimpfile
 
 assets/textures/terrain/blocks.0.png: terrain-pngs
 	mkdir -p assets/textures/terrain
-	python3 tools/autostitch.py assets/textures/terrain/blocks assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
+	python3 tools/autostitch.py assets/textures/terrain/blocks asset-src/textures/terrain/gimpfiles/blocknames.tti assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
 
 models: terrain modfuncs modapps assets/models/all.mfi assets/models/all.mai
 

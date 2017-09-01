@@ -31,6 +31,7 @@ namespace x801 {
     class ClientWindow;
   }
 }
+#include <Chunk.h>
 #include "Client.h"
 #include "window/ChatWindow.h"
 #include "window/TerrainRenderer.h"
@@ -51,6 +52,7 @@ namespace x801 {
       Client* getParentClient() { return c; }
       virtual ~ClientWindow() override;
       Client* c;
+      x801::map::BlockTextureBindings* bindings = nullptr;
     private:
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;

@@ -61,17 +61,30 @@ namespace x801 {
       Block() : label(0) {}
       Block(uint32_t b) : label(b) {}
       uint32_t label;
-      uint8_t getOrientation() {
-        return (uint8_t) (label >> 26);
+      bool isSolid() {
+        return (label & (1 << 31)) != 0;
       }
-      uint32_t getBlockID() {
-        return label & ((1 << 26) - 1);
+      uint32_t getBaseID() {
+        return label & ((1 << 16) - 1);
+      }
+      uint32_t getDecorationID() {
+        return (label >> 16) & ((1 << 15) - 1);
       }
       bool operator==(Block other) {
         return label == other.label;
       }
     };
-    const size_t BLOCKS_IN_CHUNK = 16 * 16 * 16;
+    class BlockTextureBindings {
+    public:
+      BlockTextureBindings(std::istream& fh);
+      size_t getTexID(size_t blockID) {
+        if (blockID == 0) return -1;
+        return texIDsByBlockID[blockID - 1];
+      }
+    private:
+      std::vector<size_t> texIDsByBlockID;
+    };
+    const size_t BLOCKS_IN_CHUNK = 16 * 16;
     class Chunk {
     public:
       Chunk(int x, int y, int z) :
@@ -99,8 +112,8 @@ namespace x801 {
       ChunkXYZ getXYZ() const { return xyz; }
       bool isEmpty() const { return empty; }
       Block* getMapBlocks() { return map; }
-      Block getMapBlockAt(size_t ix, size_t iy, size_t iz) const;
-      void setMapBlockAt(size_t ix, size_t iy, size_t iz, Block b);
+      Block getMapBlockAt(size_t ix, size_t iy) const;
+      void setMapBlockAt(size_t ix, size_t iy, Block b);
       Chunk(const Chunk& that) :
           xyz(that.xyz), empty(that.empty),
           map(that.empty ? nullptr : new Block[BLOCKS_IN_CHUNK]) {

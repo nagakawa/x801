@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <chrono>
 #include <math.h>
+#include <sstream>
 #include <utility>
 
 #include <imgui.h>
@@ -43,6 +44,7 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft
     p != nullptr && tv != nullptr &&
     gs != nullptr && tex != nullptr);
   fboMS = ft.ms.fbo;
+  bindings = cw->bindings;
 #ifndef NDEBUG
   axes.setUpRender();
   axes.setScale(100);

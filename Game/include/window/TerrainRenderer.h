@@ -105,6 +105,7 @@ namespace x801 {
       agl::Texture* tex;
       x801::map::ModelApplicationIndex* mai;
       x801::map::ModelFunctionIndex* mfi;
+      x801::map::BlockTextureBindings* bindings;
       std::shared_ptr<agl::FBO> fboMS;
 #ifndef NDEBUG
       Axes axes;

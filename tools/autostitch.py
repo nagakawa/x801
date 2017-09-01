@@ -1,17 +1,18 @@
 # Texture Stitcher for x801
-# Usage: python3 tools/autostitch.py assets/textures/terrain/blocks assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
+# Usage: python3 tools/autostitch.py assets/textures/terrain/blocks asset-src/textures/terrain/gimpfiles/blocknames.tti  assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
 
 import argparse
+import fparser
 import pathlib
 import re
+import readtable
 from PIL import Image
-
-def error(msg):
-  raise InputException(msg)
 
 parser = argparse.ArgumentParser(description='Stitch textures for Experiment801.')
 parser.add_argument('destinationImage', metavar='di', type=str, nargs=1,
     help='the destination path for the image')
+parser.add_argument('sourceTable', metavar='sd', type=str, nargs=1,
+    help='the source path for the table')
 parser.add_argument('destinationTable', metavar='dd', type=str, nargs=1,
     help='the destination path for the table')
 parser.add_argument('images', metavar='images', type=str, nargs=1,
@@ -32,6 +33,8 @@ image = Image.new(
   (asize, asize),
   (0, 0, 0, 0)
 )
+# name -> id
+nametable = readtable.read(args.sourceTable[0])
 table = {}
 
 def save():
@@ -55,7 +58,10 @@ for fn in pathlib.Path(args.images[0]).glob("*.png"):
   image.paste(newImage, (x * tsize, y * tsize))
   shortname = fn.name
   shortname = shortname[0:shortname.rfind('.')]
-  table[shortname] = cumul + capat * pageno
+  if not shortname in nametable:
+    fparser.error("Name not found: " + shortname)
+  myid = nametable[shortname]
+  table[myid] = cumul + capat * pageno
   cumul += 1
 
 save()
@@ -63,6 +69,6 @@ save()
 fh = open(args.destinationTable[0], "w")
 
 for (name, index) in table.items():
-  fh.write(name + " " + str(index) + "\n")
+  fh.write(str(name) + " " + str(index) + "\n")
 
 fh.close()
