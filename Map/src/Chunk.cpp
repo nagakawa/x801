@@ -98,10 +98,24 @@ namespace x801 {
         if (fh.fail()) {
           fh.clear();
           fh.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          continue;
         }
         texIDsByBlockID.resize(key + 1);
         texIDsByBlockID[key] = value;
+        std::cout << key << " -> " << value << "\n";
       }
+    }
+    std::ostream& operator<<(
+        std::ostream& s,
+        const BlockTextureBindings& b) {
+      s << "[";
+      for (size_t i = 0; i < b.count(); ++i) {
+        if (i != 0) s << ", ";
+        size_t realid = i + 1;
+        s << realid << " -> " << b.getTexID(realid);
+      }
+      s << "]";
+      return s;
     }
   }
 }

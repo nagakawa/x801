@@ -76,8 +76,7 @@ ChunkBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& pos)
   );
   auto it2 = cmbs.find(pos);
   auto res = &(it2->second);
-  res->setUpRender(false);
-  res->setUpRender(true);
+  res->setUpRender();
   return res;
 }
 
@@ -97,8 +96,7 @@ void x801::game::TerrainRenderer::draw() {
       x801::map::ChunkXYZ c = { cx + ix, cy + iy, cz };
       ChunkBuffer* cmb = summon(c);
       if (cmb != nullptr) {
-        cmb->render(false);
-        //cmb->render(true);
+        cmb->render();
         ++rendered;
         if (isChatWindowOpen) {
           ImGui::TextWrapped("%d, %d rendered", c.x, c.y);
@@ -130,84 +128,129 @@ static const char* VERTEX_SOURCE =
   // The position of the vertex, in 16-metre units,
   // from the centre of the northwestmost block of the chunk.
   "layout (location = 0) in vec2 position; \n"
+  "layout (location = 1) in uint block; \n"
+  "layout (location = 2) in uint W; \n"
   "out vec2 TexCoord; \n"
+  "flat out uint w; \n"
   // The model-view-projection matrix.
   "uniform mat4 mvp; \n"
   // The offset of this chunk, in metres.
   "uniform vec3 offset; \n"
   "void main() { \n"
-  "  gl_Position = mvp * vec4(vec3(16 * position, 0) + offset, 1.0f); \n"
+  "  uvec2 localOffset = uvec2(block >> 4u, block & 15u); \n"
+  "  vec3 basePosition = vec3(position + localOffset, 0) + offset; \n"
+  "  gl_Position = mvp * vec4(basePosition, 1.0f); \n"
   "  TexCoord = position; \n"
+  "  w = W; \n"
   "} \n"
   ;
 
 static const char* FRAGMENT_SOURCE =
   "#version 330 core \n"
   "in vec2 TexCoord; \n"
+  "flat in uint w; \n"
   "out vec4 colour; \n"
   "uniform sampler2D tex; \n"
-  "uniform uint tiles[256]; \n"
-  "uniform uint mappings[]; \n"
   "#define DIVISOR 128u \n" // 4096 / 32
   "void main() { \n"
-  "  ivec2 indices = ivec2(TexCoord * 16); \n"
-  "  uint w = tiles[indices.y * 16 + indices.x]; \n"
-  "  uint base = w & 0xFFFFu/*ck*/; \n"
-  "  if (base == 0u) discard; \n"
-  "  uint baseTexID = mappings[base - 1u]; \n"
-  "  vec2 uvstart = vec2(base % DIVISOR, base / DIVISOR); \n"
-  // or (W / DIVISOR) % DIVISOR
+  "  vec2 uvstart = vec2(w % DIVISOR, w / DIVISOR); \n"
+  // or (w / DIVISOR) % DIVISOR
   // (if we need to use multiple textures)
-  "  vec2 local = mod(TexCoord * 16, 1); \n"
+  "  vec2 local = mod(TexCoord, 1); \n"
   "  vec2 realtc = (local + uvstart) / DIVISOR; \n"
+  // "  colour = vec4(vec3(w % 4u, (w / 4u) % 4u, (w / 16u) % 4u) / 3.0, 1); \n"
   "  colour = texture(tex, realtc); \n"
   "} \n"
   ;
 
-void x801::game::ChunkBuffer::setUpRender(bool layer) {
+void x801::game::ChunkBuffer::createMesh() {
+  // Iterate over all chunk-local coordinates
+  for (size_t x = 0; x < 16; ++x) {
+    for (size_t y = 0; y < 16; ++y) {
+      x801::map::Block block =
+        chunk->getMapBlockAt(x, y);
+      uint32_t baseID = block.getBaseID();
+      // uint32_t decorationID = block.getDecorationID();
+      if (baseID != 0) {
+        size_t texID = tr->cw->bindings->getTexID(baseID);
+        MeshEntry me = {
+          (uint16_t) texID,
+          (uint8_t) ((x << 4) | y),
+          false
+        };
+        mesh.push_back(me);
+      }
+    }
+  }
+  /*
+  std::cout << "(" << chunk->getX() << ", " << chunk->getY() << ") ";
+  std::cout << mesh.size() << " [";
+  for (auto& m : mesh) {
+    std::cout << "(" << m.w << ", " << (m.xy >> 4) << ", " << (m.xy & 15) << ", " << m.decorator << "), ";
+  }
+  std::cout << "]\n";
+  */
+}
+
+void x801::game::ChunkBuffer::setUpRender() {
+  createMesh();
   agl::Shader* vertexShader = new agl::Shader(VERTEX_SOURCE, GL_VERTEX_SHADER);
   agl::Shader* fragmentShader = new agl::Shader(FRAGMENT_SOURCE, GL_FRAGMENT_SHADER);
-  program[layer].attach(*vertexShader);
-  program[layer].attach(*fragmentShader);
-  program[layer].link();
-  program[layer].use();
+  program.attach(*vertexShader);
+  program.attach(*fragmentShader);
+  program.link();
+  program.use();
   delete vertexShader;
   delete fragmentShader;
-  vao[layer].setActive();
-  vbo[layer].feedData(sizeof(squareCoords), squareCoords, GL_STATIC_DRAW);
+  vao.setActive();
+  vbo.feedData(sizeof(squareCoords), squareCoords, GL_STATIC_DRAW);
   // Set vertex coordinates of rect
-  glVertexAttribPointer(0, 2, GL_FLOAT, false, 2 * sizeof(float), (void*) 0);
+  glVertexAttribPointer(0,
+    2, GL_FLOAT, false,
+    2 * sizeof(float), (void*) 0);
   glEnableVertexAttribArray(0);
-  program[layer].use();
+  ivbo.feedData(mesh.size() * sizeof(MeshEntry), mesh.data(), GL_STATIC_DRAW);
+  glVertexAttribIPointer(
+    1,
+    1, GL_UNSIGNED_BYTE,
+    sizeof(MeshEntry), (void*) offsetof(MeshEntry, xy));
+  glVertexAttribIPointer(
+    2,
+    1, GL_UNSIGNED_SHORT,
+    sizeof(MeshEntry), (void*) offsetof(MeshEntry, w));
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
+  glVertexAttribDivisor(1, 1);
+  glVertexAttribDivisor(2, 1);
+  program.use();
   tr->tex->bindTo(0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  SETUNSP(program[layer], 1i, "tex", 0);
+  SETUNSP(program, 1i, "tex", 0);
   glm::vec3 offset(
     xyz.x * 16.0f,
     xyz.y * 16.0f,
     xyz.z
   );
-  SETUNSPV(program[layer], 3fv, "offset", glm::value_ptr(offset));
+  SETUNSPV(program, 3fv, "offset", glm::value_ptr(offset));
   glUniform1uiv(
-    program[layer].getUniformLocation("tiles"),
+    program.getUniformLocation("tiles"),
     16 * 16,
     (GLuint*) chunk->getMapBlocks()
   );
   glUniform1uiv(
-    program[layer].getUniformLocation("mappings"),
+    program.getUniformLocation("mappings"),
     tr->cw->bindings->count(),
     (GLuint*) tr->cw->bindings->data()
   );
-  std::cout << "\n";
 #ifndef NDEBUG
-  setup[layer] = true;
+  setup = true;
 #endif
 }
 
-void x801::game::ChunkBuffer::render(bool layer) {
+void x801::game::ChunkBuffer::render() {
 #ifndef NDEBUG
-  if (!setup[layer])
+  if (!setup)
     throw "ChunkBuffer: render() called before setUpRender()";
 #endif
   /*glEnable(GL_DEPTH_TEST);
@@ -220,8 +263,8 @@ void x801::game::ChunkBuffer::render(bool layer) {
   glEnable(GL_DEPTH_TEST);
   glDepthMask(false);
   glEnable(GL_BLEND);
-  vao[layer].setActive();
-  program[layer].use();
+  vao.setActive();
+  program.use();
   glm::mat4 mvp;
   tr->gs->selfPositionMutex.lock();
   const auto selfPos = tr->gs->selfPosition;
@@ -254,7 +297,7 @@ void x801::game::ChunkBuffer::render(bool layer) {
 #ifndef NDEBUG
   tr->axes.setMVP(mvp);
 #endif
-  SETUNSPM(program[layer], 4fv, "mvp", glm::value_ptr(mvp));
-  glDrawArrays(GL_TRIANGLES, 0, 6);
+  SETUNSPM(program, 4fv, "mvp", glm::value_ptr(mvp));
+  glDrawArraysInstanced(GL_TRIANGLES, 0, 6, mesh.size());
   glDepthMask(true);
 }

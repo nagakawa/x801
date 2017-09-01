@@ -356,6 +356,10 @@ std::stringstream x801::game::Patcher::getSStream(const char* fname) {
   uint8_t* contents;
   getFileEntry(fname, version, contentLength, contents);
   std::string s((const char*) contents, contentLength);
+#ifndef NDEBUG
+  std::cerr << "Making stream from " << fname << ":\n";
+  std::cerr << s << '\n';
+#endif
   delete[] contents;
   return std::stringstream(std::move(s));
 }

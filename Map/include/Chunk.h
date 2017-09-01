@@ -77,15 +77,18 @@ namespace x801 {
     class BlockTextureBindings {
     public:
       BlockTextureBindings(std::istream& fh);
-      size_t getTexID(size_t blockID) {
+      size_t getTexID(size_t blockID) const {
         if (blockID == 0) return -1;
         return texIDsByBlockID[blockID - 1];
       }
-      size_t count() { return texIDsByBlockID.size(); }
+      size_t count() const { return texIDsByBlockID.size(); }
       void* data() { return &(texIDsByBlockID[0]); }
     private:
       std::vector<size_t> texIDsByBlockID;
     };
+    std::ostream& operator<<(
+        std::ostream& s,
+        const BlockTextureBindings& b);
     const size_t BLOCKS_IN_CHUNK = 16 * 16;
     class Chunk {
     public:
