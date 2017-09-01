@@ -3,12 +3,12 @@ WorldID: 0
 AreaID: 0
 @TIL2
 Code: to END
-_.fill(0, 0, 0, 79, 79, 0, _.getid("grass"))
+_.fill(0, 0, 0, 79, 79, 0, _.getid("grass") | _.getdid("kukka"))
 for x in range(40):
   for y in range(40):
     _.put(2 * x, 2 * y, 0, 0)
 for x in range(80):
   for y in range(80):
     if (x + y) % 3 == 0:
-      _.put(x, y, _.getid("mb_right"), 0)
+      _.put(x, y, 0, _.getid("mb_right"), METHOD_BASE)
 END

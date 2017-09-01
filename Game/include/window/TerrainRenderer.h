@@ -98,10 +98,10 @@ namespace x801 {
       Patcher* p;
       TextureView* tv;
       ClientGameState* gs;
-      agl::Texture* tex;
+      agl::Texture* texb;
+      agl::Texture* texd;
       x801::map::ModelApplicationIndex* mai;
       x801::map::ModelFunctionIndex* mfi;
-      x801::map::BlockTextureBindings* bindings;
       std::shared_ptr<agl::FBO> fboMS;
 #ifndef NDEBUG
       Axes axes;

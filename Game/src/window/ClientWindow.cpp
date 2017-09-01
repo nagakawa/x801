@@ -52,11 +52,11 @@ void x801::game::ClientWindow::initialise() {
     0, 0, (float) getWidth(), (float) getHeight(),
   });
   terrain->setUp();
-  fuck = new agl::Sprite2D(tr->tex);
+  fuck = new agl::Sprite2D(tr->texd);
   fuck->setApp(this);
   fuck->addSprite({
-    0, 0, (float) tr->tex->getWidth(), (float) tr->tex->getHeight(),
-    0, 0, (float) tr->tex->getWidth(), (float) tr->tex->getHeight(),
+    0, 0, (float) tr->texd->getWidth(), (float) tr->texd->getHeight(),
+    0, 0, (float) tr->texd->getWidth(), (float) tr->texd->getHeight(),
   });
   fuck->setUp();
   for (size_t i = 0; i < FTIMES_TO_STORE; ++i) {
@@ -64,7 +64,10 @@ void x801::game::ClientWindow::initialise() {
   }
   std::stringstream bFile =
     c->patcher->getSStream("textures/terrain/blocks.tti");
-  bindings = new x801::map::BlockTextureBindings(bFile);
+  bindings[0] = new x801::map::BlockTextureBindings(bFile);
+  std::stringstream bFile2 =
+    c->patcher->getSStream("textures/decorations/blocks.tti");
+  bindings[1] = new x801::map::BlockTextureBindings(bFile2);
 }
 
 static const int keycodes[] = {
@@ -165,5 +168,6 @@ x801::game::ClientWindow::~ClientWindow() {
   delete tr;
   delete terrain;
   delete fuck;
-  delete bindings;
+  delete bindings[0];
+  delete bindings[1];
 }

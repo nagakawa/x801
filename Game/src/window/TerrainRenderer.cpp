@@ -35,16 +35,17 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft
   p = c->patcher;
   tv = c->textureView;
   gs = &(c->g);
-  tex = tv->getTexture("textures/terrain/blocks.0.png");
+  texb = tv->getTexture("textures/terrain/blocks.0.png");
+  texd = tv->getTexture("textures/decorations/blocks.0.png");
   ModelView* mv = c->modelView;
   mai = mv->getMAI();
   mfi = mv->getMFI();
   assert(
     cw != nullptr && c != nullptr &&
     p != nullptr && tv != nullptr &&
-    gs != nullptr && tex != nullptr);
+    gs != nullptr && texb != nullptr
+    && texd != nullptr);
   fboMS = ft.ms.fbo;
-  bindings = cw->bindings;
 #ifndef NDEBUG
   axes.setUpRender();
   axes.setScale(100);
@@ -127,7 +128,9 @@ static const char* VERTEX_SOURCE =
   "layout (location = 0) in vec2 position; \n"
   "layout (location = 1) in uint block; \n"
   "layout (location = 2) in uint W; \n"
+  "layout (location = 3) in int dec; \n"
   "out vec2 TexCoord; \n"
+  "flat out int decorator; \n"
   "flat out uint w; \n"
   // The model-view-projection matrix.
   "uniform mat4 mvp; \n"
@@ -137,8 +140,10 @@ static const char* VERTEX_SOURCE =
   "  uvec2 localOffset = uvec2(block >> 4u, block & 15u); \n"
   "  vec3 basePosition = vec3(position + localOffset, 0) + offset; \n"
   "  gl_Position = mvp * vec4(basePosition, 1.0f); \n"
+  "  if (dec != 0) gl_Position.z -= 1; \n"
   "  TexCoord = position; \n"
   "  w = W; \n"
+  "  decorator = dec; \n"
   "} \n"
   ;
 
@@ -146,17 +151,20 @@ static const char* FRAGMENT_SOURCE =
   "#version 330 core \n"
   "in vec2 TexCoord; \n"
   "flat in uint w; \n"
+  "flat in int decorator; \n"
   "out vec4 colour; \n"
-  "uniform sampler2D tex; \n"
+  "uniform sampler2D texb; \n"
+  "uniform sampler2D texd; \n"
   "#define DIVISOR 128u \n" // 4096 / 32
   "void main() { \n"
+  //"  if (decorator == 0) discard; \n"
   "  vec2 uvstart = vec2(w % DIVISOR, w / DIVISOR); \n"
   // or (w / DIVISOR) % DIVISOR
   // (if we need to use multiple textures)
   "  vec2 local = mod(TexCoord, 1); \n"
   "  vec2 realtc = (local + uvstart) / DIVISOR; \n"
   // "  colour = vec4(vec3(w % 4u, (w / 4u) % 4u, (w / 16u) % 4u) / 3.0, 1); \n"
-  "  colour = texture(tex, realtc); \n"
+  "  colour = texture(decorator != 0 ? texd : texb, realtc); \n"
   "} \n"
   ;
 
@@ -167,9 +175,11 @@ void x801::game::ChunkBuffer::createMesh() {
       x801::map::Block block =
         chunk->getMapBlockAt(x, y);
       uint32_t baseID = block.getBaseID();
-      // uint32_t decorationID = block.getDecorationID();
-      if (baseID != 0) {
-        size_t texID = tr->cw->bindings->getTexID(baseID);
+      uint32_t decorationID = block.getDecorationID();
+      x801::map::BlockTextureBindings** bindings
+        = tr->cw->bindings;
+      if (baseID != 0 && baseID <= bindings[0]->count()) {
+        size_t texID = bindings[0]->getTexID(baseID);
         MeshEntry me = {
           (uint16_t) texID,
           (uint8_t) ((x << 4) | y),
@@ -177,16 +187,25 @@ void x801::game::ChunkBuffer::createMesh() {
         };
         mesh.push_back(me);
       }
+      if (decorationID != 0 && decorationID <= bindings[1]->count()) {
+        size_t texID = bindings[1]->getTexID(decorationID);
+        MeshEntry me = {
+          (uint16_t) texID,
+          (uint8_t) ((x << 4) | y),
+          true
+        };
+        mesh.push_back(me);
+      }
     }
   }
-  /*
+  
   std::cout << "(" << chunk->getX() << ", " << chunk->getY() << ") ";
   std::cout << mesh.size() << " [";
   for (auto& m : mesh) {
     std::cout << "(" << m.w << ", " << (m.xy >> 4) << ", " << (m.xy & 15) << ", " << m.decorator << "), ";
   }
   std::cout << "]\n";
-  */
+  
 }
 
 void x801::game::ChunkBuffer::setUpRender() {
@@ -215,31 +234,31 @@ void x801::game::ChunkBuffer::setUpRender() {
     2,
     1, GL_UNSIGNED_SHORT,
     sizeof(MeshEntry), (void*) offsetof(MeshEntry, w));
+  glVertexAttribIPointer(
+    3,
+    1, GL_UNSIGNED_BYTE,
+    sizeof(MeshEntry), (void*) offsetof(MeshEntry, decorator));
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(3);
   glVertexAttribDivisor(1, 1);
   glVertexAttribDivisor(2, 1);
+  glVertexAttribDivisor(3, 1);
   program.use();
-  tr->tex->bindTo(0);
+  tr->texb->bindTo(0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  SETUNSP(program, 1i, "tex", 0);
+  SETUNSP(program, 1i, "texb", 0);
+  tr->texd->bindTo(1);
+  glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D + 1, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  SETUNSP(program, 1i, "texd", 1);
   glm::vec3 offset(
     xyz.x * 16.0f,
     xyz.y * 16.0f,
     xyz.z
   );
   SETUNSPV(program, 3fv, "offset", glm::value_ptr(offset));
-  glUniform1uiv(
-    program.getUniformLocation("tiles"),
-    16 * 16,
-    (GLuint*) chunk->getMapBlocks()
-  );
-  glUniform1uiv(
-    program.getUniformLocation("mappings"),
-    tr->cw->bindings->count(),
-    (GLuint*) tr->cw->bindings->data()
-  );
 #ifndef NDEBUG
   setup = true;
 #endif
@@ -257,6 +276,8 @@ void x801::game::ChunkBuffer::render() {
   } else {
     glDisable(GL_BLEND);
   }*/
+  tr->texb->bindTo(0);
+  tr->texd->bindTo(1);
   glEnable(GL_DEPTH_TEST);
   glDepthMask(false);
   glEnable(GL_BLEND);

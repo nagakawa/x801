@@ -137,9 +137,10 @@ class Chunk:
     output.write(self.array.data)
 
 class TileSec:
-  def __init__(self, table):
+  def __init__(self, table, dtable):
     self.chunks = {}
     self.table = table
+    self.dtable = dtable
   def createChunk(self, x, y, z):
     self.chunks[(x, y, z)] = Chunk(x, y, z)
   def getn(self, x, y, z):
@@ -171,6 +172,9 @@ class TileSec:
   def getid(self, name):
     if name == "air": return 0
     return self.table[name] + 1
+  def getdid(self, name):
+    if name == "air": return 0
+    return (self.dtable[name] + 1) << 16
 
 otherModules = ['math', 'random']
 
@@ -181,14 +185,18 @@ yourfuncs = {
   "TileSec": TileSec,
   "Chunk": Chunk,
   "__builtins__": safeBuiltins,
+  "METHOD_BASE": METHOD_BASE,
+  "METHOD_ALL": METHOD_ALL,
+  "METHOD_DEC": METHOD_DEC,
+  "METHOD_SOLID": METHOD_SOLID,
 }
 
 for module in otherModules:
   yourfuncs.update(importlib.import_module(module).__dict__)
 
-def export_TIL2(sec, table):
+def export_TIL2(sec, table, dtable):
   output = io.BytesIO()
-  tiles = TileSec(table)
+  tiles = TileSec(table, dtable)
   codess = sec["Code"]
   for codes in codess:
     for code in codes:

@@ -52,7 +52,8 @@ namespace x801 {
       Client* getParentClient() { return c; }
       virtual ~ClientWindow() override;
       Client* c;
-      x801::map::BlockTextureBindings* bindings = nullptr;
+      x801::map::BlockTextureBindings* bindings[2]
+        = {nullptr, nullptr};
     private:
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;
