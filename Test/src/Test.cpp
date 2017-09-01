@@ -145,22 +145,20 @@ void testChunkIO() {
   assertEqual(chunk.isEmpty(), false, "Chunk should not be empty");
   x801::map::Block wall(0x80000001);
   x801::map::Block space(0);
-  x801::map::Block shouldBeWall = chunk.getMapBlockAt(0, 5, 3);
+  x801::map::Block shouldBeWall = chunk.getMapBlockAt(0, 5);
   assertEqual(shouldBeWall, wall, "Wall on west edge");
-  shouldBeWall = chunk.getMapBlockAt(15, 7, 2);
+  shouldBeWall = chunk.getMapBlockAt(15, 7);
   assertEqual(shouldBeWall, wall, "Wall on east edge");
-  shouldBeWall = chunk.getMapBlockAt(6, 0, 1);
+  shouldBeWall = chunk.getMapBlockAt(6, 0);
   assertEqual(shouldBeWall, wall, "Wall on north edge");
-  shouldBeWall = chunk.getMapBlockAt(3, 15, 2);
+  shouldBeWall = chunk.getMapBlockAt(3, 15);
   assertEqual(shouldBeWall, wall, "Wall on south edge");
-  shouldBeWall = chunk.getMapBlockAt(7, 9, 0);
-  assertEqual(shouldBeWall, wall, "Wall on floor (wtf?)");
-  x801::map::Block shouldBeSpace = chunk.getMapBlockAt(5, 5, 7);
+  x801::map::Block shouldBeSpace = chunk.getMapBlockAt(5, 5);
   assertEqual(shouldBeSpace, space, "Space in center");
-  chunk.setMapBlockAt(5, 5, 7, wall);
-  shouldBeWall = chunk.getMapBlockAt(5, 5, 7);
+  chunk.setMapBlockAt(5, 5, wall);
+  shouldBeWall = chunk.getMapBlockAt(5, 5);
   assertEqual(shouldBeWall, wall, "Newly-set wall");
-  chunk.setMapBlockAt(5, 5, 7, space); // Revert the change
+  chunk.setMapBlockAt(5, 5, space); // Revert the change
   std::stringstream output(std::ios_base::out | std::ios_base::binary);
   chunk.write(output);
   assertEqual(output.str(), s, "Input and output match");
@@ -184,7 +182,7 @@ void testTileSecIO() {
   x801::map::TileSec ts(input);
   x801::map::Block wall(0x80000001);
   x801::map::Block shouldBeWall =
-    ts.getBlock(x801::map::BlockXYZ(35, 63, -30));
+    ts.getBlock(x801::map::BlockXYZ(35, 63, -2));
   assertEqual(shouldBeWall, wall, "Wall on south edge of chunk 1");
   std::stringstream output(std::ios_base::out | std::ios_base::binary);
   ts.write(output);
@@ -199,7 +197,7 @@ void testAreaIO() {
     "\x03\x00\x03\x00" // World 3 Area 3
     "\x01\x00\x00\x00" // This world has one data section.
     // Data Section 0
-    "TIL3" // id
+    "TIL2" // id
     "\x12\x80\x00\x00" // this is 32786 bytes long
     "\x00\x00\x00\x00"
     "\x02\x00"

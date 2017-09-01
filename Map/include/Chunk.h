@@ -93,17 +93,7 @@ namespace x801 {
       Chunk(ChunkXYZ xyz) :
           xyz(xyz), empty(true),
           map(nullptr) {}
-      Chunk(std::istream& handle) {
-        xyz.x = x801::base::readInt<int16_t>(handle);
-        xyz.y = x801::base::readInt<int16_t>(handle);
-        xyz.z = x801::base::readInt<int16_t>(handle);
-        empty = x801::base::readInt<uint16_t>(handle);
-        map = empty ? nullptr : new Block[BLOCKS_IN_CHUNK];
-        if (empty) return;
-        for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
-          map[i] = Block(x801::base::readInt<uint32_t>(handle));
-        }
-      }
+      Chunk(std::istream& handle);
       void write(std::ostream& handle) const;
       ~Chunk();
       int getX() const { return xyz.x; }

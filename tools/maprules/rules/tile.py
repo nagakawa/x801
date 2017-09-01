@@ -122,7 +122,7 @@ class Chunk:
     self.x = x
     self.y = y
     self.z = z
-    self.array = np.zeros(4096, np.int32)
+    self.array = np.zeros(256, np.int32)
   def get(self, x, y):
     index = (x << 4) | y
     return self.array[index]
@@ -171,7 +171,6 @@ class TileSec:
   def getid(self, name):
     if name == "air": return 0
     return self.table[name] + 1
-
 
 otherModules = ['math', 'random']
 

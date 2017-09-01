@@ -355,7 +355,7 @@ std::stringstream x801::game::Patcher::getSStream(const char* fname) {
   uint32_t version, contentLength;
   uint8_t* contents;
   getFileEntry(fname, version, contentLength, contents);
-  std::string s(contents, contentLength);
+  std::string s((const char*) contents, contentLength);
   delete[] contents;
   return std::stringstream(std::move(s));
 }

@@ -44,16 +44,20 @@ namespace x801 {
       map[index] = b;
     }
     
-    /*Chunk::Chunk(std::istream& handle) {
-      width = x801::base::readInt<uint16_t>(handle);
-      height = x801::base::readInt<uint16_t>(handle);
-      xoff = x801::base::readInt<int16_t>(handle);
-      yoff = x801::base::readInt<int16_t>(handle);
-      allocateBlocks();
-      for (int i = 0; i < width * height; ++i) {
+    Chunk::Chunk(std::istream& handle) {
+      xyz.x = x801::base::readInt<int16_t>(handle);
+      xyz.y = x801::base::readInt<int16_t>(handle);
+      xyz.z = x801::base::readInt<int16_t>(handle);
+      empty = x801::base::readInt<uint16_t>(handle);
+      map = empty ? nullptr : new Block[BLOCKS_IN_CHUNK];
+      if (empty) return;
+      // std::cout << '(' << xyz.x << ", " << xyz.y << ", " << xyz.z << ") ";
+      for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
         map[i] = Block(x801::base::readInt<uint32_t>(handle));
+        // std::cout << map[i].label << ' ';
       }
-    }*/
+      // std::cout << '\n';
+    }
     
     void Chunk::write(std::ostream& handle) const {
       x801::base::writeInt<int16_t>(handle, xyz.x);
