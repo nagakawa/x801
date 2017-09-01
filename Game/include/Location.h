@@ -30,7 +30,9 @@ namespace x801 {
   namespace game {
     struct Location {
       x801::map::QualifiedAreaID areaID;
-      float x, y, z, rot;
+      float x, y;
+      int z;
+      uint8_t rot;
       // Used by both the client (for position prediction) and
       // the server.
       bool applyKeyInput(KeyInput input, RakNet::Time last);

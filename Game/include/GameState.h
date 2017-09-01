@@ -182,6 +182,9 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(locationMutex);
         return playersByID[id];
       }
+      Player& getPlayerUnsynchronised(uint32_t id) {
+        return playersByID[id];
+      }
       // Write all of the elements of alreadyRequestedIDs into
       // a buffer. It should be big enough to fit the total
       // number of elements in the set; use totalRequested()

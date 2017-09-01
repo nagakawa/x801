@@ -253,7 +253,7 @@ void testDBAuth() {
   assertEqual(id, 0, "User Dworgyn does not exist, so 0 is returned");
   x801::game::Location locationOfUruwi = {
     { 0, 0 }, // Presumably messing around in the x801 counterpart of the Commons?
-    3.7f, 9.2f, 0.0f, -0.14f
+    3.7f, 9.2f, 0, 1
   };
   db.savePlayerLocation(1, locationOfUruwi);
   x801::game::Location shouldBeSame;
@@ -310,109 +310,6 @@ void testCircularQueue() {
     "Same element has index that is one less than before front was popped");
 }
 
-void testModelFunctionIO() {
-  using namespace std::literals::string_literals;
-  // Taken from block.cmf
-  std::string bdata =
-    "\x01\x00\x3F\x06\x08\x00\x0C\x00\xC0\xC0\x40\x40\xC0\x40\x40\x40"
-    "\x40\xC0\x40\x40\x40\xC0\xC0\xC0\xC0\xC0\xC0\x40\xC0\x40\x40\xC0"
-    "\x00\x00\x01\x00\x02\x00\x00\x00\x80\x00\x80\x80\x00\x01\x02\x00"
-    "\x03\x00\x00\x00\x80\x80\x00\x80\x00\x00\x00\x01\x04\x00\x05\x00"
-    "\x06\x00\x00\x80\x80\x00\x80\x80\x01\x02\x06\x00\x07\x00\x04\x00"
-    "\x80\x80\x00\x80\x00\x80\x01\x02\x02\x00\x03\x00\x06\x00\x00\x00"
-    "\x80\x00\x80\x80\x02\x04\x06\x00\x07\x00\x02\x00\x80\x80\x00\x80"
-    "\x00\x00\x02\x04\x00\x00\x01\x00\x04\x00\x00\x00\x80\x00\x80\x80"
-    "\x03\x08\x04\x00\x05\x00\x00\x00\x80\x80\x00\x80\x00\x00\x03\x08"
-    "\x01\x00\x02\x00\x07\x00\x00\x00\x80\x00\x80\x80\x04\x10\x07\x00"
-    "\x04\x00\x01\x00\x80\x80\x00\x80\x00\x00\x04\x10\x03\x00\x00\x00"
-    "\x05\x00\x00\x00\x80\x00\x80\x80\x05\x20\x05\x00\x06\x00\x03\x00"
-    "\x80\x80\x00\x80\x00\x00\x05\x20"
-    ""s;
-  std::stringstream input(bdata);
-  x801::map::ModelFunction block(input);
-  assertEqual(block.hitboxType, x801::map::HitboxType::HITBOX_FULL,
-    "Read that this is a full block");
-  assertEqual(block.textureCount, 6, "Uses 6 textures");
-  // First vertex is nnp.
-  assertEqual(block.vertices[0].x, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].y, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].z, 64, "Vertex 0 has X of +64 (+0.5)");
-  // First face is 0 - 1 - 2
-  assertEqual(block.faces[0].vertices[0].index, 0,
-    "First vertex of face 0 is vertex 0");
-  assertEqual(block.faces[0].vertices[0].u, 0,
-    "First vertex of face 0 has u = 0");
-  assertEqual(block.faces[0].vertices[0].v, 0,
-    "First vertex of face 0 has v = 0");
-  std::stringstream output;
-  block.write(output);
-  std::string outData = output.str();
-  assertEqual(outData, bdata, "Input and output are equal");
-}
-
-void testModelFunctionIndexIO() {
-  using namespace std::literals::string_literals;
-  std::string adata =
-    "\x58\x4D\x44\x46\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00"
-    "\x01\x00\x3F\x06\x08\x00\x0C\x00\xC0\xC0\x40\x40\xC0\x40\x40\x40"
-    "\x40\xC0\x40\x40\x40\xC0\xC0\xC0\xC0\xC0\xC0\x40\xC0\x40\x40\xC0"
-    "\x00\x00\x01\x00\x02\x00\x00\x00\x80\x00\x80\x80\x00\x01\x02\x00"
-    "\x03\x00\x00\x00\x80\x80\x00\x80\x00\x00\x00\x01\x04\x00\x05\x00"
-    "\x06\x00\x00\x80\x80\x00\x80\x80\x01\x02\x06\x00\x07\x00\x04\x00"
-    "\x80\x80\x00\x80\x00\x80\x01\x02\x02\x00\x03\x00\x06\x00\x00\x00"
-    "\x80\x00\x80\x80\x02\x04\x06\x00\x07\x00\x02\x00\x80\x80\x00\x80"
-    "\x00\x00\x02\x04\x00\x00\x01\x00\x04\x00\x00\x00\x80\x00\x80\x80"
-    "\x03\x08\x04\x00\x05\x00\x00\x00\x80\x80\x00\x80\x00\x00\x03\x08"
-    "\x01\x00\x02\x00\x07\x00\x00\x00\x80\x00\x80\x80\x04\x10\x07\x00"
-    "\x04\x00\x01\x00\x80\x80\x00\x80\x00\x00\x04\x10\x03\x00\x00\x00"
-    "\x05\x00\x00\x00\x80\x00\x80\x80\x05\x20\x05\x00\x06\x00\x03\x00"
-    "\x80\x80\x00\x80\x00\x00\x05\x20"
-    ""s;
-  std::stringstream input(adata);
-  x801::map::ModelFunctionIndex all(input);
-  x801::map::ModelFunction& block = all.models[0];
-  assertEqual(block.hitboxType, x801::map::HitboxType::HITBOX_FULL,
-    "Read that the first block is a full block");
-  assertEqual(block.textureCount, 6, "Uses 6 textures");
-  // First vertex is nnp.
-  assertEqual(block.vertices[0].x, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].y, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].z, 64, "Vertex 0 has X of +64 (+0.5)");
-  // First face is 0 - 1 - 2
-  assertEqual(block.faces[0].vertices[0].index, 0,
-    "First vertex of face 0 is vertex 0");
-  assertEqual(block.faces[0].vertices[0].u, 0,
-    "First vertex of face 0 has u = 0");
-  assertEqual(block.faces[0].vertices[0].v, 0,
-    "First vertex of face 0 has v = 0");
-  std::stringstream output;
-  all.write(output);
-  std::string outData = output.str();
-  assertEqual(outData, adata, "Input and output are equal");
-}
-
-#include "humanPart.h"
-void testEntityPartIO() {
-  std::stringstream input(binaries::humanPart);
-  x801::map::Part part(input);
-  assertApproximate(part.hitboxSize.x, 0.9f, 1e-4f, "Hitbox size is working");
-  assertEqual(part.components.size(), 6u, "Has 6 components");
-  size_t rightLegIndex = part.componentIndicesByName["rightLeg"];
-  size_t torsoIndex = part.componentIndicesByName["torso"];
-  assertEqual(part.componentNames[rightLegIndex], "rightLeg",
-    "rightLeg is rightLeg");
-  x801::map::Component& rightLeg = part.components[rightLegIndex];
-  assertEqual(rightLeg.parent, torsoIndex, "Parent of right leg is torso");
-  assertApproximate(rightLeg.offsetCoordinates.z, 0.1f, 1e-4f,
-    "Offset coordinate is correct");
-  // faces are pretty hard to test... ._.
-  // but we can test control angles
-  std::vector<size_t> expectedControls { rightLegIndex };
-  std::vector<size_t>& actualControls = part.controlAngles["rightLeg"];
-  assertEqual(expectedControls, actualControls,
-    "Right leg control angle controls correct components");
-}
-
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
@@ -426,9 +323,6 @@ const Test x801::test::parts[] = {
   {"area", testAreaIO, true},
   {"dbAuth", testDBAuth, true},
   {"circularQueue", testCircularQueue, true},
-  {"modelFunctionIO", testModelFunctionIO, true},
-  {"modelFunctionIndexIO", testModelFunctionIndexIO, true},
-  {"entityPartIO", testEntityPartIO, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 

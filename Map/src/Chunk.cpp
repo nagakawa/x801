@@ -102,7 +102,6 @@ namespace x801 {
         }
         texIDsByBlockID.resize(key + 1);
         texIDsByBlockID[key] = value;
-        std::cout << key << " -> " << value << "\n";
       }
     }
     std::ostream& operator<<(

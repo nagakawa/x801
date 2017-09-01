@@ -74,6 +74,10 @@ static const int keycodes[] = {
   GLFW_KEY_RIGHT,
 };
 
+static const char* dirNames[] = {
+  "right", "up", "left", "down"
+};
+
 static const int keycodeCount = sizeof(keycodes) / sizeof(keycodes[0]);
 
 void x801::game::ClientWindow::tick() {
@@ -103,6 +107,8 @@ void x801::game::ClientWindow::tick() {
   fuck->tick();
   chat->render();
   ImGui::Begin("Basic info");
+  ImGui::TextWrapped("Engine Version: %s",
+    x801::base::engineVersion.toString().c_str());
   curr = (curr + 1) % FTIMES_TO_STORE;
   ftimes[curr] = 1000.0f / getFPS();
   ImGui::TextWrapped("FPS: %.2f", getRollingFPS());
@@ -123,17 +129,20 @@ void x801::game::ClientWindow::tick() {
   }
   std::string str(s.str());
   ImGui::TextWrapped("%s", str.c_str());
+  c->g.locationMutex.lock_shared();
   for (const auto& pair : c->g.playersByID) {
     uint32_t id = pair.first;
     const Location& loc =
       (id == c->g.myID) ? pair.second.getLocation() : c->g.selfPosition;
     ImGui::TextWrapped(
-      "%s (#%d) @ world-%d area-%d (%f, %f, %f) < %f radians",
+      "%s (#%d) @ world-%d area-%d (%f, %f, %d) < %s",
       c->getUsername(id).c_str(), id,
       loc.areaID.worldID, loc.areaID.areaID,
-      loc.x, loc.y, loc.z, loc.rot
+      loc.x, loc.y, loc.z,
+      dirNames[loc.rot]
     );
   }
+  c->g.locationMutex.unlock_shared();
   ImGui::TextWrapped("inputs = 0x%x", inputs);
   ImGui::TextWrapped("Size of history is %zu", c->g.history.size());
   ImGui::End();

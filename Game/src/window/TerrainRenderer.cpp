@@ -98,9 +98,6 @@ void x801::game::TerrainRenderer::draw() {
       if (cmb != nullptr) {
         cmb->render();
         ++rendered;
-        if (isChatWindowOpen) {
-          ImGui::TextWrapped("%d, %d rendered", c.x, c.y);
-        }
       }
     }
   }
@@ -269,14 +266,8 @@ void x801::game::ChunkBuffer::render() {
   tr->gs->selfPositionMutex.lock();
   const auto selfPos = tr->gs->selfPosition;
   tr->gs->selfPositionMutex.unlock();
-  float theta = selfPos.rot;
   float aspectRatio = ((float) tr->cw->getWidth()) / tr->cw->getHeight();
-#if 0 // top-downish perspective code
-  // I don't know why I have to multiply the y by -1, but it works.
-  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, -1.0f, -1.0f) / 8.0f);
-  // Rotate 30 degrees backwards
-  mvp = glm::rotate(mvp, glm::radians(30.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-  mvp = glm::rotate(mvp, glm::radians(90.0f) - theta, glm::vec3(0.0f, 0.0f, 1.0f));
+  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, -1.0f) / 8.0f);
   // Centre on player
   mvp = glm::translate(
     mvp,
@@ -285,14 +276,6 @@ void x801::game::ChunkBuffer::render() {
       -selfPos.y,
       -selfPos.z
     )
-  );
-#endif
-  mvp = glm::scale(mvp, glm::vec3(1.0f, -1.0f, 1.0f));
-  mvp *= glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
-  mvp *= glm::lookAt(
-    glm::vec3(selfPos.x, selfPos.y, selfPos.z + 1.6f),
-    glm::vec3(selfPos.x + cosf(theta), selfPos.y + sinf(theta), selfPos.z + 1.6f),
-    glm::vec3(0.0f, 0.0f, 1.0f)
   );
 #ifndef NDEBUG
   tr->axes.setMVP(mvp);
