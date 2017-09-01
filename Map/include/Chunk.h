@@ -81,6 +81,8 @@ namespace x801 {
         if (blockID == 0) return -1;
         return texIDsByBlockID[blockID - 1];
       }
+      size_t count() { return texIDsByBlockID.size(); }
+      void* data() { return &(texIDsByBlockID[0]); }
     private:
       std::vector<size_t> texIDsByBlockID;
     };

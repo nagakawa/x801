@@ -81,7 +81,7 @@ ChunkBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& pos)
   return res;
 }
 
-static constexpr int RADIUS = 0;
+static constexpr int RADIUS = 2;
 
 void x801::game::TerrainRenderer::draw() {
   bool isChatWindowOpen = ImGui::Begin("Basic info");
@@ -118,9 +118,9 @@ void x801::game::TerrainRenderer::draw() {
 
 float squareCoords[6][2] = {
   {0.0f, 0.0f},
-  {0.0f, 0.1f},
+  {0.0f, 1.0f},
   {1.0f, 0.0f},
-  {0.0f, 0.1f},
+  {0.0f, 1.0f},
   {1.0f, 0.0f},
   {1.0f, 1.0f},
 };
@@ -129,7 +129,7 @@ static const char* VERTEX_SOURCE =
   "#version 330 core \n"
   // The position of the vertex, in 16-metre units,
   // from the centre of the northwestmost block of the chunk.
-  "layout (location = 0) in ivec2 position; \n"
+  "layout (location = 0) in vec2 position; \n"
   "out vec2 TexCoord; \n"
   // The model-view-projection matrix.
   "uniform mat4 mvp; \n"
@@ -147,19 +147,20 @@ static const char* FRAGMENT_SOURCE =
   "out vec4 colour; \n"
   "uniform sampler2D tex; \n"
   "uniform uint tiles[256]; \n"
+  "uniform uint mappings[]; \n"
   "#define DIVISOR 128u \n" // 4096 / 32
   "void main() { \n"
   "  ivec2 indices = ivec2(TexCoord * 16); \n"
   "  uint w = tiles[indices.y * 16 + indices.x]; \n"
   "  uint base = w & 0xFFFFu/*ck*/; \n"
-  "  //if (base == 0u) discard; \n"
-  "  base -= 1u; \n"
+  "  if (base == 0u) discard; \n"
+  "  uint baseTexID = mappings[base - 1u]; \n"
   "  vec2 uvstart = vec2(base % DIVISOR, base / DIVISOR); \n"
   // or (W / DIVISOR) % DIVISOR
   // (if we need to use multiple textures)
   "  vec2 local = mod(TexCoord * 16, 1); \n"
   "  vec2 realtc = (local + uvstart) / DIVISOR; \n"
-  "  colour = vec4(TexCoord.x, TexCoord.y, 0, 1); //texture(tex, realtc); \n"
+  "  colour = texture(tex, realtc); \n"
   "} \n"
   ;
 
@@ -193,11 +194,11 @@ void x801::game::ChunkBuffer::setUpRender(bool layer) {
     16 * 16,
     (GLuint*) chunk->getMapBlocks()
   );
-  GLuint* blocks = (GLuint*) chunk->getMapBlocks();
-  std::cout << "Blocks: ";
-  for (size_t i = 0; i < 256; ++i) {
-    std::cout << blocks[i] << " ";
-  }
+  glUniform1uiv(
+    program[layer].getUniformLocation("mappings"),
+    tr->cw->bindings->count(),
+    (GLuint*) tr->cw->bindings->data()
+  );
   std::cout << "\n";
 #ifndef NDEBUG
   setup[layer] = true;
