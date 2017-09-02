@@ -193,13 +193,20 @@ void testAreaIO() {
   // Make a chunk map.
   std::string s = x801::base::construct(
     "XMap" // magic number
-    "\x00\x00\x00\x00\x00\x00\x00\x00" // version
+    "\x00\x00\x00\x00\x02\x00\x00\x00" // version
     "\x03\x00\x03\x00" // World 3 Area 3
-    "\x01\x00\x00\x00" // This world has one data section.
+    "\x02\x00\x00\x00" // This world has 2 data sections.
+    // Data Section 1
+    "XDAT" // id
+    "\x11\x00\x00\x00" // this is 17 bytes long
+    "\x00\x00\x00\x00" // don't care
+    "\x05\x00" "bepis" // World name
+    "\x05\x00" "bepis" // Area name
+    "\x00\x00\xff" // Sky is perfectly blue
     // Data Section 0
     "TIL2" // id
-    "\x12\x80\x00\x00" // this is 32786 bytes long
-    "\x00\x00\x00\x00"
+    "\x12\x08\x00\x00" // this is 2066 bytes long
+    "\x00\x00\x00\x00" // don't care
     "\x02\x00"
     // Chunk 1
     "\x02\x00\x03\x00\xfe\xff" // Location
@@ -219,6 +226,7 @@ void testAreaIO() {
   // feed(std::cout, str);
   x801::map::Area area2(output);
   assertEqual(area2.getError(), x801::map::MAPERR_OK, "Map should be read without error");
+  assertEqual(area2.getXDatSec().worldName, "bepis", "World name is correct");
   std::stringstream output2(std::ios_base::out | std::ios_base::binary);
   area2.write(output2);
   assertEqual(output.str(), output2.str(), "Outputs match");

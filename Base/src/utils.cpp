@@ -123,6 +123,8 @@ int x801::base::readZipped(
     uint32_t& amtReadC,
     uint32_t& amtReadU
 ) {
+  // Save old file position
+  long base = f.tellg();
   unsigned int bsize = 1;
   int ret = Z_OK;
   char* src = (char*) malloc(CHUNK);
@@ -177,6 +179,8 @@ int x801::base::readZipped(
     block = nullptr;
   }
   (void) inflateEnd(&strm);
+  f.clear();
+  f.seekg(base + amtReadC);
   return ret;
 }
 

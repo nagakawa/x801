@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
+#include <XDatSec.h>
 #include "Server.h"
 #include "window/imgui_hooks.h"
 
@@ -123,6 +124,12 @@ namespace x801 {
         ftimes, FTIMES_TO_STORE, curr + 1,
         "Frame times (0 to 100)", 0.0f, 100.0f, ImVec2(0, 200)
       );
+      x801::map::XDatSec& xs =
+        c->g.getCurrentArea().getArea()->getXDatSec();
+      ImGui::TextWrapped(
+        "Current area: %s, %s",
+        xs.worldName.c_str(), xs.areaName.c_str()
+      );
       std::stringstream s;
       s << "User ID: ";
       s << c->g.getID();
@@ -153,8 +160,6 @@ namespace x801 {
       ImGui::TextWrapped("Size of history is %zu", c->g.history.size());
       ImGui::End();
       ImGui::Render();
-      //RakNet::TimeUS t2 = RakNet::GetTimeUS();
-      // std::cout << "Time: " << (t2 - t1) << " FPS: " << getFPS() << " or " << ImGui::GetIO().Framerate << '\n';
     }
 
     void ClientWindow::readKeys() {

@@ -47,6 +47,8 @@ x801::map::Area::Area(std::istream& fh, bool dontCare) {
       break;
     }
   }
+  if (error != 0 && (ts == nullptr || !xs.present))
+    error = MAPERR_MISSING_SECTION;
 }
 
 void x801::map::Area::write(std::ostream& fh) const {
@@ -58,6 +60,7 @@ void x801::map::Area::write(std::ostream& fh) const {
   x801::base::writeInt<uint32_t>(fh, 0);
   int ds = 0;
   writeTileSection(fh, ds);
+  writeXDatSection(fh, ds);
   fh.seekp(pos);
   x801::base::writeInt<uint32_t>(fh, ds);
   fh.seekp(0, std::ios_base::end);
@@ -68,6 +71,7 @@ x801::map::Area::~Area() {
 }
 
 #define SECTION_TILE 0x324c4954L // "TIL2"
+#define SECTION_XDAT 0x54414458L // "XDAT"
 
 int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   int stat = MAPERR_OK;
@@ -75,6 +79,7 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   uint32_t size = x801::base::readInt<uint32_t>(fh);
   bool isCompressed = size >> 31;
   size &= 0x7fffffffL;
+  // std::clog << "Size: " << size << "\n";
   uint32_t uncompressedSize =
     isCompressed ? x801::base::readInt<uint32_t>(fh) : size;
   uint32_t adler32Expected = x801::base::readInt<uint32_t>(fh);
@@ -93,10 +98,12 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
     assert(fh.tellg() == startPos);
     /*std::clog << std::hex << adler32Expected << " vs " <<
       adler32Actual << '\n' << std::dec;*/
-    if (adler32Expected != adler32Actual) return MAPERR_CHECKSUM_MISMATCH;
+    if (adler32Expected != adler32Actual)
+      return MAPERR_CHECKSUM_MISMATCH;
   }
   std::istream* input = nullptr;
   if (isCompressed) {
+    // long base = fh.tellg();
     char* data = nullptr;
     uint32_t amtReadC;
     uint32_t amtReadU;
@@ -111,9 +118,12 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
     std::string s(data, uncompressedSize);
     input = new std::stringstream(s, std::ios_base::in | std::ios_base::binary);
     free(data);
+    // assert(fh.tellg() == base + size);
     //std::clog << dynamic_cast<std::stringstream*>(input)->str();
   } else {
-    input = &fh;
+    std::string s(size, '\0');
+    fh.read(&(s[0]), size);
+    input = new std::stringstream(s, std::ios_base::in | std::ios_base::binary);
   }
   switch (sectionID) {
     case SECTION_TILE: {
@@ -122,6 +132,14 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
         goto cleanup;
       }
       ts = new TileSec(*input);
+      break;
+    }
+    case SECTION_XDAT: {
+      if (xs.present) {
+        stat = MAPERR_REDUNDANT_SECTION;
+        goto cleanup;
+      }
+      xs = XDatSec(*input);
       break;
     }
     default: {
@@ -139,7 +157,7 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
     }
   }
   cleanup:
-  if (isCompressed && input != nullptr) delete input;
+  delete input;
   return stat;
 }
 
@@ -174,10 +192,10 @@ void x801::map::Area::writeSection(std::ostream& fh, uint32_t sectionID, const c
     std::string s = output.str();
     adler = adler32(adler, (const unsigned char*) s.c_str(), amtWrittenC);
     x801::base::writeInt<uint32_t>(fh, adler);
-    fh << s;
+    fh.write(s.c_str(), amtWrittenC);
   } else {
     // Write it uncompressed.
-    x801::base::writeInt<uint32_t>(fh, amtWrittenC);
+    x801::base::writeInt<uint32_t>(fh, len);
     adler = adler32(adler, (const unsigned char*) data, len);
     x801::base::writeInt<uint32_t>(fh, adler);
     fh.write(data, len);
@@ -193,4 +211,14 @@ void x801::map::Area::writeTileSection(std::ostream& fh, int& ds) const {
   ts->write(data);
   std::string s = data.str();
   writeSection(fh, SECTION_TILE, s.c_str(), s.length(), ds);
+}
+
+void x801::map::Area::writeXDatSection(std::ostream& fh, int& ds) const {
+  std::stringstream data;
+  if (!xs.present) {
+    throw "x801::map::Area::writeXDatSection: ds is empty?";
+  }
+  xs.write(data);
+  std::string s = data.str();
+  writeSection(fh, SECTION_XDAT, s.c_str(), s.length(), ds);
 }

@@ -24,18 +24,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <stddef.h>
+#include <iostream>
+#include <glm/glm.hpp>
+#include <utils.h>
+
 namespace x801 {
   namespace map {
-    const int MAPERR_OK = 0;
-    const int MAPERR_REDUNDANT_TILESEC = 1;
-    const int MAPERR_COMPRESSION = 2;
-    const int MAPERR_CHECKSUM_MISMATCH = 3;
-    const int MAPERR_WRONG_SIZE = 4;
-    const int MAPERR_UNRECOGNISED_SECTION = 5;
-    const int MAPERR_NOT_A_MAP = 6;
-    const int MAPERR_REDUNDANT_SECTION = 7;
-    const int MAPERR_MISSING_SECTION = 8;
-    const int MODERR_OK = 0;
-    const int MODERR_NOT_A_MODEL = 1;
+    class XDatSec {
+    public:
+      XDatSec() : present(false) {}
+      XDatSec(std::istream& fh);
+      void write(std::ostream& fh) const;
+      std::string worldName, areaName;
+      glm::u8vec3 bgColour;
+      bool present;
+    };
   }
 }
