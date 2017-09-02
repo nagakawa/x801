@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <RakNetTypes.h>
 #include <QualifiedAreaID.h>
+#include <Area.h>
 #include "KeyInput.h"
 
 namespace x801 {
@@ -36,6 +37,14 @@ namespace x801 {
       // Used by both the client (for position prediction) and
       // the server.
       bool applyKeyInput(KeyInput input, RakNet::Time last);
+      // Returns true if location is colliding with a solid block.
+      bool isJammed(const x801::map::Area& a);
+      // Returns true if the movement was successful,
+      // and false if it was impeded by a solid block.
+      bool applyKeyInput(
+        KeyInput input,
+        RakNet::Time last,
+        const x801::map::Area& a);
     };
   }
 }
