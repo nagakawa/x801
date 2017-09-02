@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <FBO.h>
 #include <GLFWApplication.h>
 #include <Sprite2D.h>
+#include <pixelratio.h>
 namespace x801 {
   namespace game {
     class ClientWindow;
@@ -54,6 +55,8 @@ namespace x801 {
       Client* c;
       x801::map::BlockTextureBindings* bindings[2]
         = {nullptr, nullptr};
+      void setPixelScale();
+      size_t pixelScale;
     private:
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;
