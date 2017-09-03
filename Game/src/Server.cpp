@@ -232,8 +232,8 @@ void x801::game::Server::listen() {
 }
 
 x801::game::Server::~Server() {
-  if (publicKey != nullptr) delete[] publicKey;
-  if (privateKey != nullptr) delete[] privateKey;
+  delete[] publicKey;
+  delete[] privateKey;
   RakNet::RakPeerInterface::DestroyInstance(peer);
 }
 

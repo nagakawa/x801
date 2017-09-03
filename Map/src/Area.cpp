@@ -67,7 +67,7 @@ void x801::map::Area::write(std::ostream& fh) const {
 }
 
 x801::map::Area::~Area() {
-  if (ts != nullptr) delete ts;
+  delete ts;
 }
 
 #define SECTION_TILE 0x324c4954L // "TIL2"
