@@ -41,28 +41,41 @@ def save():
   image.save(args.destinationImage[0] + "." + str(pageno) + ".png")
 
 for fn in pathlib.Path(args.images[0]).glob("*.png"):
-  if cumul >= capat:
-    # No more room.
-    # Save the current image and start a new page
-    save()
-    image = Image.new(
-      "RGBA",
-      (asize, asize),
-      (0, 0, 0, 0)
-    )
-    pageno += 1
-    cumul -= capat
-  newImage = Image.open(str(fn))
-  x = cumul % tdim
-  y = cumul // tdim
-  image.paste(newImage, (x * tsize, y * tsize))
+  # Add file entry
   shortname = fn.name
   shortname = shortname[0:shortname.rfind('.')]
   if not shortname in nametable:
     fparser.error("Name not found: " + shortname)
   myid = nametable[shortname]
   table[myid] = cumul + capat * pageno
-  cumul += 1
+  # Try to open image
+  newImage = Image.open(str(fn))
+  if newImage.height > tsize:
+    fparser.error("Image is too tall: %d > %d", newImage.height, tsize)
+  # Write image
+  nSlots = (newImage.height + tsize - 1) // tsize;
+  progress = 0
+  while progress < nSlots:
+    if cumul >= capat:
+      # No more room.
+      # Save the current image and start a new page
+      save()
+      image = Image.new(
+        "RGBA",
+        (asize, asize),
+        (0, 0, 0, 0)
+      )
+      pageno += 1
+      cumul -= capat
+    x = cumul % tdim
+    y = cumul // tdim
+    pasteAmt = min(nSlots, tdim - x)
+    region = newImage.crop(
+      (x * tsize, 0, (x + pasteAmt) * tsize, tsize)
+    )
+    image.paste(newImage, (x * tsize, y * tsize))
+    cumul += pasteAmt
+    progress += pasteAmt
 
 save()
 
