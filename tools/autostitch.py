@@ -38,7 +38,7 @@ st = args.sourceTable[0]
 nametrans = lambda x: x
 if st != "*":
   nametable = readtable.read(st)
-  nametrans = lambda x: nametable[x]
+  nametrans = lambda x: nametable.get(x, None)
 table = {}
 
 def save():
@@ -48,9 +48,9 @@ for fn in pathlib.Path(args.images[0]).glob("*.png"):
   # Add file entry
   shortname = fn.name
   shortname = shortname[0:shortname.rfind('.')]
-  if not shortname in nametable:
-    fparser.error("Name not found: " + shortname)
   myid = nametrans(shortname)
+  if myid is None:
+    fparser.error("Name not found: " + shortname)
   table[myid] = cumul + capat * pageno
   # Try to open image
   newImage = Image.open(str(fn))
