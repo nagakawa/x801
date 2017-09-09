@@ -36,6 +36,7 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/window/Launcher.cpp
   ${PROJECT_SOURCE_DIR}/window/imgui_hooks.cpp
   ${PROJECT_SOURCE_DIR}/window/entity_rendering/Entity.cpp
+  ${PROJECT_SOURCE_DIR}/window/entity_rendering/EntityManager.cpp
   ${PROJECT_SOURCE_DIR}/window/entity_rendering/EntityRenderer.cpp
   ${PROJECT_SOURCE_DIR}/window/entity_rendering/Atlas.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/TextureView.cpp

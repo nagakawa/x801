@@ -31,10 +31,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <boost/bimap.hpp>
-#include <boost/bimap/multiset_of.hpp>
-#include <boost/bimap/set_of.hpp>
-
 #include <EBO.h>
 #include <FBO.h>
 #include <Shader.h>
@@ -45,7 +41,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Area.h>
 #include <Chunk.h>
-#include <EntityModel.h>
 
 namespace x801 {
   namespace game {
@@ -93,6 +88,18 @@ namespace x801 {
       friend class TerrainRenderer;
     };
     */
+    class EntityBuffer {
+    public:
+      struct MeshEntry {
+        uint16_t texID;
+        float x, y;
+      };
+      EntityBuffer(EntityRenderer* er) :
+        er(er) {};
+      EntityRenderer* er;
+    private:
+      std::vector<MeshEntry> mesh;
+    };
     class EntityRenderer {
     public:
       EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
