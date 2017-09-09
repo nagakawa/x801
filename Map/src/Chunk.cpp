@@ -91,6 +91,8 @@ namespace x801 {
       return *this;
     }
     
+    static constexpr size_t BLOCK_ID_LIMIT = 65535;
+
     BlockTextureBindings::BlockTextureBindings(std::istream& fh) {
       unsigned int key, value;
       while (!fh.eof() && !fh.bad()) {
@@ -100,8 +102,27 @@ namespace x801 {
           fh.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
           continue;
         }
+        if (key > BLOCK_ID_LIMIT) {
+          std::cerr << "Block ID limit exceeded in BlockTextureBindings!\n";
+          std::cerr << "Limit is " << BLOCK_ID_LIMIT;
+          std::cerr << " but received " << key << "!\n";
+          exit(-1);
+        }
         texIDsByBlockID.resize(key + 1);
         texIDsByBlockID[key] = value;
+      }
+    }
+    EntityTextureBindings::EntityTextureBindings(std::istream& fh) {
+      std::string key;
+      unsigned int value;
+      while (!fh.eof() && !fh.bad()) {
+        fh >> key >> value;
+        if (fh.fail()) {
+          fh.clear();
+          fh.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          continue;
+        }
+        texIDsByEntityID[key] = value;
       }
     }
     std::ostream& operator<<(

@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <functional>
 #include <iostream>
+#include <unordered_map>
+#include <vector>
 #include <utils.h>
 
 namespace x801 {
@@ -85,6 +87,17 @@ namespace x801 {
       void* data() { return &(texIDsByBlockID[0]); }
     private:
       std::vector<size_t> texIDsByBlockID;
+    };
+    class EntityTextureBindings {
+    public:
+      EntityTextureBindings(std::istream& fh);
+      size_t getTexID(std::string id) const {
+        auto it = texIDsByEntityID.find(id);
+        if (it != texIDsByEntityID.end()) return -1;
+        return it->second;
+      }
+    private:
+      std::unordered_map<std::string, size_t> texIDsByEntityID;
     };
     std::ostream& operator<<(
         std::ostream& s,
