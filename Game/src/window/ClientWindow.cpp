@@ -105,6 +105,7 @@ namespace x801 {
       c->g.fastForwardSelfClient(ki);
       c->sendKeyInput(ki);
       ImGui_ImplGlfwGL3_NewFrame();
+      setMVP();
       glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       tr->draw();
@@ -180,6 +181,30 @@ namespace x801 {
           (size_t) getWidth(), (size_t) getHeight(),
           WANTED_AREA);
       std::cout << "Pixel scale: " << pixelScale << "\n";
+    }
+    
+    void x801::game::ClientWindow::setMVP() {
+      c->g.selfPositionMutex.lock();
+      const auto selfPos = c->g.selfPosition;
+      c->g.selfPositionMutex.unlock();
+      // -----------------------------------------
+      float aspectRatio = ((float) getWidth()) / getHeight();
+      size_t pHeight = getHeight() / (pixelScale * TILE_SIZE);
+      // Top edge to bottom edge: NDCs differ by 2.0f.
+      float heightScale = 2.0f / pHeight;
+      // -----------------------------------------
+      // Read these transformations from bottom to top.
+      mvp = glm::mat4();
+      mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, -1.0f) * heightScale);
+      // Round player coordinates to the nearest 1/16th of a block
+      float spx = roundf(selfPos.x * 16) / 16;
+      float spy = roundf(selfPos.y * 16) / 16;
+      float spz = roundf(selfPos.z * 16) / 16;
+      // Centre on player
+      mvp = glm::translate(
+        mvp,
+        glm::vec3(-spx, -spy, -spz)
+      );
     }
 
     ClientWindow::~ClientWindow() {

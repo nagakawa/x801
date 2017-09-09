@@ -57,6 +57,7 @@ namespace x801 {
         = {nullptr, nullptr};
       void setPixelScale();
       size_t pixelScale;
+      glm::mat4 mvp;
     private:
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;
@@ -66,6 +67,7 @@ namespace x801 {
       float ftimes[FTIMES_TO_STORE];
       size_t curr = 0;
       agl::FBOTexMS ft;
+      void setMVP();
     };
   }
 }

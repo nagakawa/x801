@@ -84,7 +84,6 @@ ChunkBuffer* x801::game::TerrainRenderer::summon(const x801::map::ChunkXYZ& pos)
 static constexpr int RADIUS = 2;
 
 void x801::game::TerrainRenderer::draw() {
-  setMVP();
   bool isChatWindowOpen = ImGui::Begin("Basic info");
   size_t rendered = 0;
   fboMS->setActive();
@@ -265,31 +264,6 @@ void x801::game::ChunkBuffer::setUpRender() {
 #endif
 }
 
-void x801::game::TerrainRenderer::setMVP() {
-  gs->selfPositionMutex.lock();
-  const auto selfPos = gs->selfPosition;
-  gs->selfPositionMutex.unlock();
-  // -----------------------------------------
-  float aspectRatio = ((float) cw->getWidth()) / cw->getHeight();
-  size_t pixelScale = cw->pixelScale;
-  size_t pHeight = cw->getHeight() / (pixelScale * TILE_SIZE);
-  // Top edge to bottom edge: NDCs differ by 2.0f.
-  float heightScale = 2.0f / pHeight;
-  // -----------------------------------------
-  // Read these transformations from bottom to top.
-  mvp = glm::mat4();
-  mvp = glm::scale(mvp, glm::vec3(1.0f / aspectRatio, 1.0f, -1.0f) * heightScale);
-  // Round player coordinates to the nearest 1/16th of a block
-  float spx = roundf(selfPos.x * 16) / 16;
-  float spy = roundf(selfPos.y * 16) / 16;
-  float spz = roundf(selfPos.z * 16) / 16;
-  // Centre on player
-  mvp = glm::translate(
-    mvp,
-    glm::vec3(-spx, -spy, -spz)
-  );
-}
-
 void x801::game::ChunkBuffer::render() {
 #ifndef NDEBUG
   if (!setup)
@@ -309,7 +283,7 @@ void x801::game::ChunkBuffer::render() {
   glEnable(GL_BLEND);
   vao.setActive();
   program.use();
-  glm::mat4 mvp = tr->mvp;
+  glm::mat4 mvp = tr->cw->mvp;
 #ifndef NDEBUG
   tr->axes.setMVP(mvp);
 #endif

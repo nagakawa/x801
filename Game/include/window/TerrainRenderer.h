@@ -104,7 +104,6 @@ namespace x801 {
       x801::map::ModelApplicationIndex* mai;
       x801::map::ModelFunctionIndex* mfi;
       std::shared_ptr<agl::FBO> fboMS;
-      glm::mat4 mvp;
 #ifndef NDEBUG
       Axes axes;
 #endif
@@ -114,7 +113,6 @@ namespace x801 {
           ChunkBuffer,
           x801::map::ChunkHasher> cmbs;
       x801::map::Chunk* getChunk(const x801::map::ChunkXYZ& pos);
-      void setMVP();
       friend class ChunkBuffer;
     };
   }
