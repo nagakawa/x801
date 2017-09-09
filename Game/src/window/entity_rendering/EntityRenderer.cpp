@@ -31,6 +31,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    void EntityBuffer::push() {
+      ivbo.feedData(mesh.size() * sizeof(MeshEntry), mesh.data(), GL_STATIC_DRAW);
+      glVertexAttribIPointer(
+        1,
+        1, GL_UNSIGNED_SHORT,
+        sizeof(MeshEntry), (void*) offsetof(MeshEntry, texID));
+      glVertexAttribPointer(
+        2,
+        2, GL_FLOAT, false,
+        sizeof(MeshEntry), (void*) offsetof(MeshEntry, x));
+    }
     void EntityBuffer::feed() {
       EntityManager* em = er->em;
       mesh.clear();
@@ -43,6 +54,7 @@ namespace x801 {
         MeshEntry entry = { l.x, l.y, (uint16_t) tid };
         mesh.push_back(entry);
       });
+      push();
     }
     static const char* VERTEX_SOURCE =
       "#version 330 core \n"
@@ -95,15 +107,7 @@ namespace x801 {
         2, GL_FLOAT, false,
         2 * sizeof(float), (void*) 0);
       glEnableVertexAttribArray(0);
-      ivbo.feedData(mesh.size() * sizeof(MeshEntry), mesh.data(), GL_STATIC_DRAW);
-      glVertexAttribIPointer(
-        1,
-        1, GL_UNSIGNED_SHORT,
-        sizeof(MeshEntry), (void*) offsetof(MeshEntry, texID));
-      glVertexAttribPointer(
-        2,
-        2, GL_FLOAT, false,
-        sizeof(MeshEntry), (void*) offsetof(MeshEntry, x));
+      push();
       glEnableVertexAttribArray(1);
       glEnableVertexAttribArray(2);
       glVertexAttribDivisor(1, 1);
@@ -148,6 +152,10 @@ namespace x801 {
         em != nullptr);
       fboMS = ft.ms.fbo;
       buffer = new EntityBuffer(this);
+      std::stringstream eFile =
+        c->patcher->getSStream("textures/entity/entities.tti");
+      tb = new x801::map::EntityTextureBindings(eFile);
+      Entity::tb = tb;
     }
   }
 }

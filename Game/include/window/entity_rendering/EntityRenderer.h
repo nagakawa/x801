@@ -102,6 +102,7 @@ namespace x801 {
       void render();
       EntityRenderer* er;
     private:
+      void push();
       std::vector<MeshEntry> mesh;
       agl::VAO vao;
       agl::VBO vbo;
@@ -114,7 +115,10 @@ namespace x801 {
     class EntityRenderer {
     public:
       EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft, EntityManager* em);
-      ~EntityRenderer() { delete buffer; }
+      ~EntityRenderer() {
+        delete buffer;
+        delete tb;
+      }
       void draw();
       // ChunkBuffer* summon(const x801::map::ChunkXYZ& pos);
       ClientWindow* cw;
@@ -126,9 +130,11 @@ namespace x801 {
       EntityManager* em;
       std::shared_ptr<agl::FBO> fboMS;
       void setUpRender() { buffer->setUpRender(); }
+      void feed() { buffer->feed(); }
       void render() { buffer->render(); }
     private:
       EntityBuffer* buffer = nullptr;
+      x801::map::EntityTextureBindings* tb;
       /*
       std::unordered_map<
           x801::map::ChunkXYZ,

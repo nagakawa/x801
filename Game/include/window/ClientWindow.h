@@ -36,6 +36,8 @@ namespace x801 {
 #include "Client.h"
 #include "window/ChatWindow.h"
 #include "window/TerrainRenderer.h"
+#include "window/entity_rendering/EntityManager.h"
+#include "window/entity_rendering/EntityRenderer.h"
 
 namespace x801 {
   namespace game {
@@ -61,6 +63,8 @@ namespace x801 {
     private:
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;
+      EntityManager* em = nullptr;
+      EntityRenderer* er = nullptr;
       agl::Sprite2D* terrain;
       agl::Sprite2D* fuck;
       static constexpr size_t FTIMES_TO_STORE = 128;

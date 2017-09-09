@@ -28,7 +28,8 @@ namespace x801 {
         // Get player tex ID
         playerTexID = tb->getTexID("placeholder");
       }
-      return playerTexID + l.rot + (walkFrame % 2) * 4;
+      return playerTexID + l.rot + ((walkFrame / 15) % 2) * 4;
     }
+    x801::map::EntityTextureBindings* Entity::tb = nullptr;
   }
 }

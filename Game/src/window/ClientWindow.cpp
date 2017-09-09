@@ -55,6 +55,9 @@ namespace x801 {
         c->patcher->getSStream("textures/decorations/blocks.tti");
       bindings[1] = new x801::map::BlockTextureBindings(bFile2);
       tr = new TerrainRenderer(this, ft);
+      em = new EntityManager();
+      er = new EntityRenderer(this, ft, em);
+      er->setUpRender();
       terrain = new agl::Sprite2D(&*(ft.ss.texture));
       terrain->setApp(this);
       terrain->addSprite({
@@ -72,6 +75,9 @@ namespace x801 {
       for (size_t i = 0; i < FTIMES_TO_STORE; ++i) {
         ftimes[i] = 100.0f;
       }
+      // Test!!!
+      Location l = {{0, 0}, 5, 5, 0, 2};
+      em->addEntity<PlayerEntity>(1, l);
     }
 
     static const int keycodes[] = {
@@ -109,6 +115,8 @@ namespace x801 {
       glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       tr->draw();
+      er->feed();
+      er->render();
       ft.ms.fbo->blitTo(*(ft.ss.fbo), getWidth(), getHeight());
       agl::setDefaultFBOAsActive();
       terrain->tick();
@@ -161,6 +169,7 @@ namespace x801 {
       ImGui::TextWrapped("Size of history is %zu", c->g.history.size());
       ImGui::End();
       ImGui::Render();
+      em->advanceFrame();
     }
 
     void ClientWindow::readKeys() {
@@ -210,6 +219,8 @@ namespace x801 {
     ClientWindow::~ClientWindow() {
       delete chat;
       delete tr;
+      delete er;
+      delete em;
       delete terrain;
       delete fuck;
       delete bindings[0];

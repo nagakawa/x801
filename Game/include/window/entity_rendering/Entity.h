@@ -35,15 +35,16 @@ namespace x801 {
   namespace game {
     class Entity {
     public:
-      virtual ~Entity() = 0;
+      virtual ~Entity() {};
       virtual void advanceFrame() = 0;
       virtual size_t getTexture() = 0;
       virtual Location getLocation() = 0;
       virtual bool setLocation(const Location& l) = 0;
     protected:
       static x801::map::EntityTextureBindings* tb;
+      friend class EntityRenderer;
     };
-    class PlayerEntity : Entity {
+    class PlayerEntity : public Entity {
     public:
       PlayerEntity(uint32_t id, Location l) :
         id(id), l(l), walkFrame(0) {}

@@ -34,5 +34,28 @@ namespace x801 {
       }
       entityMutex.unlock_shared();
     }
+    void EntityManager::deleteEntity(size_t id) {
+      entityMutex.lock();
+      entities.erase(id);
+      entityMutex.unlock();
+    }
+    Entity* EntityManager::getEntity(size_t id) {
+      entityMutex.lock_shared();
+      auto it = entities.find(id);
+      if (it == entities.end()) {
+        entityMutex.unlock_shared();
+        return nullptr;
+      }
+      Entity* e = &*(it->second);
+      entityMutex.unlock_shared();
+      return e;
+    }
+    void EntityManager::advanceFrame() {
+      entityMutex.lock_shared();
+      for (auto& p : entities) {
+        p.second->advanceFrame();
+      }
+      entityMutex.unlock_shared();
+    }
   }
 }
