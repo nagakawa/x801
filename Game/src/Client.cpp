@@ -437,10 +437,15 @@ void x801::game::Client::processMovement(
     Location& l = p.getLocation();
     stream.Read(xfix);
     stream.Read(yfix);
-    stream.Read(l.rot);
-    stream.Read(l.z);
+    uint8_t t;
+    int8_t z;
+    stream.Read(t);
+    stream.Read(z);
     l.x = xfix / 65536.0f;
     l.y = yfix / 65536.0f;
+    l.z = z;
+    l.rot = t;
+    // std::cerr << playerID << "\n";
     // std::cerr << playerID << " " <<  xfix << " " << yfix << " " << l.rot << '\n';
   }
   g.locationMutex.unlock();
