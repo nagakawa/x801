@@ -1,4 +1,4 @@
-#pragma once
+#include "window/entity_rendering/OverheadName.h"
 
 /*
 Copyright (C) 2016 AGC.
@@ -17,12 +17,21 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if !defined(__cplusplus) || __cplusplus < 201103L
-#error Only C++11 or later supported.
-#endif
-
 namespace x801 {
   namespace game {
-    extern float squareCoords[6][2];
+    OverheadName OverheadName::operator=(const OverheadName& other) {
+      title = other.title;
+      name = other.name;
+      rank = other.rank;
+      classifier = other.classifier;
+      return *this;
+    }
+    OverheadName OverheadName::operator=(OverheadName&& other) {
+      title = std::move(other.title);
+      name = std::move(other.name);
+      rank = other.rank;
+      classifier = other.classifier;
+      return *this;
+    }
   }
 }
