@@ -37,9 +37,6 @@ x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft
   gs = &(c->g);
   texb = tv->getTexture("textures/terrain/blocks.0.png");
   texd = tv->getTexture("textures/decorations/blocks.0.png");
-  ModelView* mv = c->modelView;
-  mai = mv->getMAI();
-  mfi = mv->getMFI();
   assert(
     cw != nullptr && c != nullptr &&
     p != nullptr && tv != nullptr &&

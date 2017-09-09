@@ -55,17 +55,64 @@ namespace x801 {
 }
 #include "Client.h"
 #include "GameState.h"
-#include "window/Axes.h"
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
 #include "window/patcher_views/BlueprintView.h"
 #include "window/patcher_views/PartView.h"
 #include "window/patcher_views/TextureView.h"
-#include "window/entity_rendering/Atlas.h"
 #include "window/entity_rendering/Entity.h"
 
 namespace x801 {
   namespace game {
-    //
+    /*
+    constexpr size_t TILE_SIZE = 32;
+    class ChunkBuffer {
+    public:
+      struct MeshEntry {
+        uint16_t w;
+        uint8_t xy;
+        bool decorator;
+      };
+      ChunkBuffer(
+        const x801::map::ChunkXYZ& xyz,
+        TerrainRenderer* tr,
+        x801::map::Chunk* chunk) :
+        xyz(xyz), tr(tr), chunk(chunk) {}
+      void setUpRender();
+      void render();
+    private:
+      x801::map::ChunkXYZ xyz;
+      TerrainRenderer* tr;
+      x801::map::Chunk* chunk;
+      agl::VBO vbo;
+      std::vector<MeshEntry> mesh;
+      void createMesh();
+      agl::VBO ivbo;
+      agl::VAO vao;
+      agl::ShaderProgram program;
+      friend class TerrainRenderer;
+    };
+    */
+    class EntityRenderer {
+    public:
+      EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
+      void draw();
+      // ChunkBuffer* summon(const x801::map::ChunkXYZ& pos);
+      ClientWindow* cw;
+      Client* c;
+      Patcher* p;
+      TextureView* tv;
+      ClientGameState* gs;
+      agl::Texture* tex;
+      std::shared_ptr<agl::FBO> fboMS;
+    private:
+      /*
+      std::unordered_map<
+          x801::map::ChunkXYZ,
+          ChunkBuffer,
+          x801::map::ChunkHasher> cmbs;
+      x801::map::Chunk* getChunk(const x801::map::ChunkXYZ& pos);
+      */
+    };
   }
 }

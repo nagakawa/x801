@@ -29,6 +29,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    //
+    EntityRenderer::EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft) {
+      this->cw = cw;
+      c = cw->c;
+      p = c->patcher;
+      tv = c->textureView;
+      gs = &(c->g);
+      tex = tv->getTexture("textures/entity/entities.0.png");
+      assert(
+        cw != nullptr && c != nullptr &&
+        p != nullptr && tv != nullptr &&
+        gs != nullptr && tex != nullptr);
+      fboMS = ft.ms.fbo;
+    }
   }
 }

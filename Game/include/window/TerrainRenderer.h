@@ -101,8 +101,6 @@ namespace x801 {
       ClientGameState* gs;
       agl::Texture* texb;
       agl::Texture* texd;
-      x801::map::ModelApplicationIndex* mai;
-      x801::map::ModelFunctionIndex* mfi;
       std::shared_ptr<agl::FBO> fboMS;
 #ifndef NDEBUG
       Axes axes;
