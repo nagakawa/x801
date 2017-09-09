@@ -185,6 +185,13 @@ namespace x801 {
       Player& getPlayerUnsynchronised(uint32_t id) {
         return playersByID[id];
       }
+      void purgePlayers() {
+        boost::unique_lock<boost::shared_mutex> guard(locationMutex);
+        purgePlayersUnsynchronised();
+      }
+      void purgePlayersUnsynchronised() {
+        playersByID.clear();
+      }
       // Write all of the elements of alreadyRequestedIDs into
       // a buffer. It should be big enough to fit the total
       // number of elements in the set; use totalRequested()

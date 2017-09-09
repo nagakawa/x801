@@ -429,6 +429,8 @@ void x801::game::Client::processMovement(
   uint32_t playerCount;
   stream.Read(playerCount);
   g.locationMutex.lock();
+  // XXX this is slightly hackish
+  g.purgePlayersUnsynchronised();
   for (size_t i = 0; i < playerCount; ++i) {
     uint32_t playerID;
     int32_t xfix, yfix;
