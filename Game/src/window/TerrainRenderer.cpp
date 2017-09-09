@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <static_block.h>
 
+#include "rect.h"
+
 using namespace x801::game;
 
 x801::game::TerrainRenderer::TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft) {
@@ -108,15 +110,6 @@ void x801::game::TerrainRenderer::draw() {
   axes.render();
 #endif
 }
-
-float squareCoords[6][2] = {
-  {0.0f, 0.0f},
-  {0.0f, 1.0f},
-  {1.0f, 0.0f},
-  {0.0f, 1.0f},
-  {1.0f, 0.0f},
-  {1.0f, 1.0f},
-};
 
 static const char* VERTEX_SOURCE =
   "#version 330 core \n"

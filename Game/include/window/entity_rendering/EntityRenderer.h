@@ -92,15 +92,23 @@ namespace x801 {
     class EntityBuffer {
     public:
       struct MeshEntry {
-        uint16_t texID;
         float x, y;
+        uint16_t texID;
       };
       EntityBuffer(EntityRenderer* er) :
         er(er) {};
       void feed();
+      void setUpRender();
+      void render();
       EntityRenderer* er;
     private:
       std::vector<MeshEntry> mesh;
+      agl::VAO vao;
+      agl::VBO vbo;
+      agl::VBO ivbo;
+#ifndef NDEBUG
+      bool isset;
+#endif
     };
     class EntityRenderer {
     public:
