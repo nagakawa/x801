@@ -75,6 +75,7 @@ namespace x801 {
       for (size_t i = 0; i < FTIMES_TO_STORE; ++i) {
         ftimes[i] = 100.0f;
       }
+      PlayerEntity::cw = this;
     }
 
     static const int keycodes[] = {

@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace game {
     enum class EntityClassifier : uint16_t {
+      NONE,
       PLAYER,
       NPC,
       MOB_REGULAR1, // yellow name (as in w101)
@@ -36,6 +37,8 @@ namespace x801 {
     };
     class OverheadName {
     public:
+      OverheadName() :
+        title(), name(), rank(0), classifier(EntityClassifier::NONE) {}
       OverheadName(
           std::string title,
           std::string name,

@@ -30,9 +30,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <Chunk.h>
 
 #include "Location.h"
+#include "window/entity_rendering/OverheadName.h"
 
 namespace x801 {
   namespace game {
+    class ClientWindow;
     class Entity {
     public:
       virtual ~Entity() {};
@@ -40,6 +42,9 @@ namespace x801 {
       virtual size_t getTexture() = 0;
       virtual Location getLocation() = 0;
       virtual bool setLocation(const Location& l) = 0;
+      virtual OverheadName overheadName() {
+        return OverheadName();
+      }
     protected:
       static x801::map::EntityTextureBindings* tb;
       friend class EntityRenderer;
@@ -56,10 +61,13 @@ namespace x801 {
         this->l = l;
         return true;
       }
+      OverheadName overheadName() override;
     private:
       uint32_t id;
       Location l;
       size_t walkFrame;
+      static ClientWindow* cw;
+      friend class ClientWindow;
     };
   }
 }
