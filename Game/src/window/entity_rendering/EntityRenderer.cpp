@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <utils.h>
 
+#include "x801_rect.h"
+
 namespace x801 {
   namespace game {
     void EntityBuffer::feed() {
@@ -100,30 +102,36 @@ namespace x801 {
         sizeof(MeshEntry), (void*) offsetof(MeshEntry, texID));
       glVertexAttribPointer(
         2,
-        2, GL_FLOAT, false
+        2, GL_FLOAT, false,
         sizeof(MeshEntry), (void*) offsetof(MeshEntry, x));
       glEnableVertexAttribArray(1);
       glEnableVertexAttribArray(2);
       glVertexAttribDivisor(1, 1);
       glVertexAttribDivisor(2, 1);
       program.use();
-      tr->texb->bindTo(0);
+      er->tex->bindTo(0);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       SETUNSP(program, 1i, "texb", 0);
-      tr->texd->bindTo(1);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      SETUNSP(program, 1i, "texd", 1);
-      glm::vec3 offset(
-        xyz.x * 16.0f,
-        xyz.y * 16.0f,
-        xyz.z
-      );
-      SETUNSPV(program, 3fv, "offset", glm::value_ptr(offset));
 #ifndef NDEBUG
-      isset = true;
+      setup = true;
 #endif
+    }
+    void EntityBuffer::render() {
+#ifndef NDEBUG
+      if (!setup)
+        throw "ChunkBuffer: render() called before setUpRender()";
+#endif
+      er->tex->bindTo(0);
+      glDisable(GL_DEPTH_TEST);
+      glDepthMask(false);
+      glEnable(GL_BLEND);
+      vao.setActive();
+      program.use();
+      glm::mat4 mvp = er->cw->mvp;
+      SETUNSPM(program, 4fv, "mvp", glm::value_ptr(mvp));
+      glDrawArraysInstanced(GL_TRIANGLES, 0, 6, mesh.size());
+      glDepthMask(true);
     }
     EntityRenderer::EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft, EntityManager* em) {
       this->cw = cw;
@@ -139,6 +147,7 @@ namespace x801 {
         gs != nullptr && tex != nullptr &&
         em != nullptr);
       fboMS = ft.ms.fbo;
+      buffer = new EntityBuffer(this);
     }
   }
 }

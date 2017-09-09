@@ -106,13 +106,15 @@ namespace x801 {
       agl::VAO vao;
       agl::VBO vbo;
       agl::VBO ivbo;
+      agl::ShaderProgram program;
 #ifndef NDEBUG
-      bool isset;
+      bool setup;
 #endif
     };
     class EntityRenderer {
     public:
       EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft, EntityManager* em);
+      ~EntityRenderer() { delete buffer; }
       void draw();
       // ChunkBuffer* summon(const x801::map::ChunkXYZ& pos);
       ClientWindow* cw;
@@ -123,7 +125,10 @@ namespace x801 {
       agl::Texture* tex;
       EntityManager* em;
       std::shared_ptr<agl::FBO> fboMS;
+      void setUpRender() { buffer->setUpRender(); }
+      void render() { buffer->render(); }
     private:
+      EntityBuffer* buffer = nullptr;
       /*
       std::unordered_map<
           x801::map::ChunkXYZ,

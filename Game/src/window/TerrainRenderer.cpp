@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <static_block.h>
 
-#include "rect.h"
+#include "x801_rect.h"
 
 using namespace x801::game;
 

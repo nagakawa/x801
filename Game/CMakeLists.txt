@@ -17,7 +17,7 @@ SET(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/main.cpp
-  ${PROJECT_SOURCE_DIR}/rect.cpp
+  ${PROJECT_SOURCE_DIR}/x801_rect.cpp
   ${PROJECT_SOURCE_DIR}/Config.cpp
   ${PROJECT_SOURCE_DIR}/Server.cpp
   ${PROJECT_SOURCE_DIR}/Client.cpp
