@@ -22,11 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    static size_t playerTexID = -1U;
+    static size_t playerTexID = -1;
     size_t PlayerEntity::getTexture() {
-      if (playerTexID == -1U) {
+      if (playerTexID + 1 == 0) {
         // Get player tex ID
         playerTexID = tb->getTexID("placeholder");
+        if (playerTexID + 1 == 0) {
+          std::cerr << "playerTexID == -1U\n";
+          return -1U;
+        }
       }
       return playerTexID + l.rot + ((walkFrame / 15) % 2) * 4;
     }

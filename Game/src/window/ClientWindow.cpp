@@ -75,9 +75,6 @@ namespace x801 {
       for (size_t i = 0; i < FTIMES_TO_STORE; ++i) {
         ftimes[i] = 100.0f;
       }
-      // Test!!!
-      Location l = {{0, 0}, 5, 5, 0, 2};
-      em->addEntity<PlayerEntity>(1, l);
     }
 
     static const int keycodes[] = {
@@ -115,6 +112,7 @@ namespace x801 {
       glClearColor(1.0f, 0.8f, 0.8f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       tr->draw();
+      readPlayersFromGS();
       er->feed();
       er->render();
       ft.ms.fbo->blitTo(*(ft.ss.fbo), getWidth(), getHeight());
@@ -214,6 +212,44 @@ namespace x801 {
         mvp,
         glm::vec3(-spx, -spy, -spz)
       );
+    }
+
+    void ClientWindow::readPlayersFromGS() {
+      // First, go over the list of users in the entityIDsBYPlayer map
+      // and remove any that don't exist in the CGS.
+      std::vector<uint32_t> removeList;
+      for (auto& p : entityIDsByPlayer) {
+        if (c->g.playersByID.count(p.first) == 0) {
+          removeList.push_back(p.first);
+        }
+      }
+      for (uint32_t player : removeList) {
+        size_t id = entityIDsByPlayer[player];
+        em->deleteEntity(id);
+        entityIDsByPlayer.erase(player);
+      }
+      // Second, go over the list of users in the ClientGameState
+      // and add any new players, as well as updating
+      // existing players.
+      for (auto& p : c->g.playersByID) {
+        
+        auto it = entityIDsByPlayer.find(p.first);
+        if (it == entityIDsByPlayer.end()) {
+          // Add the player
+          size_t id =
+            em->addEntity<PlayerEntity>(p.first, p.second.getLocation());
+          entityIDsByPlayer[p.first] = id;
+        } else {
+          size_t id = it->second;
+          PlayerEntity* e = (PlayerEntity*) em->getEntity(id);
+          if (p.first == c->g.myID) {
+            // Is this thee, experimenter?
+            e->setLocation(c->g.selfPosition);
+          } else {
+            e->setLocation(p.second.getLocation());
+          }
+        }
+      }
     }
 
     ClientWindow::~ClientWindow() {

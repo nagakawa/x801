@@ -72,6 +72,11 @@ namespace x801 {
       size_t curr = 0;
       agl::FBOTexMS ft;
       void setMVP();
+      std::unordered_map<uint32_t, size_t> entityIDsByPlayer;
+      // Add players that have started to exist,
+      // remove players that no longer exist and
+      // update the positions of players.
+      void readPlayersFromGS();
     };
   }
 }

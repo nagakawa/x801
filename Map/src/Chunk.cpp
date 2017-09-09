@@ -137,5 +137,20 @@ namespace x801 {
       s << "]";
       return s;
     }
+    std::ostream& operator<<(
+        std::ostream& s,
+        const EntityTextureBindings& b) {
+      s << "[";
+      bool first = true;
+      for (const auto& p : b.texIDsByEntityID) {
+        if (first)
+          first = false;
+        else
+          std::cout << ", ";
+        s << p.first << " -> " << p.second;
+      }
+      s << "]";
+      return s;
+    }
   }
 }

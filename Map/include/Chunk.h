@@ -93,15 +93,21 @@ namespace x801 {
       EntityTextureBindings(std::istream& fh);
       size_t getTexID(std::string id) const {
         auto it = texIDsByEntityID.find(id);
-        if (it != texIDsByEntityID.end()) return -1;
+        if (it == texIDsByEntityID.end()) return -1;
         return it->second;
       }
     private:
       std::unordered_map<std::string, size_t> texIDsByEntityID;
+      friend std::ostream& operator<<(
+          std::ostream& s,
+          const EntityTextureBindings& b);
     };
     std::ostream& operator<<(
         std::ostream& s,
         const BlockTextureBindings& b);
+    std::ostream& operator<<(
+        std::ostream& s,
+        const EntityTextureBindings& b);
     const size_t BLOCKS_IN_CHUNK = 16 * 16;
     class Chunk {
     public:
