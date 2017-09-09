@@ -27,6 +27,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    //
+    void EntityManager::forEach(std::function<void(Entity&)> cb) {
+      entityMutex.lock_shared();
+      for (auto& p : entities) {
+        cb(*(p.second));
+      }
+      entityMutex.unlock_shared();
+    }
   }
 }

@@ -56,6 +56,7 @@ namespace x801 {
 #include "window/patcher_views/PartView.h"
 #include "window/patcher_views/TextureView.h"
 #include "window/entity_rendering/Entity.h"
+#include "window/entity_rendering/EntityManager.h"
 
 namespace x801 {
   namespace game {
@@ -96,13 +97,14 @@ namespace x801 {
       };
       EntityBuffer(EntityRenderer* er) :
         er(er) {};
+      void feed();
       EntityRenderer* er;
     private:
       std::vector<MeshEntry> mesh;
     };
     class EntityRenderer {
     public:
-      EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
+      EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft, EntityManager* em);
       void draw();
       // ChunkBuffer* summon(const x801::map::ChunkXYZ& pos);
       ClientWindow* cw;
@@ -111,6 +113,7 @@ namespace x801 {
       TextureView* tv;
       ClientGameState* gs;
       agl::Texture* tex;
+      EntityManager* em;
       std::shared_ptr<agl::FBO> fboMS;
     private:
       /*

@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <unordered_map>
 
@@ -57,6 +58,12 @@ namespace x801 {
         entityMutex.unlock_shared();
         return e;
       }
+      void deleteEntity(size_t id) {
+        entityMutex.lock();
+        entities.erase(id);
+        entityMutex.unlock();
+      }
+      void forEach(std::function<void(Entity&)> cb);
     private:
       mutable boost::shared_mutex entityMutex;
       std::unordered_map<size_t, std::unique_ptr<Entity>> entities;

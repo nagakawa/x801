@@ -29,17 +29,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    EntityRenderer::EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft) {
+    void EntityBuffer::feed() {
+      EntityManager* em = er->em;
+      mesh.clear();
+      // XXX this iterates over every entity.
+      // This could be problematic for large numbers of entities.
+      em->forEach([this](Entity& e) {
+        Location l = e.getLocation();
+        size_t tid = e.getTexture();
+        if (l.z != er->gs->selfPosition.z) return;
+        MeshEntry entry = { (uint16_t) tid, l.x, l.y };
+        mesh.push_back(entry);
+      });
+    }
+    EntityRenderer::EntityRenderer(ClientWindow* cw, agl::FBOTexMS& ft, EntityManager* em) {
       this->cw = cw;
       c = cw->c;
       p = c->patcher;
       tv = c->textureView;
       gs = &(c->g);
       tex = tv->getTexture("textures/entity/entities.0.png");
+      this->em = em;
       assert(
         cw != nullptr && c != nullptr &&
         p != nullptr && tv != nullptr &&
-        gs != nullptr && tex != nullptr);
+        gs != nullptr && tex != nullptr &&
+        em != nullptr);
       fboMS = ft.ms.fbo;
     }
   }
