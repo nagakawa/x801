@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <memory>
 #include <unordered_map>
 
+#include <boost/thread/shared_mutex.hpp>
+
 #include "window/entity_rendering/Entity.h"
 
 namespace x801 {
@@ -39,10 +41,24 @@ namespace x801 {
         size_t id = firstVacant++;
         std::unique_ptr<Entity> e =
           std::make_unique<E>(std::forward<Args>(args)...);
+        entityMutex.lock();
         entities[id] = std::move(e);
+        entityMutex.unlock();
         return id;
       }
+      Entity* getEntity(size_t id) {
+        entityMutex.lock_shared();
+        auto it = entities.find(id);
+        if (it == entities.end()) {
+          entityMutex.unlock_shared();
+          return nullptr;
+        }
+        Entity* e = &*(it->second);
+        entityMutex.unlock_shared();
+        return e;
+      }
     private:
+      mutable boost::shared_mutex entityMutex;
       std::unordered_map<size_t, std::unique_ptr<Entity>> entities;
       std::atomic<size_t> firstVacant;
     };
