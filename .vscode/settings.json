@@ -71,5 +71,6 @@
     "sstream": "cpp",
     "streambuf": "cpp"
   },
-  "python.linting.pylintEnabled": false
+  "python.linting.pylintEnabled": false,
+  "python.formatting.provider": "autopep8"
 }

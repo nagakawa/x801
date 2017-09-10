@@ -1,4 +1,4 @@
-#pragma once
+#include "XDatSec.h"
 
 /*
 Copyright (C) 2016 AGC.
@@ -17,24 +17,22 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if !defined(__cplusplus) || __cplusplus < 201103L
-#error Only C++11 or later supported.
-#endif
-
-#include <stdint.h>
-#include <string>
-
 namespace x801 {
-  namespace game {
-    enum ClientOrServer { HUH, CLIENT, SERVER, DB_ADD_USER };
-    struct CLineConfig {
-      ClientOrServer mode = HUH;
-      std::string ip = "localhost";
-      std::string username = "";
-      std::string password = "";
-      uint16_t port = 0;
-      bool useIPV6 = false;
-      bool debug = false;
-    };
+  namespace map {
+    XDatSec::XDatSec(std::istream& fh) {
+      worldName = x801::base::readString<uint16_t>(fh);
+      areaName = x801::base::readString<uint16_t>(fh);
+      for (size_t i = 0; i < 3; ++i) {
+        bgColour[i] = (uint8_t) fh.get();
+      }
+      present = true;
+    }
+    void XDatSec::write(std::ostream& fh) const {
+      x801::base::writeString<uint16_t>(fh, worldName);
+      x801::base::writeString<uint16_t>(fh, areaName);
+      for (size_t i = 0; i < 3; ++i) {
+        fh.put((char) bgColour[i]);
+      }
+    }
   }
 }

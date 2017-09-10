@@ -1,4 +1,4 @@
-#pragma once
+#include "pixelratio.h"
 
 /*
 Copyright (C) 2016 AGC.
@@ -17,24 +17,24 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#if !defined(__cplusplus) || __cplusplus < 201103L
-#error Only C++11 or later supported.
-#endif
-
-#include <stdint.h>
-#include <string>
+#include <math.h>
+#include <algorithm>
 
 namespace x801 {
-  namespace game {
-    enum ClientOrServer { HUH, CLIENT, SERVER, DB_ADD_USER };
-    struct CLineConfig {
-      ClientOrServer mode = HUH;
-      std::string ip = "localhost";
-      std::string username = "";
-      std::string password = "";
-      uint16_t port = 0;
-      bool useIPV6 = false;
-      bool debug = false;
-    };
+  namespace base {
+    size_t calculatePixelScale(
+      size_t tileSize,
+      size_t screenWidth,
+      size_t screenHeight,
+      size_t desiredArea
+    ) {
+      // Calculate how many tiles are visible
+      // given a scale of 1
+      double actualArea = screenWidth * screenHeight;
+      actualArea /= tileSize * tileSize;
+      double ratio = actualArea / desiredArea;
+      if (ratio < 1) return 1;
+      return (size_t) sqrt(ratio);
+    }
   }
 }

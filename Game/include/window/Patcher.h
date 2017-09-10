@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <mutex>
+#include <sstream>
 #include <thread>
 #include <curl/curl.h>
 #include <sqlite3.h>
@@ -65,6 +66,7 @@ namespace x801 {
           fetchThread.join();
       }
       void fetchFile(const char* fname);
+      std::stringstream getSStream(const char* fname);
     private:
       sqlite3* conn;
       uint32_t latestVersion = 0;

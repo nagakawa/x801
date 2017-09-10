@@ -38,6 +38,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 typedef int_fast32_t Int;
 typedef uint_fast32_t UInt;
 
+// C++17 or up doesn't support `register`
+#if __cplusplus > 201402L
+#define REGISTER
+#else
+#define REGISTER register
+#endif
+
 #define DEFINE_OFFSETS_AND_FLAGS(type, name, offsetValue) \
   const type OFFSET#name = offsetValue; \
   const type FLAG#name = 1 << offsetValue;
@@ -66,27 +73,35 @@ namespace x801 {
         "convBEW has not been specialised for this type");
       return 0;
     }
+    template<> uint8_t convLER<uint8_t>(uint8_t x);
     template<> uint16_t convLER<uint16_t>(uint16_t x);
     template<> uint32_t convLER<uint32_t>(uint32_t x);
     template<> uint64_t convLER<uint64_t>(uint64_t x);
+    template<> uint8_t convLEW<uint8_t>(uint8_t x);
     template<> uint16_t convLEW<uint16_t>(uint16_t x);
     template<> uint32_t convLEW<uint32_t>(uint32_t x);
     template<> uint64_t convLEW<uint64_t>(uint64_t x);
+    template<> int8_t convLER<int8_t>(int8_t x);
     template<> int16_t convLER<int16_t>(int16_t x);
     template<> int32_t convLER<int32_t>(int32_t x);
     template<> int64_t convLER<int64_t>(int64_t x);
+    template<> int8_t convLEW<int8_t>(int8_t x);
     template<> int16_t convLEW<int16_t>(int16_t x);
     template<> int32_t convLEW<int32_t>(int32_t x);
     template<> int64_t convLEW<int64_t>(int64_t x);
+    template<> uint8_t convBER<uint8_t>(uint8_t x);
     template<> uint16_t convBER<uint16_t>(uint16_t x);
     template<> uint32_t convBER<uint32_t>(uint32_t x);
     template<> uint64_t convBER<uint64_t>(uint64_t x);
+    template<> uint8_t convBEW<uint8_t>(uint8_t x);
     template<> uint16_t convBEW<uint16_t>(uint16_t x);
     template<> uint32_t convBEW<uint32_t>(uint32_t x);
     template<> uint64_t convBEW<uint64_t>(uint64_t x);
+    template<> int8_t convBER<int8_t>(int8_t x);
     template<> int16_t convBER<int16_t>(int16_t x);
     template<> int32_t convBER<int32_t>(int32_t x);
     template<> int64_t convBER<int64_t>(int64_t x);
+    template<> int8_t convBEW<int8_t>(int8_t x);
     template<> int16_t convBEW<int16_t>(int16_t x);
     template<> int32_t convBEW<int32_t>(int32_t x);
     template<> int64_t convBEW<int64_t>(int64_t x);

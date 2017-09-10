@@ -56,4 +56,26 @@ void x801::base::Version::write(std::ostream& fh) const {
   writeInt<uint16_t>(fh, prerelease);
 }
 
-const Version x801::base::engineVersion(0, 0, 1, ALPHA, 0);
+static const char* typeNames[] = {
+  "a", "b", "rc"
+};
+
+std::string x801::base::Version::toString() const {
+  std::string s = std::to_string(vMajor);
+  s += ".";
+  s += std::to_string(vMinor);
+  s += ".";
+  s += std::to_string(vPatch);
+  int type = getPrereleaseType();
+  int number = getPrereleaseNumber();
+  if (type != RELEASE) {
+    s += typeNames[type];
+    s += std::to_string(number);
+  } else if (number != 0) {
+    s += "_";
+    s += std::to_string(number);
+  }
+  return s;
+}
+
+const Version x801::base::engineVersion(0, 0, 3, ALPHA, 0);

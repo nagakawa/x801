@@ -26,40 +26,59 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <FBO.h>
 #include <GLFWApplication.h>
 #include <Sprite2D.h>
+#include <pixelratio.h>
 namespace x801 {
   namespace game {
     class ClientWindow;
   }
 }
+#include <Chunk.h>
 #include "Client.h"
 #include "window/ChatWindow.h"
 #include "window/TerrainRenderer.h"
+#include "window/entity_rendering/EntityManager.h"
+#include "window/entity_rendering/EntityRenderer.h"
 
 namespace x801 {
   namespace game {
     class ClientWindow : public agl::GLFWApplication {
     public:
       using agl::GLFWApplication::GLFWApplication;
-      void initialise();
-      void tick();
-      void readKeys();
-      void onMouse(double xpos, double ypos);
+      void initialise() override;
+      void tick() override;
+      void readKeys() override;
+      void onMouse(double xpos, double ypos) override;
       void start() {
         GLFWApplication::start();
       }
       ChatWindow* getChatWindow() { return chat; }
       Client* getParentClient() { return c; }
+      void loadEntities();
       virtual ~ClientWindow() override;
       Client* c;
+      x801::map::BlockTextureBindings* bindings[2]
+        = {nullptr, nullptr};
+      void setPixelScale();
+      size_t pixelScale;
+      glm::mat4 mvp;
     private:
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;
+      EntityManager* em = nullptr;
+      EntityRenderer* er = nullptr;
       agl::Sprite2D* terrain;
       agl::Sprite2D* fuck;
       static constexpr size_t FTIMES_TO_STORE = 128;
       float ftimes[FTIMES_TO_STORE];
       size_t curr = 0;
       agl::FBOTexMS ft;
+      void setMVP();
+      std::unordered_map<uint32_t, size_t> entityIDsByPlayer;
+      // Add players that have started to exist,
+      // remove players that no longer exist and
+      // update the positions of players.
+      void readPlayersFromGS();
+      friend class Client;
     };
   }
 }

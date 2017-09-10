@@ -27,27 +27,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::base;
 
+template<> uint8_t x801::base::convLER<uint8_t>(uint8_t x) { return x; }
 template<> uint16_t x801::base::convLER<uint16_t>(uint16_t x) { return le16toh(x); }
 template<> uint32_t x801::base::convLER<uint32_t>(uint32_t x) { return le32toh(x); }
 template<> uint64_t x801::base::convLER<uint64_t>(uint64_t x) { return le64toh(x); }
+template<> uint8_t x801::base::convLEW<uint8_t>(uint8_t x) { return x; }
 template<> uint16_t x801::base::convLEW<uint16_t>(uint16_t x) { return htole16(x); }
 template<> uint32_t x801::base::convLEW<uint32_t>(uint32_t x) { return htole32(x); }
 template<> uint64_t x801::base::convLEW<uint64_t>(uint64_t x) { return htole64(x); }
+template<> int8_t x801::base::convLER<int8_t>(int8_t x) { return x; }
 template<> int16_t x801::base::convLER<int16_t>(int16_t x) { return le16toh(x); }
 template<> int32_t x801::base::convLER<int32_t>(int32_t x) { return le32toh(x); }
 template<> int64_t x801::base::convLER<int64_t>(int64_t x) { return le64toh(x); }
+template<> int8_t x801::base::convLEW<int8_t>(int8_t x) { return x; }
 template<> int16_t x801::base::convLEW<int16_t>(int16_t x) { return htole16(x); }
 template<> int32_t x801::base::convLEW<int32_t>(int32_t x) { return htole32(x); }
 template<> int64_t x801::base::convLEW<int64_t>(int64_t x) { return htole64(x); }
+template<> uint8_t x801::base::convBER<uint8_t>(uint8_t x) { return x; }
 template<> uint16_t x801::base::convBER<uint16_t>(uint16_t x) { return be16toh(x); }
 template<> uint32_t x801::base::convBER<uint32_t>(uint32_t x) { return be32toh(x); }
 template<> uint64_t x801::base::convBER<uint64_t>(uint64_t x) { return be64toh(x); }
+template<> uint8_t x801::base::convBEW<uint8_t>(uint8_t x) { return x; }
 template<> uint16_t x801::base::convBEW<uint16_t>(uint16_t x) { return htobe16(x); }
 template<> uint32_t x801::base::convBEW<uint32_t>(uint32_t x) { return htobe32(x); }
 template<> uint64_t x801::base::convBEW<uint64_t>(uint64_t x) { return htobe64(x); }
+template<> int8_t x801::base::convBER<int8_t>(int8_t x) { return x; }
 template<> int16_t x801::base::convBER<int16_t>(int16_t x) { return be16toh(x); }
 template<> int32_t x801::base::convBER<int32_t>(int32_t x) { return be32toh(x); }
 template<> int64_t x801::base::convBER<int64_t>(int64_t x) { return be64toh(x); }
+template<> int8_t x801::base::convBEW<int8_t>(int8_t x) { return x; }
 template<> int16_t x801::base::convBEW<int16_t>(int16_t x) { return htobe16(x); }
 template<> int32_t x801::base::convBEW<int32_t>(int32_t x) { return htobe32(x); }
 template<> int64_t x801::base::convBEW<int64_t>(int64_t x) { return htobe64(x); }
@@ -123,6 +131,8 @@ int x801::base::readZipped(
     uint32_t& amtReadC,
     uint32_t& amtReadU
 ) {
+  // Save old file position
+  long base = f.tellg();
   unsigned int bsize = 1;
   int ret = Z_OK;
   char* src = (char*) malloc(CHUNK);
@@ -177,6 +187,8 @@ int x801::base::readZipped(
     block = nullptr;
   }
   (void) inflateEnd(&strm);
+  f.clear();
+  f.seekg(base + amtReadC);
   return ret;
 }
 

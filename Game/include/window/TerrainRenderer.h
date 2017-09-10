@@ -59,36 +59,33 @@ namespace x801 {
 
 namespace x801 {
   namespace game {
-    struct CMVertex {
-      // The vertex coordinates are chunk-local and are expressed
-      // as signed 9.7's.
-      uint32_t w;
-      int16_t x, y, z;
-      uint8_t u, v;
-    };
-    static_assert(offsetof(CMVertex, x) + 2 == offsetof(CMVertex, y) && offsetof(CMVertex, y) + 2 == offsetof(CMVertex, z) && offsetof(CMVertex, u) + 1 == offsetof(CMVertex, v), "Basic offset checks");
-    class ChunkMeshBuffer {
+    constexpr size_t TILE_SIZE = 32;
+    class ChunkBuffer {
     public:
-      ChunkMeshBuffer(
-          const x801::map::ChunkXYZ& xyz,
-          TerrainRenderer* tr,
-          x801::map::Chunk* chunk) :
-          xyz(xyz), tr(tr), chunk(chunk) {}
-      void createMesh();
-      void setUpRender(bool layer);
-      void render(bool layer);
+      struct MeshEntry {
+        uint16_t w;
+        uint8_t xy;
+        bool decorator;
+      };
+      ChunkBuffer(
+        const x801::map::ChunkXYZ& xyz,
+        TerrainRenderer* tr,
+        x801::map::Chunk* chunk) :
+        xyz(xyz), tr(tr), chunk(chunk) {}
+      void setUpRender();
+      void render();
     private:
-      void addBlock(size_t lx, size_t ly, size_t lz, uint8_t obuf[16][16][16]);
       x801::map::ChunkXYZ xyz;
       TerrainRenderer* tr;
       x801::map::Chunk* chunk;
-      std::vector<CMVertex> opaqueVertices;
-      std::vector<CMVertex> transparentVertices;
-      agl::VBO vbo[2];
-      agl::VAO vao[2];
-      agl::ShaderProgram program[2];
+      agl::VBO vbo;
+      std::vector<MeshEntry> mesh;
+      void createMesh();
+      agl::VBO ivbo;
+      agl::VAO vao;
+      agl::ShaderProgram program;
 #ifndef NDEBUG
-      bool setup[2] = {false, false};
+      bool setup = false;
 #endif
       friend class TerrainRenderer;
     };
@@ -96,15 +93,14 @@ namespace x801 {
     public:
       TerrainRenderer(ClientWindow* cw, agl::FBOTexMS& ft);
       void draw();
-      ChunkMeshBuffer* summon(const x801::map::ChunkXYZ& pos);
+      ChunkBuffer* summon(const x801::map::ChunkXYZ& pos);
       ClientWindow* cw;
       Client* c;
       Patcher* p;
       TextureView* tv;
       ClientGameState* gs;
-      agl::Texture* tex;
-      x801::map::ModelApplicationIndex* mai;
-      x801::map::ModelFunctionIndex* mfi;
+      agl::Texture* texb;
+      agl::Texture* texd;
       std::shared_ptr<agl::FBO> fboMS;
 #ifndef NDEBUG
       Axes axes;
@@ -112,10 +108,10 @@ namespace x801 {
     private:
       std::unordered_map<
           x801::map::ChunkXYZ,
-          ChunkMeshBuffer,
+          ChunkBuffer,
           x801::map::ChunkHasher> cmbs;
       x801::map::Chunk* getChunk(const x801::map::ChunkXYZ& pos);
-      friend class ChunkMeshBuffer;
+      friend class ChunkBuffer;
     };
   }
 }

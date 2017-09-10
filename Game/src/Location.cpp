@@ -27,22 +27,69 @@ using namespace x801::game;
 
 #include "movement_constants.h"
 
-// TODO: support passing a reference to a map and use collision detection.
-bool x801::game::Location::applyKeyInput(KeyInput input, RakNet::Time last) {
-  uint32_t inputs = input.inputs;
-  if (inputs == 0) return true;
-  float delta = ((ssize_t) input.time - (ssize_t) last) / 1000.0f;
-  int isMovingForward = (inputs & (1 << K_OFFSET_FORWARD)) != 0;
-  int isMovingBack = (inputs & (1 << K_OFFSET_BACK)) != 0;
-  int isTurningLeft = (inputs & (1 << K_OFFSET_LEFT)) != 0;
-  int isTurningRight = (inputs & (1 << K_OFFSET_RIGHT)) != 0;
-  float advance = PLAYER_SPEED * delta * (isMovingForward - isMovingBack);
-  x += advance * cosf(rot);
-  y += advance * sinf(rot);
-  rot += PLAYER_ANGULAR_VELOCITY * delta * (isTurningLeft - isTurningRight);
-  if (rot > 10 || rot < -10) {
-    std::cout << "Shit\n";
+namespace x801 {
+  namespace game {
+    bool Location::applyKeyInput(KeyInput input, RakNet::Time last) {
+      uint32_t inputs = input.inputs;
+      if (inputs == 0) return true;
+      float delta = ((ssize_t) input.time - (ssize_t) last) / 1000.0f;
+      int isMovingUp =
+        (inputs & (1 << K_OFFSET_FORWARD)) != 0;
+      int isMovingDown =
+        (inputs & (1 << K_OFFSET_BACK)) != 0;
+      int isMovingLeft =
+        (inputs & (1 << K_OFFSET_LEFT)) != 0;
+      int isMovingRight =
+        (inputs & (1 << K_OFFSET_RIGHT)) != 0;
+      x += PLAYER_SPEED * delta * (isMovingRight - isMovingLeft);
+      y += PLAYER_SPEED * delta * (isMovingDown - isMovingUp);
+      rot =
+        isMovingRight ? 0 :
+        isMovingUp ? 1 :
+        isMovingLeft ? 2 :
+        isMovingDown ? 3 :
+        rot;
+      return true;
+    }
+    // This is the centre-to-edge distance of a hitbox.
+    // An entity's hitbox is a square.
+    static const float HITBOX_SIZE = 0.3f;
+    bool Location::isJammed(const x801::map::Area& a) {
+      using namespace x801::map;
+      TileSec& ts = a.getTileSec();
+      // Bounds for which blocks need to be collision-checked
+      int xmin = (int) (x - HITBOX_SIZE) - 1;
+      int ymin = (int) (y - HITBOX_SIZE) - 1;
+      int xmax = (int) (x + HITBOX_SIZE);
+      int ymax = (int) (y + HITBOX_SIZE);
+      // Check the necessary blocks
+      for (int xc = xmin; xc <= xmax; ++xc) {
+        for (int yc = ymin; yc <= ymax; ++yc) {
+          BlockXYZ xyz(xc, yc, z);
+          Block b = ts.getBlock(xyz);
+          if (b.isSolid() || b.getBaseID() == 0)
+            return true;
+        }
+      }
+      return false;
+    }
+    bool Location::applyKeyInput(
+        KeyInput input,
+        RakNet::Time last,
+        const x801::map::Area& a) {
+      // No need to check if you're not moving
+      if (input.inputs == 0) return true;
+      // Unconditionally allow movement when
+      // already jammed
+      if (isJammed(a)) return applyKeyInput(input, last);
+      // Save old position
+      Location old = *this;
+      applyKeyInput(input, last);
+      if (isJammed(a)) {
+        *this = old;
+        return false;
+      }
+      return true;
+    }
   }
-  rot = fmod(rot, 2 * M_PI);
-  return true;
 }

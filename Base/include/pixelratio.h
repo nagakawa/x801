@@ -21,20 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <stddef.h>
 #include <stdint.h>
-#include <string>
 
 namespace x801 {
-  namespace game {
-    enum ClientOrServer { HUH, CLIENT, SERVER, DB_ADD_USER };
-    struct CLineConfig {
-      ClientOrServer mode = HUH;
-      std::string ip = "localhost";
-      std::string username = "";
-      std::string password = "";
-      uint16_t port = 0;
-      bool useIPV6 = false;
-      bool debug = false;
-    };
+  namespace base {
+    // Calculates the optimum scaling ratio for
+    // each pixel given the tile size, screen dimensions
+    // and desired number of tiles viewable in the screen.
+    size_t calculatePixelScale(
+      size_t tileSize,
+      size_t screenWidth,
+      size_t screenHeight,
+      size_t desiredArea
+    );
   }
 }

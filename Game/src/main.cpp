@@ -100,9 +100,13 @@ int lmain(int argc, char** argv) {
     client.login(cred);
     client.getListenThread().join();
     curl_global_cleanup();
-  } else {
+  } else if (c.mode == SERVER) {
     std::cout << "You intend to start a server.\n";
     Server server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);
+  } else {
+    std::cout << "You intend to add a user.\n";
+    Database db;
+    db.createUserDebug(c.username, c.password);
   }
   return 0;
 }
@@ -111,6 +115,7 @@ const char* x801::game::USAGE =
   "Usage:\n"
   "  Game [-6] [-d] --client <address> <port>\n"
   "  Game [-6] --server <port>\n"
+  "  Game --add-user <username> <password>\n"
   "  -6 (--use-ipv6): use IPV6\n"
   "  -4 (--use-ipv4): use IPV4\n"
   "  --client <address> <port> (-c): start a client\n"
@@ -144,6 +149,12 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
         int port = atoi(argv[i]);
         if (port == 0) ok = false;
         else cn.port = (uint16_t) port;
+      } else if (mode == DB_ADD_USER) {
+        cn.username = argv[i];
+        if (i + 1 >= argc) ok = false;
+        else {
+          cn.password = argv[++i];
+        }
       }
       mode = HUH;
     } else if (arg[0] == '-') {
@@ -153,6 +164,8 @@ int x801::game::readSettings(CLineConfig& cn, int argc, char** argv) {
           mode = CLIENT;
         else if (!strcmp(name, "server") || !strcmp(name, "samantha"))
           mode = SERVER;
+        else if (!strcmp(name, "add-user"))
+          mode = DB_ADD_USER;
         else if (!strcmp(name, "use-ipv6"))
           cn.useIPV6 = true;
         else if (!strcmp(name, "use-ipv4"))

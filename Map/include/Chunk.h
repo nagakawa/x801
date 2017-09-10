@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <functional>
 #include <iostream>
+#include <unordered_map>
+#include <vector>
 #include <utils.h>
 
 namespace x801 {
@@ -61,17 +63,52 @@ namespace x801 {
       Block() : label(0) {}
       Block(uint32_t b) : label(b) {}
       uint32_t label;
-      uint8_t getOrientation() {
-        return (uint8_t) (label >> 26);
+      bool isSolid() {
+        return (label & (1 << 31)) != 0;
       }
-      uint32_t getBlockID() {
-        return label & ((1 << 26) - 1);
+      uint32_t getBaseID() {
+        return label & ((1 << 16) - 1);
+      }
+      uint32_t getDecorationID() {
+        return (label >> 16) & ((1 << 15) - 1);
       }
       bool operator==(Block other) {
         return label == other.label;
       }
     };
-    const size_t BLOCKS_IN_CHUNK = 16 * 16 * 16;
+    class BlockTextureBindings {
+    public:
+      BlockTextureBindings(std::istream& fh);
+      size_t getTexID(size_t blockID) const {
+        if (blockID == 0) return -1;
+        return texIDsByBlockID[blockID - 1];
+      }
+      size_t count() const { return texIDsByBlockID.size(); }
+      void* data() { return &(texIDsByBlockID[0]); }
+    private:
+      std::vector<size_t> texIDsByBlockID;
+    };
+    class EntityTextureBindings {
+    public:
+      EntityTextureBindings(std::istream& fh);
+      size_t getTexID(std::string id) const {
+        auto it = texIDsByEntityID.find(id);
+        if (it == texIDsByEntityID.end()) return -1;
+        return it->second;
+      }
+    private:
+      std::unordered_map<std::string, size_t> texIDsByEntityID;
+      friend std::ostream& operator<<(
+          std::ostream& s,
+          const EntityTextureBindings& b);
+    };
+    std::ostream& operator<<(
+        std::ostream& s,
+        const BlockTextureBindings& b);
+    std::ostream& operator<<(
+        std::ostream& s,
+        const EntityTextureBindings& b);
+    const size_t BLOCKS_IN_CHUNK = 16 * 16;
     class Chunk {
     public:
       Chunk(int x, int y, int z) :
@@ -80,17 +117,7 @@ namespace x801 {
       Chunk(ChunkXYZ xyz) :
           xyz(xyz), empty(true),
           map(nullptr) {}
-      Chunk(std::istream& handle) {
-        xyz.x = x801::base::readInt<int16_t>(handle);
-        xyz.y = x801::base::readInt<int16_t>(handle);
-        xyz.z = x801::base::readInt<int16_t>(handle);
-        empty = x801::base::readInt<uint16_t>(handle);
-        map = empty ? nullptr : new Block[BLOCKS_IN_CHUNK];
-        if (empty) return;
-        for (size_t i = 0; i < BLOCKS_IN_CHUNK; ++i) {
-          map[i] = Block(x801::base::readInt<uint32_t>(handle));
-        }
-      }
+      Chunk(std::istream& handle);
       void write(std::ostream& handle) const;
       ~Chunk();
       int getX() const { return xyz.x; }
@@ -99,8 +126,8 @@ namespace x801 {
       ChunkXYZ getXYZ() const { return xyz; }
       bool isEmpty() const { return empty; }
       Block* getMapBlocks() { return map; }
-      Block getMapBlockAt(size_t ix, size_t iy, size_t iz) const;
-      void setMapBlockAt(size_t ix, size_t iy, size_t iz, Block b);
+      Block getMapBlockAt(size_t ix, size_t iy) const;
+      void setMapBlockAt(size_t ix, size_t iy, Block b);
       Chunk(const Chunk& that) :
           xyz(that.xyz), empty(that.empty),
           map(that.empty ? nullptr : new Block[BLOCKS_IN_CHUNK]) {

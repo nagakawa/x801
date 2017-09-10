@@ -21,8 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
-#include <iostream>
 #include <stdint.h>
+#include <iostream>
+#include <string>
 #include "utils.h"
 
 namespace x801 {
@@ -48,12 +49,13 @@ namespace x801 {
         prerelease(readInt<uint16_t>(fh)) {}
       Version() :
         vMajor(0), vMinor(0), vPatch(0), prerelease(0) {}
-      int getPrereleaseType() { return prerelease >> 14; }
-      int getPrereleaseNumber() { return prerelease & 0x3fff; }
+      int getPrereleaseType() const { return prerelease >> 14; }
+      int getPrereleaseNumber() const { return prerelease & 0x3fff; }
       bool operator==(Version& other);
       bool operator<(Version& other);
       bool canSucceed(Version& other);
       void write(std::ostream& fh) const;
+      std::string toString() const;
     };
     extern const Version engineVersion;
   }

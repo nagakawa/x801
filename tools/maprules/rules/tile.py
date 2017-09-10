@@ -105,18 +105,30 @@ def oriNameToNumber(name):
   isFlipped = d3 == (d3x ^ 1)
   return (d1 << 3) | (d2 << 1) | d3
 
+# Block format:
+# bit 31: solid?
+# bit 16 - 30: decoration
+# bit 0 - 15: base
+def applyMethod(meth, new, old):
+  return (old & ~meth) | (new & meth)
+
+METHOD_ALL = 0xFFFFFFFF
+METHOD_BASE = 0x0000FFFF
+METHOD_DEC = 0x7FFF0000
+METHOD_SOLID = 0x80000000
+
 class Chunk:
   def __init__(self, x, y, z):
     self.x = x
     self.y = y
     self.z = z
-    self.array = np.zeros(4096, np.int32)
-  def get(self, x, y, z):
-    index = (z << 8) | (x << 4) | y
-    return array[index]
-  def put(self, x, y, z, b, ori = 0):
-    index = (z << 8) | (x << 4) | y
-    self.array[index] = b | (ori << 26)
+    self.array = np.zeros(256, np.int32)
+  def get(self, x, y):
+    index = (x << 4) | y
+    return self.array[index]
+  def put(self, x, y, b):
+    index = (x << 4) | y
+    self.array[index] = b
   def write(self, output):
     writeInt(output, self.x, 2)
     writeInt(output, self.y, 2)
@@ -125,47 +137,44 @@ class Chunk:
     output.write(self.array.data)
 
 class TileSec:
-  def __init__(self, table):
+  def __init__(self, table, dtable):
     self.chunks = {}
     self.table = table
+    self.dtable = dtable
   def createChunk(self, x, y, z):
     self.chunks[(x, y, z)] = Chunk(x, y, z)
   def getn(self, x, y, z):
     try:
-      chunk = self.chunks[(x >> 4, y >> 4, z >> 4)]
-      return chunk.get(x & 15, y & 15, z & 15)
+      chunk = self.chunks[(x >> 4, y >> 4, z)]
+      return chunk.get(x & 15, y & 15)
     except KeyError:
       return 0
-  def putn(self, x, y, z, b, ori = 0):
-    ori = oriNameToNumber(ori)
+  def put(self, x, y, z, b, method=METHOD_ALL):
     try:
-      chunk = self.chunks[(x >> 4, y >> 4, z >> 4)]
-      chunk.put(x & 15, y & 15, z & 15, b, ori)
+      chunk = self.chunks[(x >> 4, y >> 4, z)]
+      old = chunk.get(x & 15, y & 15)
+      chunk.put(x & 15, y & 15, applyMethod(method, b, old))
     except KeyError:
-      chunk = Chunk(x >> 4, y >> 4, z >> 4)
-      chunk.put(x & 15, y & 15, z & 15, b, ori)
-      self.chunks[x >> 4, y >> 4, z >> 4] = chunk
-  def put(self, x, y, z, b, ori = 0):
-    if b == "air": self.putn(x, y, z, 0)
-    else: self.putn(x, y, z, self.table[b] + 1, ori)
+      chunk = Chunk(x >> 4, y >> 4, z)
+      old = chunk.get(x & 15, y & 15)
+      chunk.put(x & 15, y & 15, applyMethod(method, b, old))
+      self.chunks[(x >> 4, y >> 4, z)] = chunk
   def write(self, output):
     chunks = self.chunks.values()
     writeInt(output, len(chunks), 2)
     for c in chunks:
       c.write(output)
-  def fill(self, x1, y1, z1, x2, y2, z2, t, ori = 0):
-    n = self.table[t] + 1 if t != "air" else 0
-    isfunc = callable(ori)
-    if isfunc:
-      for x in range(x1, x2 + 1):
-        for y in range(y1, y2 + 1):
-          for z in range(z1, z2 + 1):
-            self.putn(x, y, z, n, ori(x, y, z))
-    else:
-      for x in range(x1, x2 + 1):
-        for y in range(y1, y2 + 1):
-          for z in range(z1, z2 + 1):
-            self.putn(x, y, z, n, ori)
+  def fill(self, x1, y1, z1, x2, y2, z2, b, method=METHOD_ALL):
+    for x in range(x1, x2 + 1):
+      for y in range(y1, y2 + 1):
+        for z in range(z1, z2 + 1):
+          self.put(x, y, z, b, method)
+  def getid(self, name):
+    if name == "air": return 0
+    return self.table[name] + 1
+  def getdid(self, name):
+    if name == "air": return 0
+    return (self.dtable[name] + 1) << 16
 
 otherModules = ['math', 'random']
 
@@ -176,14 +185,18 @@ yourfuncs = {
   "TileSec": TileSec,
   "Chunk": Chunk,
   "__builtins__": safeBuiltins,
+  "METHOD_BASE": METHOD_BASE,
+  "METHOD_ALL": METHOD_ALL,
+  "METHOD_DEC": METHOD_DEC,
+  "METHOD_SOLID": METHOD_SOLID,
 }
 
 for module in otherModules:
   yourfuncs.update(importlib.import_module(module).__dict__)
 
-def export_TIL3(sec, table):
+def export_TIL2(sec, table, dtable):
   output = io.BytesIO()
-  tiles = TileSec(table)
+  tiles = TileSec(table, dtable)
   codess = sec["Code"]
   for codes in codess:
     for code in codes:

@@ -21,119 +21,79 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <stdint.h>
 #include <unordered_map>
 #include <vector>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-
 #include <Texture.h>
 
-#include <EntityModel.h>
+#include <Chunk.h>
 
-#include "window/patcher_views/PartView.h"
-#include "window/patcher_views/TextureView.h"
+#include "Location.h"
+#include "window/entity_rendering/OverheadName.h"
 
 namespace x801 {
   namespace game {
-    struct PartLink {
-      size_t parentPart, component;
-      glm::vec3 offset;
-      glm::quat orientation;
-    };
+    class ClientWindow;
     class Entity {
     public:
-      Entity() {}
-      Entity(
-        PartView& pv,
-        const x801::map::Blueprint& bp
-      );
-
-#define XAPP \
-  X(usedParts), \
-  X(usedTextures), \
-  X(controlAngles), \
-  X(links), \
-  X(indicesByID), \
-  X(absolutePartPositions), \
-  X(absolutePartOrientations), \
-  X(absoluteComponentPositions), \
-  X(absoluteComponentOrientations)
-#define X(n) n(std::move(e.n))
-
-      Entity(Entity&& e) :
-        XAPP {}
-
-#undef X
-#define X(n) n = std::move(e.n)
-
-      Entity& operator=(Entity&& e) {
-        XAPP;
-        return *this;
+      virtual ~Entity() {};
+      virtual void advanceFrame() = 0;
+      virtual size_t getTexture() = 0;
+      virtual Location getLocation() = 0;
+      virtual bool setLocation(const Location& l) = 0;
+      virtual OverheadName overheadName() {
+        return OverheadName();
       }
-
-#undef X
-#undef XAPP
-
-      /*
-        Invariants:
-        usedParts.size() == usedTextures.size()
-        usedParts.size() == usedLinks.size()
-        usedParts.size() == absolutePartPositions.size()
-        usedParts.size() == absolutePartOrientations.size()
-        usedParts.size() == absoluteComponentPositions.size()
-        usedParts.size() == absoluteComponentOrientations.size()
-        for all i in [0, usedParts.size()):
-          absoluteComponentPositions[i].size() ==
-            usedParts[i]->components.size()
-          absoluteComponentOrientations[i].size() ==
-            usedParts[i]->components.size()
-      */
-      bool update();
-      bool isDirty() { return dirty; }
-      void addPart(
-          const x801::map::Part* part,
-          const std::string& tex,
-          const PartLink& link,
-          const std::string& partID) {
-        size_t i = usedParts.size();
-        indicesByID[partID] = i;
-        usedParts.push_back(part);
-        usedTextures.push_back(tex);
-        links.push_back(link);
-        absolutePartPositions.emplace_back();
-        absolutePartOrientations.emplace_back();
-        size_t nComponents = part->components.size();
-        absoluteComponentPositions.emplace_back(nComponents);
-        absoluteComponentOrientations.emplace_back(nComponents);
-        dirty = true;
+      virtual bool isPlayer() { return false; }
+    protected:
+      static x801::map::EntityTextureBindings* tb;
+      friend class EntityRenderer;
+    };
+    class PlayerEntity : public Entity {
+    public:
+      PlayerEntity(uint32_t id, const Location& l) :
+        id(id), l(l), walkFrame(0) {}
+      ~PlayerEntity() override {}
+      void advanceFrame() override { walkFrame += 1; }
+      size_t getTexture() override;
+      Location getLocation() override { return l; }
+      bool setLocation(const Location& l) override {
+        this->l = l;
+        return true;
       }
-      void setControlAngle(const std::string& name, glm::quat angle) {
-        controlAngles[name] = angle;
-        dirty = true;
-      }
+      OverheadName overheadName() override;
+      bool isPlayer() override { return true; }
     private:
-      bool dirty = false;
-      std::vector<const x801::map::Part*> usedParts;
-      std::vector<std::string> usedTextures;
-      std::unordered_map<std::string, glm::quat> controlAngles;
-      std::vector<PartLink> links;
-      std::unordered_map<std::string, size_t> indicesByID;
-      std::vector<glm::vec3> absolutePartPositions;
-      std::vector<glm::quat> absolutePartOrientations;
-      // Not quite absolute: these are relative to their grounds
-      std::vector<std::vector<glm::vec3>> absoluteComponentPositions;
-      std::vector<std::vector<glm::quat>> absoluteComponentOrientations;
-      void updatePartTraits();
-      void updatePartTraits(size_t partID, std::vector<bool>& isUpdated);
-      // Update the components of a part
-      void updateComponentsOfPart(
-        size_t partID);
-      void updateComponentOfPart(
-        size_t partID, size_t componentID,
-        std::vector<bool>& isUpdated
-      );
+      uint32_t id;
+      Location l;
+      size_t walkFrame;
+      static ClientWindow* cw;
+      friend class ClientWindow;
+    };
+    class NPCEntity : public Entity {
+    public:
+      NPCEntity(
+          std::string texname, const Location& l,
+          std::string title, std::string name,
+          size_t offset = 0) :
+        texID(tb->getTexID(texname)), l(l),
+        title(title), name(name), offset(offset) {}
+      ~NPCEntity() override {}
+      void advanceFrame() override {}
+      size_t getTexture() override { return texID + offset; };
+      Location getLocation() override { return l; }
+      bool setLocation(const Location& l) override {
+        this->l = l;
+        return true;
+      }
+      OverheadName overheadName() override;
+    private:
+      size_t texID;
+      Location l;
+      std::string title;
+      std::string name;
+      size_t offset = 0;
     };
   }
 }
