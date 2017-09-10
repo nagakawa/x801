@@ -206,6 +206,10 @@ bool x801::game::Client::handleLPacket(
   return true;
 }
 
+void x801::game::Client::switchAreaToCurrent() {
+  g.currentArea.setArea(mapView->getArea(g.selfPosition.areaID));
+}
+
 static const double GAP = 10e-3;
 static const double THRESH = 2e-3;
 

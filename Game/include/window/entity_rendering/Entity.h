@@ -75,8 +75,10 @@ namespace x801 {
     public:
       NPCEntity(
           std::string texname, const Location& l,
-          std::string title, std::string name) :
-        texID(tb->getTexID(texname)), l(l), title(title), name(name) {}
+          std::string title, std::string name,
+          size_t offset = 0) :
+        texID(tb->getTexID(texname)), l(l),
+        title(title), name(name), offset(offset) {}
       ~NPCEntity() override {}
       void advanceFrame() override {}
       size_t getTexture() override { return texID + offset; };

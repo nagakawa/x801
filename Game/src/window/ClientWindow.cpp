@@ -76,8 +76,8 @@ namespace x801 {
         ftimes[i] = 100.0f;
       }
       PlayerEntity::cw = this;
-      Location l = {{0, 0}, 5, 5, 0, 2};
-      em->addEntity<NPCEntity>("placeholder", l, "i like bepis", "triangle fucker");
+      c->switchAreaToCurrent();
+      loadEntities();
     }
 
     static const int keycodes[] = {
@@ -252,6 +252,20 @@ namespace x801 {
             e->setLocation(p.second.getLocation());
           }
         }
+      }
+    }
+
+    void ClientWindow::loadEntities() {
+      x801::map::POISec& ps = c->g.getCurrentArea().getArea()->getPOISec();
+      for (const auto& p : ps.entityPOIs) {
+        const x801::map::POISec::POI& poi = ps.pois[p.first];
+        const x801::map::POISec::EntityPOI& ep = p.second;
+        Location l = c->g.selfPosition;
+        l.x = poi.x;
+        l.y = poi.y;
+        l.z = poi.z;
+        l.rot = 0;
+        em->addEntity<NPCEntity>(ep.texname, l, ep.title, ep.name, ep.offset);
       }
     }
 

@@ -44,15 +44,16 @@ namespace x801 {
     class ClientWindow : public agl::GLFWApplication {
     public:
       using agl::GLFWApplication::GLFWApplication;
-      void initialise();
-      void tick();
-      void readKeys();
-      void onMouse(double xpos, double ypos);
+      void initialise() override;
+      void tick() override;
+      void readKeys() override;
+      void onMouse(double xpos, double ypos) override;
       void start() {
         GLFWApplication::start();
       }
       ChatWindow* getChatWindow() { return chat; }
       Client* getParentClient() { return c; }
+      void loadEntities();
       virtual ~ClientWindow() override;
       Client* c;
       x801::map::BlockTextureBindings* bindings[2]

@@ -123,6 +123,7 @@ namespace x801 {
         RakNet::Packet* p
       );
       void sendKeyInput(const KeyInput& input);
+      void switchAreaToCurrent();
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;
