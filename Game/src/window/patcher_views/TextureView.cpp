@@ -24,8 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    static agl::TexInitInfo opts = {GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, true, false, false};
     boost::optional<agl::Texture>
         TextureView::getTextureTransient(const std::string& name) {
+      std::cerr << "Getting texture " << name << "\n";
       underlying->fetchFile(name.c_str());
       uint32_t version, contentLength;
       uint8_t* contents = nullptr;
@@ -34,7 +36,7 @@ namespace x801 {
         version, contentLength, contents
       );
       if (status)
-        return agl::Texture(contents, (int) contentLength);
+        return agl::Texture(contents, (int) contentLength, opts);
       return boost::none;
     }
     agl::Texture* TextureView::getTexture(const std::string& name) {
