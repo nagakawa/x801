@@ -195,15 +195,15 @@ void testAreaIO() {
     "XMap" // magic number
     "\x00\x00\x00\x00\x02\x00\x00\x00" // version
     "\x03\x00\x03\x00" // World 3 Area 3
-    "\x02\x00\x00\x00" // This world has 2 data sections.
-    // Data Section 1
+    "\x03\x00\x00\x00" // This world has 2 data sections.
+    // Data Section 0
     "XDAT" // id
     "\x11\x00\x00\x00" // this is 17 bytes long
     "\x00\x00\x00\x00" // don't care
     "\x05\x00" "bepis" // World name
     "\x05\x00" "bepis" // Area name
     "\x00\x00\xff" // Sky is perfectly blue
-    // Data Section 0
+    // Data Section 1
     "TIL2" // id
     "\x12\x08\x00\x00" // this is 2066 bytes long
     "\x00\x00\x00\x00" // don't care
@@ -216,6 +216,19 @@ void testAreaIO() {
     "\x03\x00\x03\x00\xfe\xff" // Location
     "\x00\x00" // Not empty
     A_CHUNK
+    // Data Section 2
+    "pOIS" // id
+    "\x2a\x00\x00\x00" // this is 42 bytes long
+    "\x00\x00\x00\x00" // don't care
+    "\x02\x00" // 2 POIs
+    "\x05\x00\x05\x00\x00" // (5, 5, 0)
+    "\x01" // with NPC
+    "\x0b\x00" "placeholder" // texname
+    "\x00" // offset = 0
+    "\x05\x00" "bepis" // title
+    "\x05\x00" "bepis" // name
+    "\x0f\x00\x0f\x00\x00" // (15, 15, 0)
+    "\x00" // empty
   );
   std::stringstream input(s, std::ios_base::in | std::ios_base::binary);
   x801::map::Area area(input, true);
@@ -227,6 +240,11 @@ void testAreaIO() {
   x801::map::Area area2(output);
   assertEqual(area2.getError(), x801::map::MAPERR_OK, "Map should be read without error");
   assertEqual(area2.getXDatSec().worldName, "bepis", "World name is correct");
+  const x801::map::POISec& ps = area2.getPOISec();
+  assertEqual(ps.pois.size(), 2U, "2 POIs");
+  assertEqual(ps.pois.at(0).x, 5, "1st POI has x = 5");
+  assertEqual(ps.entityPOIs.at(0).name, "bepis", "1st POI has correct name");
+  assertEqual(ps.entityPOIs.count(1), 0U, "2nd POI is empty");
   std::stringstream output2(std::ios_base::out | std::ios_base::binary);
   area2.write(output2);
   assertEqual(output.str(), output2.str(), "Outputs match");

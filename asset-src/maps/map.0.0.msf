@@ -16,3 +16,6 @@ for x in range(80):
     if (x + y) % 3 == 0:
       _.put(x, y, 0, _.getid("mb_right"), METHOD_BASE)
 END
+@pOIS
+Poin: 5 5 0 "placeholder" 0 "i like bepis" "triangle fucker"
+Poi: 15 15 0

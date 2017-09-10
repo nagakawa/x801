@@ -61,6 +61,7 @@ void x801::map::Area::write(std::ostream& fh) const {
   int ds = 0;
   writeTileSection(fh, ds);
   writeXDatSection(fh, ds);
+  writePOISection(fh, ds);
   fh.seekp(pos);
   x801::base::writeInt<uint32_t>(fh, ds);
   fh.seekp(0, std::ios_base::end);
@@ -72,6 +73,7 @@ x801::map::Area::~Area() {
 
 #define SECTION_TILE 0x324c4954L // "TIL2"
 #define SECTION_XDAT 0x54414458L // "XDAT"
+#define SECTION_pOIS 0x53494F70L // "pOIS"
 
 int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   int stat = MAPERR_OK;
@@ -79,7 +81,7 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   uint32_t size = x801::base::readInt<uint32_t>(fh);
   bool isCompressed = size >> 31;
   size &= 0x7fffffffL;
-  // std::clog << "Size: " << size << "\n";
+  // std::cerr << "Size: " << size << "\n";
   uint32_t uncompressedSize =
     isCompressed ? x801::base::readInt<uint32_t>(fh) : size;
   uint32_t adler32Expected = x801::base::readInt<uint32_t>(fh);
@@ -123,6 +125,8 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   } else {
     std::string s(size, '\0');
     fh.read(&(s[0]), size);
+    // for (char c : s) std::cerr << (int) c << ' ';
+    // std::cerr << '\n';
     input = new std::stringstream(s, std::ios_base::in | std::ios_base::binary);
   }
   switch (sectionID) {
@@ -140,6 +144,14 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
         goto cleanup;
       }
       xs = XDatSec(*input);
+      break;
+    }
+    case SECTION_pOIS: {
+      if (ps.present) {
+        stat = MAPERR_REDUNDANT_SECTION;
+        goto cleanup;
+      }
+      ps = POISec(*input);
       break;
     }
     default: {
@@ -216,9 +228,19 @@ void x801::map::Area::writeTileSection(std::ostream& fh, int& ds) const {
 void x801::map::Area::writeXDatSection(std::ostream& fh, int& ds) const {
   std::stringstream data;
   if (!xs.present) {
-    throw "x801::map::Area::writeXDatSection: ds is empty?";
+    throw "x801::map::Area::writeXDatSection: xs is empty?";
   }
   xs.write(data);
   std::string s = data.str();
   writeSection(fh, SECTION_XDAT, s.c_str(), s.length(), ds);
+}
+
+void x801::map::Area::writePOISection(std::ostream& fh, int& ds) const {
+  if (!ps.present) {
+    return;
+  }
+  std::stringstream data;
+  ps.write(data);
+  std::string s = data.str();
+  writeSection(fh, SECTION_pOIS, s.c_str(), s.length(), ds);
 }
