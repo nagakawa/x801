@@ -52,7 +52,7 @@ namespace x801 {
     };
     class PlayerEntity : public Entity {
     public:
-      PlayerEntity(uint32_t id, Location l) :
+      PlayerEntity(uint32_t id, const Location& l) :
         id(id), l(l), walkFrame(0) {}
       ~PlayerEntity() override {}
       void advanceFrame() override { walkFrame += 1; }
@@ -70,6 +70,28 @@ namespace x801 {
       size_t walkFrame;
       static ClientWindow* cw;
       friend class ClientWindow;
+    };
+    class NPCEntity : public Entity {
+    public:
+      NPCEntity(
+          std::string texname, const Location& l,
+          std::string title, std::string name) :
+        texID(tb->getTexID(texname)), l(l), title(title), name(name) {}
+      ~NPCEntity() override {}
+      void advanceFrame() override {}
+      size_t getTexture() override { return texID + offset; };
+      Location getLocation() override { return l; }
+      bool setLocation(const Location& l) override {
+        this->l = l;
+        return true;
+      }
+      OverheadName overheadName() override;
+    private:
+      size_t texID;
+      Location l;
+      std::string title;
+      std::string name;
+      size_t offset = 0;
     };
   }
 }

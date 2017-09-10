@@ -76,6 +76,8 @@ namespace x801 {
         ftimes[i] = 100.0f;
       }
       PlayerEntity::cw = this;
+      Location l = {{0, 0}, 5, 5, 0, 2};
+      em->addEntity<NPCEntity>("placeholder", l, "i like bepis", "triangle fucker");
     }
 
     static const int keycodes[] = {

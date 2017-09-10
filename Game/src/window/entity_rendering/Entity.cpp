@@ -42,5 +42,12 @@ namespace x801 {
         0, EntityClassifier::PLAYER
       );
     }
+    OverheadName NPCEntity::overheadName() {
+      return OverheadName(
+        title,
+        name,
+        0, EntityClassifier::NPC
+      );
+    }
   }
 }
