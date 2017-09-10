@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <string>
 
+#include <glm/glm.hpp>
+
 namespace x801 {
   namespace game {
     enum class EntityClassifier : uint16_t {
@@ -57,6 +59,8 @@ namespace x801 {
       std::string name;
       uint16_t rank;
       EntityClassifier classifier;
+      std::string format() const;
+      glm::vec4 colour() const;
     };
   }
 }

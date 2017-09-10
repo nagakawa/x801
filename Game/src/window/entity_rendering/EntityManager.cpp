@@ -34,9 +34,18 @@ namespace x801 {
       }
       entityMutex.unlock_shared();
     }
+    void EntityManager::forEachOver(
+        std::function<void(Entity&, OverheadName&)> cb) {
+      entityMutex.lock_shared();
+      for (auto& p : entities) {
+        cb(*(p.second), names[p.first]);
+      }
+      entityMutex.unlock_shared();
+    }
     void EntityManager::deleteEntity(size_t id) {
       entityMutex.lock();
       entities.erase(id);
+      names.erase(id);
       entityMutex.unlock();
     }
     Entity* EntityManager::getEntity(size_t id) {
@@ -56,6 +65,14 @@ namespace x801 {
         p.second->advanceFrame();
       }
       entityMutex.unlock_shared();
+    }
+    void EntityManager::updateUsernames() {
+      entityMutex.lock();
+      for (auto& p : entities) {
+        if (!p.second->isPlayer()) continue;
+        names[p.first] = p.second->overheadName();
+      }
+      entityMutex.unlock();
     }
   }
 }

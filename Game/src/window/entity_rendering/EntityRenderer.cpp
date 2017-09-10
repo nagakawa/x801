@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/optional.hpp>
 
+#include <imgui.h>
+
 #include <utils.h>
 
 #include "x801_rect.h"
@@ -42,18 +44,64 @@ namespace x801 {
         2, GL_FLOAT, false,
         sizeof(MeshEntry), (void*) offsetof(MeshEntry, x));
     }
+    void EntityBuffer::switchToFull() {
+      ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+      ImGui::SetNextWindowSize(
+        ImVec2((float) er->cw->getWidth(), (float) er->cw->getHeight()));
+      ImGui::Begin(
+        "##fullscn", nullptr,
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+          ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs
+      );
+    }
+    void EntityBuffer::returnFromFull() {
+      ImGui::End();
+      ImGui::PopStyleColor();
+    }
+    void drawTextCentreBottom(
+        ImDrawList* drawList,
+        const char* s,
+        const ImVec2& pos,
+        const glm::vec4& colour) {
+      ImVec2 size = ImGui::CalcTextSize(s);
+      const ImVec2& tlpos = ImVec2(pos.x - size.x / 2, pos.y - size.y);
+      uint32_t col32 = ImGui::GetColorU32(
+        ImVec4(colour.r, colour.g, colour.b, colour.a)
+      );
+      drawList->AddText(tlpos, col32, s);
+    }
+    glm::vec2 EntityBuffer::getBottom(float x, float y) {
+      float width = (float) er->cw->getWidth();
+      float height = (float) er->cw->getHeight();
+      glm::vec4 bottom = er->cw->mvp * glm::vec4(x, y, 0, 1);
+      return glm::vec2(
+        width * (0.5 * bottom.x + 0.5),
+        height * (0.5 * bottom.y + 0.5)
+      );
+    }
     void EntityBuffer::feed() {
       EntityManager* em = er->em;
       mesh.clear();
+      switchToFull();
+      ImDrawList* drawList = ImGui::GetWindowDrawList();
       // XXX this iterates over every entity.
       // This could be problematic for large numbers of entities.
-      em->forEach([this](Entity& e) {
+      em->forEachOver([this, drawList](Entity& e, OverheadName& name) {
         Location l = e.getLocation();
         size_t tid = e.getTexture();
         if (l.z != er->gs->selfPosition.z) return;
         MeshEntry entry = { l.x, l.y, (uint16_t) tid };
         mesh.push_back(entry);
+        if (name.classifier == EntityClassifier::NONE) return;
+        glm::vec2 bottom = getBottom(l.x, l.y - 0.5);
+        drawTextCentreBottom(
+          drawList,
+          name.format().c_str(),
+          ImVec2(bottom.x, bottom.y),
+          name.colour());
       });
+      returnFromFull();
       push();
     }
     static const char* VERTEX_SOURCE =

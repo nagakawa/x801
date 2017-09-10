@@ -100,9 +100,13 @@ namespace x801 {
       void feed();
       void setUpRender();
       void render();
+      void renderOverheads();
       EntityRenderer* er;
     private:
       void push();
+      void switchToFull();
+      void returnFromFull();
+      glm::vec2 getBottom(float x, float y);
       std::vector<MeshEntry> mesh;
       agl::VAO vao;
       agl::VBO vbo;
@@ -135,13 +139,6 @@ namespace x801 {
     private:
       EntityBuffer* buffer = nullptr;
       x801::map::EntityTextureBindings* tb;
-      /*
-      std::unordered_map<
-          x801::map::ChunkXYZ,
-          ChunkBuffer,
-          x801::map::ChunkHasher> cmbs;
-      x801::map::Chunk* getChunk(const x801::map::ChunkXYZ& pos);
-      */
     };
   }
 }

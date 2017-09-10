@@ -33,5 +33,31 @@ namespace x801 {
       classifier = other.classifier;
       return *this;
     }
+    std::string OverheadName::format() const {
+      std::string s = title;
+      s += '\n';
+      s += name;
+      if (classifier >= EntityClassifier::MOB_REGULAR1) {
+        s += "\nRank ";
+        s += std::to_string(rank);
+        if (classifier == EntityClassifier::MOB_ELITE)
+          s += " Elite";
+        else if (classifier == EntityClassifier::MOB_BOSS)
+          s += " Boss";
+      }
+      return s;
+    }
+    glm::vec4 OVERHEAD_COLOURS[] = {
+      glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+      glm::vec4(0.0f, 0.3f, 1.0f, 1.0f),
+      glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+      glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
+      glm::vec4(1.0f, 0.5f, 0.0f, 1.0f),
+      glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+      glm::vec4(0.5f, 0.0f, 0.5f, 1.0f),
+    };
+    glm::vec4 OverheadName::colour() const {
+      return OVERHEAD_COLOURS[(uint16_t) classifier];
+    }
   }
 }

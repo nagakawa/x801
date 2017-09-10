@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/thread/shared_mutex.hpp>
 
 #include "window/entity_rendering/Entity.h"
+#include "window/entity_rendering/OverheadName.h"
 
 namespace x801 {
   namespace game {
@@ -46,6 +47,7 @@ namespace x801 {
         std::unique_ptr<Entity> e =
           std::make_unique<E>(std::forward<Args>(args)...);
         entityMutex.lock();
+        names[id] = e->overheadName();
         entities[id] = std::move(e);
         entityMutex.unlock();
         return id;
@@ -53,10 +55,13 @@ namespace x801 {
       Entity* getEntity(size_t id);
       void deleteEntity(size_t id);
       void forEach(std::function<void(Entity&)> cb);
+      void forEachOver(std::function<void(Entity&, OverheadName&)> cb);
       void advanceFrame();
+      void updateUsernames();
     private:
       mutable boost::shared_mutex entityMutex;
       std::unordered_map<size_t, std::unique_ptr<Entity>> entities;
+      std::unordered_map<size_t, OverheadName> names;
       std::atomic<size_t> firstVacant;
     };
   }

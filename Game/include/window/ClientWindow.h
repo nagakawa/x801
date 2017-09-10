@@ -77,6 +77,7 @@ namespace x801 {
       // remove players that no longer exist and
       // update the positions of players.
       void readPlayersFromGS();
+      friend class Client;
     };
   }
 }

@@ -45,6 +45,7 @@ namespace x801 {
       virtual OverheadName overheadName() {
         return OverheadName();
       }
+      virtual bool isPlayer() { return false; }
     protected:
       static x801::map::EntityTextureBindings* tb;
       friend class EntityRenderer;
@@ -62,6 +63,7 @@ namespace x801 {
         return true;
       }
       OverheadName overheadName() override;
+      bool isPlayer() override { return true; }
     private:
       uint32_t id;
       Location l;

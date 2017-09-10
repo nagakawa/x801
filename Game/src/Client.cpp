@@ -342,6 +342,7 @@ void x801::game::Client::processUsernameResponse(
     g.addUserUnsynchronised(userID, username);
   }
   g.lookupMutex.unlock();
+  cw->em->updateUsernames();
 }
 
 std::string x801::game::Client::getUsername(uint32_t id) {
