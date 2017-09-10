@@ -69,6 +69,11 @@ namespace x801 {
       uint32_t col32 = ImGui::GetColorU32(
         ImVec4(colour.r, colour.g, colour.b, colour.a)
       );
+      drawList->AddRectFilled(
+        ImVec2(tlpos.x - 3, tlpos.y - 3),
+        ImVec2(tlpos.x + size.x + 3, tlpos.y + size.y + 3),
+        0x80000000, 1
+      );
       drawList->AddText(tlpos, col32, s);
     }
     glm::vec2 EntityBuffer::getBottom(float x, float y) {

@@ -34,8 +34,11 @@ namespace x801 {
       return *this;
     }
     std::string OverheadName::format() const {
-      std::string s = title;
-      s += '\n';
+      std::string s = "";
+      if (title.length() != 0) {
+        s += title;
+        s += '\n';
+      }
       s += name;
       if (classifier >= EntityClassifier::MOB_REGULAR1) {
         s += "\nRank ";
@@ -49,12 +52,12 @@ namespace x801 {
     }
     glm::vec4 OVERHEAD_COLOURS[] = {
       glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
-      glm::vec4(0.0f, 0.3f, 1.0f, 1.0f),
-      glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+      glm::vec4(0.2f, 0.8f, 1.0f, 1.0f),
+      glm::vec4(0.2f, 1.0f, 0.2f, 1.0f),
       glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
-      glm::vec4(1.0f, 0.5f, 0.0f, 1.0f),
-      glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
-      glm::vec4(0.5f, 0.0f, 0.5f, 1.0f),
+      glm::vec4(1.0f, 0.8f, 0.2f, 1.0f),
+      glm::vec4(1.0f, 0.2f, 0.2f, 1.0f),
+      glm::vec4(0.8f, 0.4f, 0.8f, 1.0f),
     };
     glm::vec4 OverheadName::colour() const {
       return OVERHEAD_COLOURS[(uint16_t) classifier];

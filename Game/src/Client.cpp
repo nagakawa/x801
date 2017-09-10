@@ -366,9 +366,6 @@ void x801::game::Client::sendChatMessage(const char* message) {
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
-  textureView->getTexture("textures/terrain/blocks.png");
-  modelView->getMAI();
-  modelView->getMFI();
 }
 
 void x801::game::Client::processFilehostURIResponse(
