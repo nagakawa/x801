@@ -67,8 +67,11 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
 
 void x801::game::GameState::logout(uint32_t id) {
   playerMutex.lock();
-  Location& location = allPlayers[id].getLocation();
+  const auto& player = allPlayers[id];
+  const Location& location = player.getLocation();
+  const StatsUser& su = player.getStatsU();
   db.savePlayerLocation(id, location);
+  db.savePlayerStats(id, su);
   x801::map::QualifiedAreaID aid = location.areaID;
   areas[aid]->players.erase(id);
   allPlayers.erase(id);

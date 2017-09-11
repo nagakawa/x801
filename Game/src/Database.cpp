@@ -40,7 +40,6 @@ int x801::game::stepBlock(sqlite3_stmt* statement, sqlite3* conn) {
 
 const char* x801::game::DB_DIR = "saves/";
 const char* x801::game::DB_MAIN_PATH = "saves/me.x8d";
-const char* x801::game::DB_AUTH_PATH = "saves/auth.x8d";
 
 #pragma GCC diagnostic push                // we DO want an explicit ctor
 #pragma GCC diagnostic ignored "-Weffc++"  // since it has complex behaviour
@@ -53,14 +52,13 @@ x801::game::Database::Database() {
     boost::filesystem::create_directories(DB_DIR);
   }
   open(me, DB_MAIN_PATH);
-  open(auth, DB_AUTH_PATH);
   createAuthTable();
   createPlayerLocationTable();
+  createPlayerStatsTable();
 }
 
 x801::game::Database::~Database() {
   sqlite3_close(me);
-  sqlite3_close(auth);
 }
 #pragma GCC diagnostic pop
 
@@ -85,7 +83,7 @@ static const char* CREATE_AUTH_TABLE_QUERY =
 void x801::game::Database::createAuthTable() {
   char* errMessage;
   int stat = sqlite3_exec(
-    auth,
+    me,
     CREATE_AUTH_TABLE_QUERY,
     nullptr, nullptr, // don't callback
     &errMessage
@@ -105,21 +103,21 @@ void x801::game::Database::createUser(
       "username and hash must not be null";
   sqlite3_stmt* statement;
   int stat = sqlite3_prepare_v2(
-    auth,
+    me,
     CREATE_USER_QUERY, -1,
     &statement,
     nullptr
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   uint8_t salt[SALT_LENGTH];
   x801::base::writeRandomBytes(salt, SALT_LENGTH);
   stat = sqlite3_bind_blob(
     statement, 3, static_cast<const void*>(salt), SALT_LENGTH,
     SQLITE_STATIC
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   // Generate SHA-256 hash
   SHA256_CTX sha2;
   SHA256_Init(&sha2);
@@ -131,9 +129,9 @@ void x801::game::Database::createUser(
     statement, 2, static_cast<const void*>(cooked), COOKED_HASH_LENGTH,
     SQLITE_STATIC
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   // All parameters bound.
-  stepBlock(statement, auth);
+  stepBlock(statement, me);
   sqlite3_finalize(statement);
 }
 
@@ -168,15 +166,15 @@ static const char* GET_USER_BY_ID_QUERY =
 bool x801::game::Database::getUserByID(uint32_t id, StoredCredentials& sc) {
   sqlite3_stmt* statement;
   int stat = sqlite3_prepare_v2(
-    auth,
+    me,
     GET_USER_BY_ID_QUERY, -1,
     &statement,
     nullptr
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 1, id);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = stepBlock(statement, me);
   if (stat != SQLITE_ROW) {
     sqlite3_finalize(statement);
     return false;
@@ -195,15 +193,15 @@ static const char* GET_USER_BY_NAME_QUERY =
 bool x801::game::Database::getUserByName(const char* username, StoredCredentials& sc) {
   sqlite3_stmt* statement;
   int stat = sqlite3_prepare_v2(
-    auth,
+    me,
     GET_USER_BY_NAME_QUERY, -1,
     &statement,
     nullptr
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = stepBlock(statement, me);
   if (stat != SQLITE_ROW) {
     sqlite3_finalize(statement);
     return false;
@@ -222,15 +220,15 @@ static const char* GET_USER_ID_BY_NAME_QUERY =
 uint32_t x801::game::Database::getUserIDByName(const char* username) {
   sqlite3_stmt* statement;
   int stat = sqlite3_prepare_v2(
-    auth,
+    me,
     GET_USER_ID_BY_NAME_QUERY, -1,
     &statement,
     nullptr
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = stepBlock(statement, me);
   if (stat != SQLITE_ROW) {
     sqlite3_finalize(statement);
     return 0;
@@ -249,7 +247,9 @@ static const char* CREATE_PLAYER_LOCATION_TABLE_QUERY =
   "  x DOUBLE NOT NULL,"
   "  y DOUBLE NOT NULL,"
   "  z INTEGER NOT NULL,"
-  "  rot INTEGER NOT NULL"
+  "  rot INTEGER NOT NULL,"
+  "  FOREIGN KEY(userID) REFERENCES Logins(userID)"
+  "    ON DELETE CASCADE ON UPDATE CASCADE"
   ");"
   ;
 
@@ -272,7 +272,7 @@ static const char* SAVE_PLAYER_LOCATION_QUERY =
 
 void x801::game::Database::savePlayerLocation(
     uint32_t userID,
-    Location& location) {
+    const Location& location) {
   if (userID == 0) throw "userID must not be 0";
   sqlite3_stmt* statement;
   int stat = sqlite3_prepare_v2(
@@ -281,23 +281,23 @@ void x801::game::Database::savePlayerLocation(
     &statement,
     nullptr
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 1, userID);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 2, location.areaID.worldID);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 3, location.areaID.areaID);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_double(statement, 4, location.x);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_double(statement, 5, location.y);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 6, location.z);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 7, location.rot);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   // All parameters bound.
-  stepBlock(statement, auth);
+  stepBlock(statement, me);
   sqlite3_finalize(statement);
 }
 
@@ -326,15 +326,101 @@ bool x801::game::Database::loadPlayerLocation(uint32_t userID, Location& locatio
     &statement,
     nullptr
   );
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 1, userID);
-  if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = stepBlock(statement, auth);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = stepBlock(statement, me);
   if (stat != SQLITE_ROW) {
     sqlite3_finalize(statement);
     return false;
   }
   uint32_t actualID = locationRowToStruct(statement, location);
+  assert(actualID == userID);
+  (void) actualID; // assert not used in release mode
+  sqlite3_finalize(statement);
+  return true;
+}
+
+static const char* CREATE_PLAYER_STATS_TABLE_QUERY =
+  "CREATE TABLE IF NOT EXISTS "
+  "PlayerStats("
+  "  userID INTEGER UNIQUE NOT NULL,"
+  "  level INTEGER DEFAULT 0,"
+  "  school INTEGER DEFAULT 0,"
+  "  FOREIGN KEY(userID) REFERENCES Logins(userID)"
+  "    ON DELETE CASCADE ON UPDATE CASCADE"
+  ");"
+  ;
+  
+void x801::game::Database::createPlayerStatsTable() {
+  char* errMessage;
+  int stat = sqlite3_exec(
+    me,
+    CREATE_PLAYER_STATS_TABLE_QUERY,
+    nullptr, nullptr, // don't callback
+    &errMessage
+  );
+  if (stat != SQLITE_OK) throw errMessage;
+}
+
+static const char* SAVE_PLAYER_STATS_QUERY =
+"INSERT OR REPLACE INTO PlayerStats"
+"  (userID, level, school)"
+"  VALUES (?, ?, ?);"
+;
+
+void x801::game::Database::savePlayerStats(
+    uint32_t userID,
+    const StatsUser& su) {
+  if (userID == 0) throw "userID must not be 0";
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    me,
+    SAVE_PLAYER_STATS_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = sqlite3_bind_int(statement, 1, userID);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = sqlite3_bind_int(statement, 2, su.level);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = sqlite3_bind_int(statement, 3, su.school);
+  // All parameters bound.
+  stepBlock(statement, me);
+  sqlite3_finalize(statement);
+}
+
+uint32_t x801::game::Database::statsRowToStruct(
+    sqlite3_stmt* statement,
+    StatsUser& su) {
+  su.level = sqlite3_column_int(statement, 1);
+  su.school = sqlite3_column_int(statement, 2);
+  return sqlite3_column_int(statement, 0);
+}
+
+static const char* LOAD_PLAYER_STATS_QUERY =
+"SELECT * FROM PlayerStats"
+"  WHERE userID = ?;"
+;
+
+bool x801::game::Database::loadPlayerStats(uint32_t userID, StatsUser& su) {
+  sqlite3_stmt* statement;
+  int stat = sqlite3_prepare_v2(
+    me,
+    LOAD_PLAYER_STATS_QUERY, -1,
+    &statement,
+    nullptr
+  );
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = sqlite3_bind_int(statement, 1, userID);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = stepBlock(statement, me);
+  if (stat != SQLITE_ROW) {
+    sqlite3_finalize(statement);
+    return false;
+  }
+  uint32_t actualID = statsRowToStruct(statement, su);
   assert(actualID == userID);
   (void) actualID; // assert not used in release mode
   sqlite3_finalize(statement);

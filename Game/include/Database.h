@@ -24,14 +24,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdint.h>
 #include <string>
 #include <sqlite3.h>
+
 #include "Credentials.h"
 #include "Location.h"
+#include "combat/Stats.h"
 
 namespace x801 {
   namespace game {
     extern const char* DB_DIR;
     extern const char* DB_MAIN_PATH;
-    extern const char* DB_AUTH_PATH;
     int stepBlock(sqlite3_stmt* statement, sqlite3* conn);
     // Note: this is not the database used for the autopatcher.
     class Database {
@@ -52,18 +53,22 @@ namespace x801 {
       uint32_t getUserIDByName(const char* username);
       // --- PLAYER LOCATION-RELATED METHODS
       void createPlayerLocationTable();
-      void savePlayerLocation(uint32_t userID, Location& location);
+      void savePlayerLocation(uint32_t userID, const Location& location);
       // If none is found, the method returns false and the
       // Location struct is unmodified.
       // Recommended practice: Initialise location to a default value
       // before calling this method.
       bool loadPlayerLocation(uint32_t userID, Location& location);
+      void createPlayerStatsTable();
+      void savePlayerStats(uint32_t userID, const StatsUser& su);
+      bool loadPlayerStats(uint32_t userID, StatsUser& su);
     private:
       sqlite3* me;
       sqlite3* auth;
       void open(sqlite3*& handle, const char* path);
       void userRowToSC(sqlite3_stmt* statement, StoredCredentials& sc);
       uint32_t locationRowToStruct(sqlite3_stmt* statement, Location& location);
+      uint32_t statsRowToStruct(sqlite3_stmt* statement, StatsUser& su);
     };
   }
 }

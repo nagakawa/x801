@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Database.h"
 #include "Location.h"
 
+#include "combat/Stats.h"
+
 namespace x801 {
   namespace game {
     const Location defaultLocation = {
@@ -40,6 +42,7 @@ namespace x801 {
           playerID(id), lastMoved(RakNet::GetTime()) {
         if (!db.loadPlayerLocation(id, location))
           location = defaultLocation;
+        db.loadPlayerStats(id, su);
       }
       Player(const Player& other) :
         playerID(other.playerID), location(other.location),
@@ -52,12 +55,15 @@ namespace x801 {
       }
       Location& getLocation() { return location; }
       const Location& getLocation() const { return location; }
+      StatsUser& getStatsU() { return su; }
+      const StatsUser& getStatsU() const { return su; }
       void applyKeyInput(KeyInput input, RakNet::Time last);
       void applyKeyInput(KeyInput input);
       ~Player();
     private:
       uint32_t playerID;
       Location location;
+      StatsUser su;
       RakNet::Time lastMoved;
     };
   }

@@ -28,6 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    class StatsUser {
+    public:
+      size_t level;
+      size_t school;
+    };
     class Stats {
       class SchoolSpecific {
         mpz_class damage;
