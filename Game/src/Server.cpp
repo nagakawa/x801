@@ -45,7 +45,7 @@ static const char* FILEHOST_URI = "http://localhost:3000";
 static const char* CONFIG_PATH = "intrinsic-assets/settings.json";
 static const char* MOTD_PATH = "intrinsic-assets/motd.txt";
 
-void x801::game::Server::initialise() {
+void x801::game::Server::start() {
   readConfig();
   readMOTD();
   peer = RakNet::RakPeerInterface::GetInstance();
@@ -232,9 +232,11 @@ void x801::game::Server::listen() {
 }
 
 x801::game::Server::~Server() {
+  done = true;
   delete[] publicKey;
   delete[] privateKey;
   RakNet::RakPeerInterface::DestroyInstance(peer);
+  while (done) {}
 }
 
 const char* x801::game::KEY_DIR = "keys/";
@@ -513,7 +515,7 @@ void x801::game::Server::broadcastLocationsTo(
 
 void x801::game::Server::broadcastLocations() {
   using namespace std::chrono_literals;
-  while (true) {
+  while (!done) {
     g.playerMutex.lock_shared();
     // Location packets should be sent only to those in the same area
     for (const auto& pair : g.areas) {
@@ -523,6 +525,8 @@ void x801::game::Server::broadcastLocations() {
     g.playerMutex.unlock_shared();
     std::this_thread::sleep_for(50ms);
   }
+  std::cerr << "Exiting broadcast thread\n";
+  done = false;
 }
 
 void x801::game::Server::broadcastLocationsConcurrent() {

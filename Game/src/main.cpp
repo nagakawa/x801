@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using namespace x801::game;
 
 #include <locale.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,11 +59,35 @@ static void handleTerminate() {
 
 static boost::filesystem::path oldPath;
 
-void handleExit() {
+Server* server = nullptr;
+
+static void handleExit() {
+  std::cerr << "Exit handler was called.\n";
   boost::filesystem::current_path(oldPath);
+  delete server;
+  server = nullptr;
+}
+
+static void handleSignal(int signo) {
+  std::cerr << "Signal #" << signo << " caught.\n";
+  exit(-1);
+}
+
+static void createSignalHandler(int signo) {
+  auto stat = signal(signo, handleSignal);
+  if (stat == SIG_ERR) {
+    std::cerr << "Couldn't set handler for signal #" << signo << ".\n";
+    exit(-1);
+  }
 }
 
 int lmain(int argc, char** argv) {
+  createSignalHandler(SIGINT);
+  createSignalHandler(SIGSEGV);
+  createSignalHandler(SIGTERM);
+  createSignalHandler(SIGABRT);
+  createSignalHandler(SIGFPE);
+  createSignalHandler(SIGILL);
   oldPath = boost::filesystem::current_path();
   boost::filesystem::path ofEXE = x801::base::getPathOfCurrentExecutable();
   boost::filesystem::current_path(ofEXE.parent_path());
@@ -102,7 +127,10 @@ int lmain(int argc, char** argv) {
     curl_global_cleanup();
   } else if (c.mode == SERVER) {
     std::cout << "You intend to start a server.\n";
-    Server server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);
+    server = new Server(c.port, DEFAULT_MAX_CONNECTIONS, c.useIPV6);
+    server->start();
+    delete server;
+    server = nullptr;
   } else {
     std::cout << "You intend to add a user.\n";
     Database db;

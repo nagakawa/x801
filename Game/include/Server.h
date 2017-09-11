@@ -53,16 +53,14 @@ namespace x801 {
           unsigned short maxConnections = DEFAULT_MAX_CONNECTIONS,
           bool useIPV6 = false
       ) : maxConnections(maxConnections), port(port),
-          useIPV6(useIPV6), playersByCookie() {
-        initialise();
-      }
+          useIPV6(useIPV6), playersByCookie() {}
       ~Server();
       Server(const Server& s) = delete;
       void operator=(const Server& s) = delete;
+      void start();
       const unsigned short maxConnections;
       const uint16_t port;
     private:
-      void initialise();
       bool readConfig();
       bool readMOTD();
       void updateKeyFiles();
@@ -143,6 +141,7 @@ namespace x801 {
       std::string filehost;
       std::string motd;
       RakNet::Time drift = 0;
+      volatile bool done = false;
       GameState g;
     };
   }

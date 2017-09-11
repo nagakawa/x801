@@ -41,6 +41,19 @@ void x801::game::AreaWithPlayers::removePlayer(uint32_t id) {
 x801::game::AreaWithPlayers::~AreaWithPlayers() {
 }
 
+x801::game::GameState::~GameState() {
+  std::cerr << "Destroying GameState; saving player data\n";
+  for (const auto& p : allPlayers) {
+    uint32_t id = p.first;
+    std::cerr << "  for player #" << id << '\n';
+    const Player& player = p.second;
+    const Location& location = player.getLocation();
+    const StatsUser& su = player.getStatsU();
+    db.savePlayerLocation(id, location);
+    db.savePlayerStats(id, su);
+  }
+}
+
 LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
   StoredCredentials sc;
   bool succeeded = db.getUserByName(c.getUsername(), sc);
@@ -67,7 +80,7 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
 
 void x801::game::GameState::logout(uint32_t id) {
   playerMutex.lock();
-  const auto& player = allPlayers[id];
+  const Player& player = allPlayers[id];
   const Location& location = player.getLocation();
   const StatsUser& su = player.getStatsU();
   db.savePlayerLocation(id, location);

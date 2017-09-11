@@ -101,6 +101,7 @@ namespace x801 {
     
     class GameState {
     public:
+      ~GameState();
       LoginStatus login(Credentials& c, uint32_t& id);
       void logout(uint32_t id);
       auto findPlayer(uint32_t id) const {
