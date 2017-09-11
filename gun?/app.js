@@ -24,6 +24,12 @@ function getContent(name, callback) {
 const server = http.createServer((req, res) => {
   var parsedURL = url.parse(req.url, true);
   if (parsedURL.pathname == "/content") {
+    if (parsedURL.query.fname.indexOf("..") != -1) {
+      res.setHeader('Content-Type', 'text/plain');
+      res.statusCode = 403;
+      res.end("What the fuck, man.\n");
+      return;
+    }
     getContent("assets/" + parsedURL.query.fname, (err, data) => {
       if (err) {
         res.setHeader('Content-Type', 'text/plain');
