@@ -36,7 +36,7 @@ namespace x801 {
       // at the cost of low health and attack.
       School("Wind", "Windsomething?", 395, 19),
       // The base health is based on Wizard101's Life.
-      School("Light", "Luminary", 443, 17),
+      School("Light", "Luminary", 443, 27),
       // The base health is based on Wizard101's Death.
       School("Darkness", "Tenebromancer", 426, 24),
       // The following schools are used only for spells.
