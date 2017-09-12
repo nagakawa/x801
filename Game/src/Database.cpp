@@ -347,6 +347,7 @@ static const char* CREATE_PLAYER_STATS_TABLE_QUERY =
   "  userID INTEGER UNIQUE NOT NULL,"
   "  level INTEGER DEFAULT 0,"
   "  school INTEGER DEFAULT 0,"
+  "  xp INTEGER DEFAULT 0,"
   "  FOREIGN KEY(userID) REFERENCES Logins(userID)"
   "    ON DELETE CASCADE ON UPDATE CASCADE"
   ");"
@@ -365,8 +366,8 @@ void x801::game::Database::createPlayerStatsTable() {
 
 static const char* SAVE_PLAYER_STATS_QUERY =
 "INSERT OR REPLACE INTO PlayerStats"
-"  (userID, level, school)"
-"  VALUES (?, ?, ?);"
+"  (userID, level, school, xp)"
+"  VALUES (?, ?, ?, ?);"
 ;
 
 void x801::game::Database::savePlayerStats(
@@ -386,6 +387,9 @@ void x801::game::Database::savePlayerStats(
   stat = sqlite3_bind_int(statement, 2, su.level);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   stat = sqlite3_bind_int(statement, 3, su.school);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
+  stat = sqlite3_bind_int(statement, 4, su.xp);
+  if (stat != SQLITE_OK) throw sqlite3_errmsg(me);
   // All parameters bound.
   stepBlock(statement, me);
   sqlite3_finalize(statement);
@@ -396,6 +400,7 @@ uint32_t x801::game::Database::statsRowToStruct(
     StatsUser& su) {
   su.level = sqlite3_column_int(statement, 1);
   su.school = sqlite3_column_int(statement, 2);
+  su.xp = sqlite3_column_int(statement, 3);
   return sqlite3_column_int(statement, 0);
 }
 

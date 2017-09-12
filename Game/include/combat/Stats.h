@@ -32,6 +32,7 @@ namespace x801 {
     public:
       size_t level;
       size_t school;
+      size_t xp;
     };
     class Stats {
       class SchoolSpecific {
