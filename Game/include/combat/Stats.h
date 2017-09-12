@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gmpxx.h>
 
+#include "combat/School.h"
+
 namespace x801 {
   namespace game {
     class StatsUser {
@@ -35,7 +37,10 @@ namespace x801 {
       size_t xp;
     };
     class Stats {
+    public:
+      Stats(const StatsUser& su, const std::vector<School>& schools);
       class SchoolSpecific {
+      public:
         mpz_class damage;
         mpz_class resist;
         int accuracy; // 0.1%s

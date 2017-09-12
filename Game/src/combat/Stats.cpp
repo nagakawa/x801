@@ -20,8 +20,24 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <algorithm>
+
 namespace x801 {
   namespace game {
-    //
+    size_t baseMana(size_t level) {
+      return 15 + 2 * level;
+    }
+    size_t basePowerChance(size_t level) {
+      if (level < 10) return 0;
+      if (level >= 40) return 40;
+      return level;
+    }
+    Stats::Stats(const StatsUser& su, const std::vector<School>& schools) {
+      level = su.level;
+      school = su.school;
+      maxHealth = schools[school].getBaseHealth(level);
+      maxMana = baseMana(level);
+      powerPipChance = basePowerChance(level);
+    }
   }
 }
