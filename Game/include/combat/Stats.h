@@ -41,6 +41,7 @@ namespace x801 {
       Stats(const StatsUser& su, const std::vector<School>& schools);
       class SchoolSpecific {
       public:
+        SchoolSpecific() : damage(0), resist(0), accuracy(0), pierce(0) {}
         mpz_class damage;
         mpz_class resist;
         int accuracy; // 0.1%s
