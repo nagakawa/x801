@@ -215,32 +215,22 @@ void x801::map::Area::writeSection(std::ostream& fh, uint32_t sectionID, const c
   ++ds;
 }
 
-void x801::map::Area::writeTileSection(std::ostream& fh, int& ds) const {
-  std::stringstream data;
-  if (ts == nullptr) {
-    throw "x801::map::Area::writeTileSection: ts is nullptr?";
+#define CREATE_WRITE_METHOD(Class, field, check, fatal, d, secid) \
+  void x801::map::Area::write##Class(std::ostream& fh, int& ds) const { \
+    std::stringstream data; \
+    if (check) { \
+      CHECK_FAILED(Class, check, fatal); \
+    } \
+    field d write(data); \
+    std::string s = data.str(); \
+    writeSection(fh, secid, s.c_str(), s.length(), ds); \
   }
-  ts->write(data);
-  std::string s = data.str();
-  writeSection(fh, SECTION_TILE, s.c_str(), s.length(), ds);
-}
+#define CHECK_FAILED(Class, check, fatal) \
+  CHECK_FAILED_##fatal(Class, check)
+#define CHECK_FAILED_true(Class, check) \
+  throw "x801::map::Area::write" #Class ": " #check "?"
+#define CHECK_FAILED_false(Class, check) return
 
-void x801::map::Area::writeXDatSection(std::ostream& fh, int& ds) const {
-  std::stringstream data;
-  if (!xs.present) {
-    throw "x801::map::Area::writeXDatSection: xs is empty?";
-  }
-  xs.write(data);
-  std::string s = data.str();
-  writeSection(fh, SECTION_XDAT, s.c_str(), s.length(), ds);
-}
-
-void x801::map::Area::writePOISection(std::ostream& fh, int& ds) const {
-  if (!ps.present) {
-    return;
-  }
-  std::stringstream data;
-  ps.write(data);
-  std::string s = data.str();
-  writeSection(fh, SECTION_pOIS, s.c_str(), s.length(), ds);
-}
+CREATE_WRITE_METHOD(TileSection, ts, ts == nullptr, true, ->, SECTION_TILE)
+CREATE_WRITE_METHOD(XDatSection, xs, !xs.present, true, ., SECTION_XDAT)
+CREATE_WRITE_METHOD(POISection, ps, !ps.present, false, ., SECTION_pOIS)
