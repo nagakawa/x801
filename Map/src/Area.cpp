@@ -62,6 +62,7 @@ void x801::map::Area::write(std::ostream& fh) const {
   writeTileSection(fh, ds);
   writeXDatSection(fh, ds);
   writePOISection(fh, ds);
+  writePathSection(fh, ds);
   fh.seekp(pos);
   x801::base::writeInt<uint32_t>(fh, ds);
   fh.seekp(0, std::ios_base::end);
@@ -74,6 +75,7 @@ x801::map::Area::~Area() {
 #define SECTION_TILE 0x324c4954L // "TIL2"
 #define SECTION_XDAT 0x54414458L // "XDAT"
 #define SECTION_pOIS 0x53494F70L // "pOIS"
+#define SECTION_pATH 0x48544170L // "pATH"
 
 int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   int stat = MAPERR_OK;
@@ -142,6 +144,7 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
     CREATE_READ_HANDLER(SECTION_TILE, ts != nullptr, ts, TileSec, new)
     CREATE_READ_HANDLER(SECTION_XDAT, xs.present, xs, XDatSec, )
     CREATE_READ_HANDLER(SECTION_pOIS, ps.present, ps, POISec, )
+    CREATE_READ_HANDLER(SECTION_pATH, pas.present, pas, PathSec, )
     default: {
       // 0b11100000 | 0b01000000
       // i. e. check for capital first letter
@@ -222,3 +225,4 @@ void x801::map::Area::writeSection(std::ostream& fh, uint32_t sectionID, const c
 CREATE_WRITE_METHOD(TileSection, ts, ts == nullptr, true, ->, SECTION_TILE)
 CREATE_WRITE_METHOD(XDatSection, xs, !xs.present, true, ., SECTION_XDAT)
 CREATE_WRITE_METHOD(POISection, ps, !ps.present, false, ., SECTION_pOIS)
+CREATE_WRITE_METHOD(PathSection, pas, !pas.present, false, ., SECTION_pATH)
