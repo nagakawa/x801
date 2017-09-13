@@ -69,11 +69,24 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
   usernamesByID[id] = sc.getUsernameS();
   idsByUsername[sc.getUsernameS()] = id;
   // allPlayers[id] = Player(id, db);
-  allPlayers.emplace(
+  auto p = allPlayers.emplace(
     std::piecewise_construct,
     std::forward_as_tuple(id),
     std::forward_as_tuple(id, db)
   );
+  x801::map::QualifiedAreaID aid = p.first->second.getLocation().areaID;
+  if (areas.count(aid) == 0) {
+    std::string fname = "assets/maps/map.";
+    fname += aid.worldID;
+    fname += ".";
+    fname += aid.areaID;
+    fname += ".map";
+    std::ifstream fh(fname, std::ios::binary);
+    std::unique_ptr<AreaWithPlayers> a =
+      std::make_unique<AreaWithPlayers>(this, fh);
+    areas[aid] = std::move(a);
+  }
+  areas[aid]->players.insert(id);
   playerMutex.unlock();
   return LOGIN_OK;
 }
