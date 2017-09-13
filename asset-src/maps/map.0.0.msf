@@ -19,3 +19,19 @@ END
 @pOIS
 Poin: 5 5 0 "placeholder" 0 "i like bepis" "triangle fucker"
 Poi: 15 15 0
+@pATH
+=Path
+Z: 0
+Node: 25 25
+Node: 35 25
+Node: 35 35
+Node: 25 35
+Node: 25 25
+Mob: "lostSoul" 4
+Mob: "darkFairy" 2
+Boss: "fairyQueen"
+=Path
+Z: 0
+Node: 45 45
+Node: 55 55
+Mob: "darkFairy" 1
