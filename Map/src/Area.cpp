@@ -130,30 +130,18 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
     input = new std::stringstream(s, std::ios_base::in | std::ios_base::binary);
   }
   switch (sectionID) {
-    case SECTION_TILE: {
-      if (ts != nullptr) {
-        stat = MAPERR_REDUNDANT_TILESEC;
-        goto cleanup;
-      }
-      ts = new TileSec(*input);
-      break;
+#define CREATE_READ_HANDLER(id, check, field, Class, isnew) \
+    case id: { \
+      if (check) { \
+        stat = MAPERR_REDUNDANT_TILESEC; \
+        goto cleanup; \
+      } \
+      field = isnew Class(*input); \
+      break; \
     }
-    case SECTION_XDAT: {
-      if (xs.present) {
-        stat = MAPERR_REDUNDANT_SECTION;
-        goto cleanup;
-      }
-      xs = XDatSec(*input);
-      break;
-    }
-    case SECTION_pOIS: {
-      if (ps.present) {
-        stat = MAPERR_REDUNDANT_SECTION;
-        goto cleanup;
-      }
-      ps = POISec(*input);
-      break;
-    }
+    CREATE_READ_HANDLER(SECTION_TILE, ts != nullptr, ts, TileSec, new)
+    CREATE_READ_HANDLER(SECTION_XDAT, xs.present, xs, XDatSec, )
+    CREATE_READ_HANDLER(SECTION_pOIS, ps.present, ps, POISec, )
     default: {
       // 0b11100000 | 0b01000000
       // i. e. check for capital first letter
