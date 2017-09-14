@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sstream>
 #include <string>
 
+#include "window/Patcher.h"
+
 using namespace x801::game;
 
 x801::map::ModelApplicationIndex* x801::game::ModelView::getMAI() {

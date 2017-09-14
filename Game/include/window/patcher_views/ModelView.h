@@ -31,15 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    class ModelView;
-  }
-}
-
-#include "window/Patcher.h"
-#include "window/patcher_views/TextureView.h"
-
-namespace x801 {
-  namespace game {
+    class Patcher;
     class ModelView {
     public:
       ModelView(Patcher* underlying) : underlying(underlying) {}

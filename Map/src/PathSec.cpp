@@ -18,11 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stdint.h>
+#include <algorithm>
+#include <iostream>
+#include <limits>
 
 namespace x801 {
   namespace map {
     Path::Path(std::istream& fh) {
       using namespace x801::base;
+      minX = minY = std::numeric_limits<int16_t>::max();
+      maxX = maxY = std::numeric_limits<int16_t>::min();
       z = readInt<int8_t>(fh);
       size_t nodeCount = readInt<uint8_t>(fh);
       size_t mobCount = readInt<uint8_t>(fh);
@@ -31,6 +36,10 @@ namespace x801 {
         int16_t x = readInt<int16_t>(fh);
         int16_t y = readInt<int16_t>(fh);
         vertices.push_back({x, y});
+        minX = std::min(minX, x);
+        maxX = std::max(maxX, x);
+        minY = std::min(minY, y);
+        maxY = std::max(maxY, y);
       }
       for (size_t i = 0; i < mobCount; ++i) {
         weights.push_back(readInt<uint8_t>(fh));

@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
+#include "window/Patcher.h"
+
 using namespace x801::game;
 
 const x801::map::Part* x801::game::PartView::getPart(const std::string& name) {

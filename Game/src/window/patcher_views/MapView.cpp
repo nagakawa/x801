@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <sstream>
 
+#include "window/Patcher.h"
+
 using namespace x801::game;
 
 std::shared_ptr<x801::map::Area> x801::game::MapView::getArea(

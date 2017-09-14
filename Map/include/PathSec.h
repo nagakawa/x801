@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stddef.h>
-#include <iostream>
+#include <iosfwd>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -45,6 +45,7 @@ namespace x801 {
       std::vector<std::string> mobNames;
       std::vector<uint8_t> weights;
       std::vector<std::string> bossNames;
+      int16_t minX, minY, maxX, maxY;
     };
     class PathSec {
     public:

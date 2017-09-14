@@ -25,19 +25,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <boost/thread/shared_mutex.hpp>
 
 #include <Area.h>
 
 namespace x801 {
   namespace game {
-    class MapView;
-  }
-}
-#include "window/Patcher.h"
-
-namespace x801 {
-  namespace game {
+    class Patcher;
     class MapView {
     public:
       MapView(Patcher* underlying) : underlying(underlying) {}

@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
+#include "window/Patcher.h"
+
 namespace x801 {
   namespace game {
     static agl::TexInitInfo opts = {GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, true, false, false};
