@@ -188,7 +188,6 @@ bool x801::game::Client::handleLPacket(
     uint8_t* lbody, size_t llength,
     RakNet::Time t,
     RakNet::Packet* p) {
-  // TODO implement
   (void) lbody; (void) llength; (void) p;
   lCallbackLock.lock();
   auto range = lCallbacks.equal_range(lPacketType);

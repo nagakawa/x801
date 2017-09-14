@@ -172,7 +172,6 @@ void x801::game::Server::handleLPacket(
     uint8_t* lbody, size_t llength,
     RakNet::Time t,
     RakNet::Packet* p) {
-  // TODO implement
   (void) lbody; (void) llength; (void) p;
   std::array<uint8_t, COOKIE_LEN> cookieAsArray;
   for (int i = 0; i < COOKIE_LEN; ++i) cookieAsArray[i] = cookie[i];
@@ -340,20 +339,6 @@ LoginStatus x801::game::Server::login(
   cookiesByPlayer[playerID] = cookieAsArray;
   playersByAddress[address] = playerID;
   addressesByPlayer[playerID] = address;
-  /*
-  // Add player to the correct area
-  Player p;
-  bool succeeded = g.findPlayer(playerID, p);
-  assert(succeeded); (void) succeeded;
-  x801::map::QualifiedAreaID aid = p.getLocation().areaID;
-  if (g.areas.count(aid) == 0) {
-    std::ifstream mapInput("assets/map/map.0.0.map", std::ios::binary);
-    std::unique_ptr<AreaWithPlayers> area =
-      std::make_unique<AreaWithPlayers>(&g, mapInput);
-    g.areas[aid] = std::move(area);
-  }
-  g.areas[aid]->addPlayer(playerID);
-  */
   return stat;
 }
 
