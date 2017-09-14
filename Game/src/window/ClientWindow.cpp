@@ -261,8 +261,8 @@ namespace x801 {
         const x801::map::POISec::POI& poi = ps.pois[p.first];
         const x801::map::POISec::EntityPOI& ep = p.second;
         Location l = c->g.selfPosition;
-        l.x = poi.x;
-        l.y = poi.y;
+        l.x = poi.x + 0.5f; // Centre correction
+        l.y = poi.y + 0.5f;
         l.z = poi.z;
         l.rot = 0;
         em->addEntity<NPCEntity>(ep.texname, l, ep.title, ep.name, ep.offset);
