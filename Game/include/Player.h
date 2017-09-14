@@ -59,6 +59,9 @@ namespace x801 {
       const StatsUser& getStatsU() const { return su; }
       void applyKeyInput(KeyInput input, RakNet::Time last);
       void applyKeyInput(KeyInput input);
+      void applyKeyInput(KeyInput input, RakNet::Time last,
+        const x801::map::Area& a);
+      void applyKeyInput(KeyInput input, const x801::map::Area& a);
       ~Player();
     private:
       uint32_t playerID;

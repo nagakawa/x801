@@ -58,8 +58,8 @@ namespace x801 {
       using namespace x801::map;
       TileSec& ts = a.getTileSec();
       // Bounds for which blocks need to be collision-checked
-      int xmin = (int) (x - HITBOX_SIZE) - 1;
-      int ymin = (int) (y - HITBOX_SIZE) - 1;
+      int xmin = (int) (x - HITBOX_SIZE);
+      int ymin = (int) (y - HITBOX_SIZE);
       int xmax = (int) (x + HITBOX_SIZE);
       int ymax = (int) (y + HITBOX_SIZE);
       // Check the necessary blocks

@@ -77,9 +77,12 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
   x801::map::QualifiedAreaID aid = p.first->second.getLocation().areaID;
   if (areas.count(aid) == 0) {
     std::string fname = "assets/maps/map.";
-    fname += aid.worldID;
+    // Here's a gotcha!
+    // If you just append `aid.worldID`,
+    // this will call the operator+=(char) overload.
+    fname += std::to_string(aid.worldID);
     fname += ".";
-    fname += aid.areaID;
+    fname += std::to_string(aid.areaID);
     fname += ".map";
     std::ifstream fh(fname, std::ios::binary);
     std::unique_ptr<AreaWithPlayers> a =
@@ -144,6 +147,7 @@ void x801::game::ClientGameState::populateRequested(uint32_t* ids, size_t n) {
   old C++! ~ Uruwi
 */
 void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
+  x801::map::Area& a = *(currentArea.getArea());
   // Find the first (backmost) element in the queue greater than or
   // equal to t, using binary search.
   historyMutex.lock_shared();
@@ -168,7 +172,7 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
   for (size_t i = 0; i < size; ++i) {
     //std::cout << "{" << selfPosition.x << ", " << selfPosition.y << ", " << selfPosition.z << ", " << selfPosition.rot << "} ";
     //std::cout << i << "[" << history[i].inputs << ", " << (ssize_t) (history[i].time - tp) << "] ";
-    bool stat = selfPosition.applyKeyInput(history[i], tp);
+    bool stat = selfPosition.applyKeyInput(history[i], tp, a);
     if (stat) tp = history[i].time;
   }
   //std::cout << "{" << selfPosition.x << ", " << selfPosition.y << ", " << selfPosition.z << ", " << selfPosition.rot << "} ";
@@ -178,12 +182,13 @@ void x801::game::ClientGameState::fastForwardSelf(RakNet::Time t) {
     present,
     (size > 0) ? history[size - 1].inputs : 0
   };
-  selfPosition.applyKeyInput(last, tp);
+  selfPosition.applyKeyInput(last, tp, a);
   lastTimeServer = t;
   historyMutex.unlock_shared();
 }
 
 void x801::game::ClientGameState::fastForwardSelfClient(const KeyInput& ki) {
-  selfPosition.applyKeyInput(ki, lastTimeClient);
+  x801::map::Area& a = *(currentArea.getArea());
+  selfPosition.applyKeyInput(ki, lastTimeClient, a);
   lastTimeClient = ki.time;
 }

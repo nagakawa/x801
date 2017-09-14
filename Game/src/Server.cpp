@@ -340,6 +340,7 @@ LoginStatus x801::game::Server::login(
   cookiesByPlayer[playerID] = cookieAsArray;
   playersByAddress[address] = playerID;
   addressesByPlayer[playerID] = address;
+  /*
   // Add player to the correct area
   Player p;
   bool succeeded = g.findPlayer(playerID, p);
@@ -352,6 +353,7 @@ LoginStatus x801::game::Server::login(
     g.areas[aid] = std::move(area);
   }
   g.areas[aid]->addPlayer(playerID);
+  */
   return stat;
 }
 
@@ -459,7 +461,12 @@ void x801::game::Server::processMoveRequest(
   boost::shared_lock<boost::shared_mutex> guard(g.playerMutex);
   auto player = g.findPlayer(playerID);
   if (player == g.endOfPlayerMap()) return;
-  ((Player&) player->second).applyKeyInput(input);
+  Player& pl = (Player&) player->second;
+  const x801::map::Area* a = g.areas[pl.getLocation().areaID]->area.get();
+  if (a == nullptr)
+    pl.applyKeyInput(input);
+  else
+    pl.applyKeyInput(input, *a);
 }
 
 void x801::game::Server::sendUnrecognisedCookiePacket(RakNet::Packet* p) {

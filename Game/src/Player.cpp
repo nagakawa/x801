@@ -24,15 +24,25 @@ using namespace x801::game;
 
 #include <utils.h>
 
-void x801::game::Player::applyKeyInput(KeyInput input, RakNet::Time last) {
-  location.applyKeyInput(input, last);
-  lastMoved = input.time;
-}
-
-void x801::game::Player::applyKeyInput(KeyInput input) {
-  applyKeyInput(input, lastMoved);
-}
-
-x801::game::Player::~Player() {
-  // nothing
+namespace x801 {
+  namespace game {
+    void Player::applyKeyInput(KeyInput input, RakNet::Time last,
+        const x801::map::Area& a) {
+      location.applyKeyInput(input, last, a);
+      lastMoved = input.time;
+    }
+    void Player::applyKeyInput(KeyInput input, RakNet::Time last) {
+      location.applyKeyInput(input, last);
+      lastMoved = input.time;
+    }
+    void Player::applyKeyInput(KeyInput input) {
+      applyKeyInput(input, lastMoved);
+    }
+    void Player::applyKeyInput(KeyInput input, const x801::map::Area& a) {
+      applyKeyInput(input, lastMoved, a);
+    }
+    Player::~Player() {
+      // nothing
+    }
+  }
 }
