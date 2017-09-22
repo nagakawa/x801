@@ -24,6 +24,7 @@ using namespace x801::game;
 
 #include <assert.h>
 #include <string.h>
+#include <mapErrors.h>
 #include "Credentials.h"
 
 void x801::game::AreaWithPlayers::addPlayer(uint32_t id) {
@@ -87,6 +88,9 @@ LoginStatus x801::game::GameState::login(Credentials& c, uint32_t& id) {
     std::ifstream fh(fname, std::ios::binary);
     std::unique_ptr<AreaWithPlayers> a =
       std::make_unique<AreaWithPlayers>(this, fh);
+    if (a->getArea()->getError() != x801::map::MAPERR_OK) {
+      throw x801::map::IllegalMap(a->getArea()->getError());
+    }
     areas[aid] = std::move(a);
   }
   areas[aid]->players.insert(id);

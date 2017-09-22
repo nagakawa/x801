@@ -47,7 +47,7 @@ x801::map::Area::Area(std::istream& fh, bool dontCare) {
       break;
     }
   }
-  if (error != 0 && (ts == nullptr || !xs.present))
+  if (error == 0 && (ts == nullptr || !xs.present))
     error = MAPERR_MISSING_SECTION;
 }
 

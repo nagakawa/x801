@@ -24,6 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <exception>
+#include <string>
+
 namespace x801 {
   namespace map {
     const int MAPERR_OK = 0;
@@ -35,6 +38,16 @@ namespace x801 {
     const int MAPERR_NOT_A_MAP = 6;
     const int MAPERR_REDUNDANT_SECTION = 7;
     const int MAPERR_MISSING_SECTION = 8;
+    class IllegalMap : public std::exception {
+    public:
+      IllegalMap(int errcode) : errcode(errcode) {}
+      virtual const char* what() const noexcept override {
+        return mapErrorStrs[errcode];
+      }
+      static const char* mapErrorStrs[];
+    private:
+      int errcode;
+    };
     const int MODERR_OK = 0;
     const int MODERR_NOT_A_MODEL = 1;
   }

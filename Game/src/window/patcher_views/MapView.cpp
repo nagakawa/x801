@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 #include <sstream>
+#include <mapErrors.h>
 
 #include "window/Patcher.h"
 
@@ -53,6 +54,9 @@ std::shared_ptr<x801::map::Area> x801::game::MapView::getArea(
     std::stringstream in(s);
     std::shared_ptr<x801::map::Area> area =
       std::make_shared<x801::map::Area>(in);
+    if (area->getError() != x801::map::MAPERR_OK) {
+      throw x801::map::IllegalMap(area->getError());
+    }
     areas[id] = std::move(area);
     return areas[id];
   } else {

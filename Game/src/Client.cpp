@@ -299,6 +299,8 @@ void x801::game::Client::requestMOTD() {
 void x801::game::Client::requestUsernames(
     size_t count, uint32_t* ids) {
   size_t totalCount = count + g.totalRequested();
+  if (totalCount > 65535) totalCount = 65535;
+  count = totalCount - g.totalRequested();
   uint32_t* alreadyRequestedIDs = new uint32_t[totalCount - count];
   g.populateRequested(alreadyRequestedIDs, totalCount - count);
   for (size_t i = 0; i < count; ++i)
@@ -341,7 +343,7 @@ void x801::game::Client::processUsernameResponse(
     uint32_t userID;
     stream.Read(userID);
     std::string username = readStringFromBitstream16S(stream);
-    std::cerr << i << ") " << userID << ": " << username << '\n';
+    // std::cerr << i << ") " << userID << ": " << username << '\n';
     g.addUserUnsynchronised(userID, username);
   }
   g.lookupMutex.unlock();
