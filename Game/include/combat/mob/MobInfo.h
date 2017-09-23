@@ -21,20 +21,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <stdint.h>
+#include <string>
 #include <glm/glm.hpp>
+
+#include "combat/Stats.h"
 
 namespace x801 {
   namespace game {
-    class MobInfo;
-    class Mob {
+    class MobInfo {
     public:
-      bool marked = false;
-      glm::vec2 pos;
-      float progress;
-      MobInfo* info;
-    };
-    struct MobGetXY {
-      glm::vec2 getPos(const Mob& m) const { return m.pos; }
+      Stats stats;
+      std::string id;
+      std::string dispname;
+      uint16_t rank, type;
     };
   }
 }
