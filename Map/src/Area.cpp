@@ -164,7 +164,12 @@ int x801::map::Area::readSection(std::istream& fh, bool dontCare) {
   return stat;
 }
 
-void x801::map::Area::writeSection(std::ostream& fh, uint32_t sectionID, const char* data, uint32_t len, int& ds) const {
+void x801::map::Area::writeSection(
+    std::ostream& fh,
+    uint32_t sectionID,
+    const char* data,
+    uint32_t len,
+    int& ds) const {
   x801::base::writeInt<uint32_t>(fh, sectionID);
   std::stringstream output(std::ios_base::out | std::ios_base::binary);
   uint32_t amtWrittenC;

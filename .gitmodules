@@ -10,3 +10,6 @@
 [submodule "imgui"]
 	path = imgui
 	url = https://github.com/nagakawa/imgui
+[submodule "3rdparty/zekku"]
+	path = 3rdparty/zekku
+	url = https://github.com/nagakawa/zekku

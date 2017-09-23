@@ -49,6 +49,8 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/combat/Battle.cpp
   ${PROJECT_SOURCE_DIR}/combat/Stats.cpp
   ${PROJECT_SOURCE_DIR}/combat/School.cpp
+  ${PROJECT_SOURCE_DIR}/combat/mob/Mob.cpp
+  ${PROJECT_SOURCE_DIR}/combat/mob/MobManager.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

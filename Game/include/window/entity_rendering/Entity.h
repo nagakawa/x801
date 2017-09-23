@@ -46,6 +46,7 @@ namespace x801 {
         return OverheadName();
       }
       virtual bool isPlayer() { return false; }
+      bool shouldDelete = false;
     protected:
       static x801::map::EntityTextureBindings* tb;
       friend class EntityRenderer;
