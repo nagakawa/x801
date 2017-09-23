@@ -27,13 +27,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    Mob& MobManager::getEntity(zekku::Handle<> id) {
+    Mob& MobPath::getEntity(zekku::Handle<> id) {
       return mobs.deref(id);
     }
-    void MobManager::deleteEntity(zekku::Handle<> id) {
+    void MobPath::deleteEntity(zekku::Handle<> id) {
       mobs.deref(id).marked = true;
     }
-    void MobManager::forEach(std::function<void(Mob&)> cb) {
+    void MobPath::forEach(std::function<void(Mob&)> cb) {
       mobs.querym(zekku::QueryAll<float>(), [cb](Mob& mob) {
         cb(mob);
       });

@@ -29,6 +29,7 @@ namespace x801 {
     public:
       bool marked = false;
       glm::vec2 pos;
+      float progress;
     };
     struct MobGetXY {
       glm::vec2 getPos(const Mob& m) const { return m.pos; }

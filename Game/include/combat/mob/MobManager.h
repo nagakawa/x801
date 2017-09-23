@@ -27,19 +27,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <memory>
 #include <type_traits>
-#include <unordered_map>
+#include <vector>
 
 #include <boost/thread/shared_mutex.hpp>
 
 #include <zekku/QuadTree.h>
+#include <PathSec.h>
 
 #include "combat/mob/Mob.h"
 
 namespace x801 {
   namespace game {
-    class MobManager {
+    // A server-side instantiation of a mob path.
+    class MobPath {
     public:
-      MobManager() = default;
+      MobPath(
+        zekku::AABB<float> bounds,
+        x801::map::PathSec&& ps
+      ) : mobs(bounds), ps(std::move(ps)) {}
       /*
       template<class E, class... Args>
       size_t addEntity(Args&&... args) {
@@ -65,9 +70,7 @@ namespace x801 {
       zekku::QuadTree<Mob,
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY> mobs;
-      /*std::unordered_map<
-        zekku::Handle, OverheadName, zekku::HandleHasher
-      > names;*/
+      x801::map::PathSec ps;
     };
   }
 }
