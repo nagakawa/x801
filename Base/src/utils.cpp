@@ -20,237 +20,238 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <boost/random/random_device.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
-
-using namespace x801::base;
-
-template<> uint8_t x801::base::convLER<uint8_t>(uint8_t x) { return x; }
-template<> uint16_t x801::base::convLER<uint16_t>(uint16_t x) { return le16toh(x); }
-template<> uint32_t x801::base::convLER<uint32_t>(uint32_t x) { return le32toh(x); }
-template<> uint64_t x801::base::convLER<uint64_t>(uint64_t x) { return le64toh(x); }
-template<> uint8_t x801::base::convLEW<uint8_t>(uint8_t x) { return x; }
-template<> uint16_t x801::base::convLEW<uint16_t>(uint16_t x) { return htole16(x); }
-template<> uint32_t x801::base::convLEW<uint32_t>(uint32_t x) { return htole32(x); }
-template<> uint64_t x801::base::convLEW<uint64_t>(uint64_t x) { return htole64(x); }
-template<> int8_t x801::base::convLER<int8_t>(int8_t x) { return x; }
-template<> int16_t x801::base::convLER<int16_t>(int16_t x) { return le16toh(x); }
-template<> int32_t x801::base::convLER<int32_t>(int32_t x) { return le32toh(x); }
-template<> int64_t x801::base::convLER<int64_t>(int64_t x) { return le64toh(x); }
-template<> int8_t x801::base::convLEW<int8_t>(int8_t x) { return x; }
-template<> int16_t x801::base::convLEW<int16_t>(int16_t x) { return htole16(x); }
-template<> int32_t x801::base::convLEW<int32_t>(int32_t x) { return htole32(x); }
-template<> int64_t x801::base::convLEW<int64_t>(int64_t x) { return htole64(x); }
-template<> uint8_t x801::base::convBER<uint8_t>(uint8_t x) { return x; }
-template<> uint16_t x801::base::convBER<uint16_t>(uint16_t x) { return be16toh(x); }
-template<> uint32_t x801::base::convBER<uint32_t>(uint32_t x) { return be32toh(x); }
-template<> uint64_t x801::base::convBER<uint64_t>(uint64_t x) { return be64toh(x); }
-template<> uint8_t x801::base::convBEW<uint8_t>(uint8_t x) { return x; }
-template<> uint16_t x801::base::convBEW<uint16_t>(uint16_t x) { return htobe16(x); }
-template<> uint32_t x801::base::convBEW<uint32_t>(uint32_t x) { return htobe32(x); }
-template<> uint64_t x801::base::convBEW<uint64_t>(uint64_t x) { return htobe64(x); }
-template<> int8_t x801::base::convBER<int8_t>(int8_t x) { return x; }
-template<> int16_t x801::base::convBER<int16_t>(int16_t x) { return be16toh(x); }
-template<> int32_t x801::base::convBER<int32_t>(int32_t x) { return be32toh(x); }
-template<> int64_t x801::base::convBER<int64_t>(int64_t x) { return be64toh(x); }
-template<> int8_t x801::base::convBEW<int8_t>(int8_t x) { return x; }
-template<> int16_t x801::base::convBEW<int16_t>(int16_t x) { return htobe16(x); }
-template<> int32_t x801::base::convBEW<int32_t>(int32_t x) { return htobe32(x); }
-template<> int64_t x801::base::convBEW<int64_t>(int64_t x) { return htobe64(x); }
-
-static_assert(std::numeric_limits<float>::is_iec559, "Float is not IEEE 754!");
-
-float x801::base::readFloat(std::istream& fh) {
-  // Get integer representation
-  uint32_t val;
-  fh.read(reinterpret_cast<char*> (&val), sizeof(val));
-  val = convBER<uint32_t>(val);
-  return *(reinterpret_cast<float*> (&val));
-}
-
-void x801::base::writeFloat(std::ostream& fh, float x) {
-  uint32_t val = *(reinterpret_cast<float*> (&x));
-  val = convBEW<uint32_t>(val);
-  fh.write(reinterpret_cast<char*> (&val), sizeof(val));
-}
-
-glm::quat x801::base::readQuaternion(std::istream& fh) {
-  glm::quat q;
-  q.x = readFloat(fh);
-  q.y = readFloat(fh);
-  q.z = readFloat(fh);
-  q.w = readFloat(fh);
-  return q;
-}
-
-void x801::base::writeQuaternion(std::ostream& fh, const glm::quat& q) {
-  writeFloat(fh, q.x);
-  writeFloat(fh, q.y);
-  writeFloat(fh, q.z);
-  writeFloat(fh, q.w);
-}
-
-glm::vec3 x801::base::readVec3(std::istream& fh) {
-  glm::vec3 v;
-  v.x = readFloat(fh);
-  v.y = readFloat(fh);
-  v.z = readFloat(fh);
-  return v;
-}
-
-void x801::base::writeVec3(std::ostream& fh, const glm::vec3& v) {
-  writeFloat(fh, v.x);
-  writeFloat(fh, v.y);
-  writeFloat(fh, v.z);
-}
-
-glm::vec2 x801::base::readVec2(std::istream& fh) {
-  glm::vec2 v;
-  v.x = readFloat(fh);
-  v.y = readFloat(fh);
-  return v;
-}
-
-void x801::base::writeVec2(std::ostream& fh, const glm::vec2& v) {
-  writeFloat(fh, v.x);
-  writeFloat(fh, v.y);
-}
-
-std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
-  std::string s{array, size};
-  return std::stringstream(s);
-}
-
-// Working on making this code more idiomatic, since it came from a PH3
-// archive extractor written in C.
-int x801::base::readZipped(
-    std::istream& f,
-    char*& block,
-    uint32_t& amtReadC,
-    uint32_t& amtReadU
-) {
-  // Save old file position
-  long base = f.tellg();
-  unsigned int bsize = 1;
-  int ret = Z_OK;
-  char* src = (char*) malloc(CHUNK);
-  char* dest = (char*) malloc(bsize * CHUNK);
-  z_stream strm;
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
-  strm.avail_in = 0;
-  strm.next_in = Z_NULL;
-  ret = inflateInit(&strm);
-  if (ret != Z_OK) goto end;
-  do {
-    f.read(src, CHUNK);
-    strm.avail_in = f.gcount();
-    if (f.bad()) {
-      ret = Z_ERRNO;
-      break;
-    }
-    if (strm.avail_in == 0)
-      break;
-    strm.next_in = (unsigned char*) src;
-    do {
-      if (strm.total_out > CHUNK * (bsize - 1)) {
-        bsize <<= 1;
-        dest = (char*) realloc(dest, bsize * CHUNK);
-      }
-      strm.avail_out = CHUNK;
-      strm.next_out = (unsigned char*) (dest + strm.total_out);
-      ret = inflate(&strm, Z_NO_FLUSH);
-      assert(ret != Z_STREAM_ERROR);
-      switch (ret) {
-      case Z_NEED_DICT:
-          ret = Z_DATA_ERROR;     /* and fall through */
-      case Z_DATA_ERROR:
-      case Z_MEM_ERROR:
-          goto end;
-          break;
-        default:
-          ret = Z_OK;
-      }
-    } while (strm.avail_out == 0);
-    //fprintf(stderr, "Unzip: total_out %lu available space %d\n", strm.total_out, CHUNK * bsize);
-  } while (strm.avail_out != 0);
-  end:
-  amtReadC = strm.total_in;
-  amtReadU = strm.total_out;
-  free(src);
-  if (ret == 0) block = dest;
-  else {
-    free(dest);
-    block = nullptr;
-  }
-  (void) inflateEnd(&strm);
-  f.clear();
-  f.seekg(base + amtReadC);
-  return ret;
-}
-
-// Also based on zlib usage example doc but simpler because we're compressing
-// from a buffer, not a file.
-int x801::base::writeZipped(
-    std::ostream& f,
-    const char* block,
-    uint32_t len,
-    uint32_t& amtWrittenC
-) {
-  int ret = Z_OK;
-  char* dest = (char*) malloc(CHUNK);
-  z_stream strm;
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
-  strm.avail_in = len;
-  strm.next_in = (unsigned char*) block;
-  ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
-  if (ret != Z_OK) goto end;
-  do {
-    strm.avail_out = CHUNK;
-    strm.next_out = (unsigned char*) (dest);
-    ret = deflate(&strm, Z_FINISH);
-    //std::clog << "Zip status " << ret << '\n';
-    if (ret == Z_STREAM_ERROR) goto end;
-    int have = CHUNK - strm.avail_out;
-    f.write(dest, have);
-    if (f.bad()) {
-      ret = Z_ERRNO;
-      goto end;
-    }
-    switch (ret) {
-    case Z_NEED_DICT:
-        ret = Z_DATA_ERROR;     /* and fall through */
-    case Z_DATA_ERROR:
-    case Z_MEM_ERROR:
-        goto end;
-        break;
-      default:
-        ret = Z_OK;
-    }
-  } while (strm.avail_out == 0);
-  assert(strm.avail_in == 0);
-  //fprintf(stderr, "Zip: total_out %lu available space %d\n", strm.total_out, CHUNK);
-  end:
-  amtWrittenC = strm.total_out;
-  free(dest);
-  (void) deflateEnd(&strm);
-  return ret;
-}
-
-void x801::base::writeRandomBytes(uint8_t* buffer, int length) {
-  boost::random::random_device random;
-  boost::random::uniform_int_distribution<> dist(0, 255);
-  for (int i = 0; i < length; ++i)
-    buffer[i] = static_cast<uint8_t>(dist(random));
-}
+#include <gmp.h>
 
 namespace x801 {
   namespace base {
+    template<> uint8_t convLER<uint8_t>(uint8_t x) { return x; }
+    template<> uint16_t convLER<uint16_t>(uint16_t x) { return le16toh(x); }
+    template<> uint32_t convLER<uint32_t>(uint32_t x) { return le32toh(x); }
+    template<> uint64_t convLER<uint64_t>(uint64_t x) { return le64toh(x); }
+    template<> uint8_t convLEW<uint8_t>(uint8_t x) { return x; }
+    template<> uint16_t convLEW<uint16_t>(uint16_t x) { return htole16(x); }
+    template<> uint32_t convLEW<uint32_t>(uint32_t x) { return htole32(x); }
+    template<> uint64_t convLEW<uint64_t>(uint64_t x) { return htole64(x); }
+    template<> int8_t convLER<int8_t>(int8_t x) { return x; }
+    template<> int16_t convLER<int16_t>(int16_t x) { return le16toh(x); }
+    template<> int32_t convLER<int32_t>(int32_t x) { return le32toh(x); }
+    template<> int64_t convLER<int64_t>(int64_t x) { return le64toh(x); }
+    template<> int8_t convLEW<int8_t>(int8_t x) { return x; }
+    template<> int16_t convLEW<int16_t>(int16_t x) { return htole16(x); }
+    template<> int32_t convLEW<int32_t>(int32_t x) { return htole32(x); }
+    template<> int64_t convLEW<int64_t>(int64_t x) { return htole64(x); }
+    template<> uint8_t convBER<uint8_t>(uint8_t x) { return x; }
+    template<> uint16_t convBER<uint16_t>(uint16_t x) { return be16toh(x); }
+    template<> uint32_t convBER<uint32_t>(uint32_t x) { return be32toh(x); }
+    template<> uint64_t convBER<uint64_t>(uint64_t x) { return be64toh(x); }
+    template<> uint8_t convBEW<uint8_t>(uint8_t x) { return x; }
+    template<> uint16_t convBEW<uint16_t>(uint16_t x) { return htobe16(x); }
+    template<> uint32_t convBEW<uint32_t>(uint32_t x) { return htobe32(x); }
+    template<> uint64_t convBEW<uint64_t>(uint64_t x) { return htobe64(x); }
+    template<> int8_t convBER<int8_t>(int8_t x) { return x; }
+    template<> int16_t convBER<int16_t>(int16_t x) { return be16toh(x); }
+    template<> int32_t convBER<int32_t>(int32_t x) { return be32toh(x); }
+    template<> int64_t convBER<int64_t>(int64_t x) { return be64toh(x); }
+    template<> int8_t convBEW<int8_t>(int8_t x) { return x; }
+    template<> int16_t convBEW<int16_t>(int16_t x) { return htobe16(x); }
+    template<> int32_t convBEW<int32_t>(int32_t x) { return htobe32(x); }
+    template<> int64_t convBEW<int64_t>(int64_t x) { return htobe64(x); }
+
+    static_assert(std::numeric_limits<float>::is_iec559, "Float is not IEEE 754!");
+
+    float readFloat(std::istream& fh) {
+      // Get integer representation
+      uint32_t val;
+      fh.read(reinterpret_cast<char*> (&val), sizeof(val));
+      val = convBER<uint32_t>(val);
+      return *(reinterpret_cast<float*> (&val));
+    }
+
+    void writeFloat(std::ostream& fh, float x) {
+      uint32_t val = *(reinterpret_cast<float*> (&x));
+      val = convBEW<uint32_t>(val);
+      fh.write(reinterpret_cast<char*> (&val), sizeof(val));
+    }
+
+    glm::quat readQuaternion(std::istream& fh) {
+      glm::quat q;
+      q.x = readFloat(fh);
+      q.y = readFloat(fh);
+      q.z = readFloat(fh);
+      q.w = readFloat(fh);
+      return q;
+    }
+
+    void writeQuaternion(std::ostream& fh, const glm::quat& q) {
+      writeFloat(fh, q.x);
+      writeFloat(fh, q.y);
+      writeFloat(fh, q.z);
+      writeFloat(fh, q.w);
+    }
+
+    glm::vec3 readVec3(std::istream& fh) {
+      glm::vec3 v;
+      v.x = readFloat(fh);
+      v.y = readFloat(fh);
+      v.z = readFloat(fh);
+      return v;
+    }
+
+    void writeVec3(std::ostream& fh, const glm::vec3& v) {
+      writeFloat(fh, v.x);
+      writeFloat(fh, v.y);
+      writeFloat(fh, v.z);
+    }
+
+    glm::vec2 readVec2(std::istream& fh) {
+      glm::vec2 v;
+      v.x = readFloat(fh);
+      v.y = readFloat(fh);
+      return v;
+    }
+
+    void writeVec2(std::ostream& fh, const glm::vec2& v) {
+      writeFloat(fh, v.x);
+      writeFloat(fh, v.y);
+    }
+
+    std::stringstream fromCharArray(char* array, unsigned int size) {
+      std::string s{array, size};
+      return std::stringstream(s);
+    }
+
+    // Working on making this code more idiomatic, since it came from a PH3
+    // archive extractor written in C.
+    int readZipped(
+        std::istream& f,
+        char*& block,
+        uint32_t& amtReadC,
+        uint32_t& amtReadU
+    ) {
+      // Save old file position
+      long base = f.tellg();
+      unsigned int bsize = 1;
+      int ret = Z_OK;
+      char* src = (char*) malloc(CHUNK);
+      char* dest = (char*) malloc(bsize * CHUNK);
+      z_stream strm;
+      strm.zalloc = Z_NULL;
+      strm.zfree = Z_NULL;
+      strm.opaque = Z_NULL;
+      strm.avail_in = 0;
+      strm.next_in = Z_NULL;
+      ret = inflateInit(&strm);
+      if (ret != Z_OK) goto end;
+      do {
+        f.read(src, CHUNK);
+        strm.avail_in = f.gcount();
+        if (f.bad()) {
+          ret = Z_ERRNO;
+          break;
+        }
+        if (strm.avail_in == 0)
+          break;
+        strm.next_in = (unsigned char*) src;
+        do {
+          if (strm.total_out > CHUNK * (bsize - 1)) {
+            bsize <<= 1;
+            dest = (char*) realloc(dest, bsize * CHUNK);
+          }
+          strm.avail_out = CHUNK;
+          strm.next_out = (unsigned char*) (dest + strm.total_out);
+          ret = inflate(&strm, Z_NO_FLUSH);
+          assert(ret != Z_STREAM_ERROR);
+          switch (ret) {
+          case Z_NEED_DICT:
+              ret = Z_DATA_ERROR;     /* and fall through */
+          case Z_DATA_ERROR:
+          case Z_MEM_ERROR:
+              goto end;
+              break;
+            default:
+              ret = Z_OK;
+          }
+        } while (strm.avail_out == 0);
+        //fprintf(stderr, "Unzip: total_out %lu available space %d\n", strm.total_out, CHUNK * bsize);
+      } while (strm.avail_out != 0);
+      end:
+      amtReadC = strm.total_in;
+      amtReadU = strm.total_out;
+      free(src);
+      if (ret == 0) block = dest;
+      else {
+        free(dest);
+        block = nullptr;
+      }
+      (void) inflateEnd(&strm);
+      f.clear();
+      f.seekg(base + amtReadC);
+      return ret;
+    }
+
+    // Also based on zlib usage example doc but simpler because we're compressing
+    // from a buffer, not a file.
+    int writeZipped(
+        std::ostream& f,
+        const char* block,
+        uint32_t len,
+        uint32_t& amtWrittenC
+    ) {
+      int ret = Z_OK;
+      char* dest = (char*) malloc(CHUNK);
+      z_stream strm;
+      strm.zalloc = Z_NULL;
+      strm.zfree = Z_NULL;
+      strm.opaque = Z_NULL;
+      strm.avail_in = len;
+      strm.next_in = (unsigned char*) block;
+      ret = deflateInit(&strm, Z_DEFAULT_COMPRESSION);
+      if (ret != Z_OK) goto end;
+      do {
+        strm.avail_out = CHUNK;
+        strm.next_out = (unsigned char*) (dest);
+        ret = deflate(&strm, Z_FINISH);
+        //std::clog << "Zip status " << ret << '\n';
+        if (ret == Z_STREAM_ERROR) goto end;
+        int have = CHUNK - strm.avail_out;
+        f.write(dest, have);
+        if (f.bad()) {
+          ret = Z_ERRNO;
+          goto end;
+        }
+        switch (ret) {
+        case Z_NEED_DICT:
+            ret = Z_DATA_ERROR;     /* and fall through */
+        case Z_DATA_ERROR:
+        case Z_MEM_ERROR:
+            goto end;
+            break;
+          default:
+            ret = Z_OK;
+        }
+      } while (strm.avail_out == 0);
+      assert(strm.avail_in == 0);
+      //fprintf(stderr, "Zip: total_out %lu available space %d\n", strm.total_out, CHUNK);
+      end:
+      amtWrittenC = strm.total_out;
+      free(dest);
+      (void) deflateEnd(&strm);
+      return ret;
+    }
+
+    void writeRandomBytes(uint8_t* buffer, int length) {
+      boost::random::random_device random;
+      boost::random::uniform_int_distribution<> dist(0, 255);
+      for (int i = 0; i < length; ++i)
+        buffer[i] = static_cast<uint8_t>(dist(random));
+    }
+
     template<>
     size_t getLength(const char* s) {
       return strlen(s);
@@ -270,69 +271,92 @@ namespace x801 {
     const char* getPointer(std::string s) {
       return s.c_str();
     }
-  }
-}
 
-std::string x801::base::slurp(std::ifstream& fh) {
-  size_t b = fh.tellg();
-  fh.seekg(0, std::ios_base::end);
-  size_t e = fh.tellg();
-  fh.seekg(b);
-  std::string res(e - b, '\0');
-  fh.read(&res[0], e - b);
-  return res;
-}
+    std::string slurp(std::ifstream& fh) {
+      size_t b = fh.tellg();
+      fh.seekg(0, std::ios_base::end);
+      size_t e = fh.tellg();
+      fh.seekg(b);
+      std::string res(e - b, '\0');
+      fh.read(&res[0], e - b);
+      return res;
+    }
 
-// Seriously, what the fuck.
-#ifdef __WIN32
-#include <windows.h>
-std::string x801::base::getPathOfCurrentExecutable() {
-  char buf[1024];
-  uint32_t len = GetModuleFileName(nullptr, buf, 1024);
-  if (len == 0) {
-    std::cerr << "could not get exe path.\n"
-        << "error code: " << GetLastError()
-        << "\nalso use a better os\n";
-    return "";
-  }
-  buf[len] = '\0';
-  return std::string(buf);
-}
-#elif defined(__APPLE__) && defined(__MACH__) // OS X
-#include <mach-o/dyld.h>
-std::string x801::base::getPathOfCurrentExecutable() {
-  char buf[1024];
-  size_t size = 1024;
-  int stat = _NSGetExecutablePath(buf, &size);
-  if (stat != 0) {
-    std::cerr << "could not get exe path\n";
-    return "";
-  }
-  buf[size] = '\0';
-  return std::string(buf);
-}
-#elif defined(__gnu_linux__)
-#include <unistd.h>
-std::string x801::base::getPathOfCurrentExecutable() {
-  char buf[1024];
-  ssize_t len = readlink("/proc/self/exe", buf, 1023);
-  if (len == -1) {
-    perror("readlink");
-    return 0;
-  }
-  buf[len] = '\0';
-  return std::string(buf);
-}
-#else
-#error "your OS isn't supported; contact Uruwi for help"
-#endif
+    // Seriously, what the fuck.
+    #ifdef __WIN32
+    #include <windows.h>
+    std::string getPathOfCurrentExecutable() {
+      char buf[1024];
+      uint32_t len = GetModuleFileName(nullptr, buf, 1024);
+      if (len == 0) {
+        std::cerr << "could not get exe path.\n"
+            << "error code: " << GetLastError()
+            << "\nalso use a better os\n";
+        return "";
+      }
+      buf[len] = '\0';
+      return std::string(buf);
+    }
+    #elif defined(__APPLE__) && defined(__MACH__) // OS X
+    #include <mach-o/dyld.h>
+    std::string getPathOfCurrentExecutable() {
+      char buf[1024];
+      size_t size = 1024;
+      int stat = _NSGetExecutablePath(buf, &size);
+      if (stat != 0) {
+        std::cerr << "could not get exe path\n";
+        return "";
+      }
+      buf[size] = '\0';
+      return std::string(buf);
+    }
+    #elif defined(__gnu_linux__)
+    #include <unistd.h>
+    std::string getPathOfCurrentExecutable() {
+      char buf[1024];
+      ssize_t len = readlink("/proc/self/exe", buf, 1023);
+      if (len == -1) {
+        perror("readlink");
+        return 0;
+      }
+      buf[len] = '\0';
+      return std::string(buf);
+    }
+    #else
+    #error "your OS isn't supported; contact Uruwi for help"
+    #endif
 
-bool x801::base::canBeConvertedToPositiveInt(const char* s, int* out) {
-  int numberOfDigits = strspn(s, "0123456789");
-  // there are more non-digit characters
-  if (s[numberOfDigits] != '\0') return false;
-  if (out != nullptr) {
-    *out = atoi(s);
+    bool canBeConvertedToPositiveInt(const char* s, int* out) {
+      int numberOfDigits = strspn(s, "0123456789");
+      // there are more non-digit characters
+      if (s[numberOfDigits] != '\0') return false;
+      if (out != nullptr) {
+        *out = atoi(s);
+      }
+      return true;
+    }
+
+    mpz_class readMPZ(std::istream& fh) {
+      size_t bytes = readInt<uint32_t>(fh);
+      bool isneg = (bytes & (1u << 31)) != 0;
+      bytes &= (1u << 31) - 1;
+      mpz_class n;
+      char* buf = new char[bytes];
+      fh.read(buf, bytes);
+      // No C++ version of the following function,
+      // so we act on the underlying mpz_t.
+      mpz_import(n.get_mpz_t(), bytes, -1, 1, -1, 0, buf);
+      delete[] buf;
+      return isneg ? -n : n; // Here you go!
+    }
+
+    void writeMPZ(std::ostream& fh, const mpz_class& n) {
+      size_t bytes;
+      void* buf = mpz_export(nullptr, &bytes, -1, 1, -1, 0, n.get_mpz_t());
+      size_t nbytes = bytes;
+      if (sgn(n) < 0) nbytes |= (1u << 31);
+      writeInt<uint32_t>(fh, nbytes);
+      fh.write((char*) buf, bytes);
+    }
   }
-  return true;
 }

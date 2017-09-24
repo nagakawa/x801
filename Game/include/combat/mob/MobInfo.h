@@ -33,7 +33,7 @@ namespace x801 {
     public:
       Stats stats;
       std::string id;
-      std::string dispname;
+      std::string dispname, title;
       uint16_t rank, type;
     };
   }

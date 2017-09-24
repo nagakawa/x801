@@ -24,6 +24,7 @@ using namespace x801::game;
 
 #include <assert.h>
 #include <string.h>
+#include <fstream>
 #include <mapErrors.h>
 #include "Credentials.h"
 

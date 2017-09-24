@@ -23,13 +23,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <array>
-#include <fstream>
 #include <iostream>
 #include <limits>
 #include <zlib.h>
 #include <boost/functional/hash.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <gmpxx.h>
 #include "portable_endian.h"
 
 // Since I expect Int and UInt to be used frequently,
@@ -195,6 +195,8 @@ namespace x801 {
     std::string getPathOfCurrentExecutable();
 
     bool canBeConvertedToPositiveInt(const char* s, int* out = nullptr);
+    mpz_class readMPZ(std::istream& fh);
+    void writeMPZ(std::ostream& fh, const mpz_class& n);
 #ifndef NDEBUG
 #define XTRACE(...) ::x801::base::ftrace(__FILE__, __LINE__, __VA_ARGS__)
     inline void trace() {
