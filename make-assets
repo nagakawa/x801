@@ -8,7 +8,7 @@ substDirListTs1 = $(foreach dir, $(1), \
 	$(patsubst %.$(2), %.$(3), \
 	$(patsubst asset-src/models/functions/%, asset-temp/models/%, $(wildcard $(dir)/*.$(2)))))
 
-all: maps terrain entity-sprites
+all: maps terrain entity-sprites combat
 	python3 tools/rebuild-index.py
 
 ## MAPS ###
@@ -56,6 +56,19 @@ entity-pngs: $(call substDirListT,asset-src/textures/entity/gimpfiles,xcf,png)
 asset-temp/textures/entity/gimpfiles/%.png: asset-src/textures/entity/gimpfiles/%.xcf
 	mkdir -p asset-temp/textures/entity/gimpfiles
 	xcf2png $< > $@
+
+## COMBAT-RELATED ##
+
+combat: mobinfo
+
+### Mob info ###
+
+mobinfo: $(call substDirList,asset-src/mobs,emp,mob)
+
+assets/mobs/%.mob: asset-src/mobs/%.emp
+	mkdir -p assets/mobs
+	python3 tools/mobinfo-compiler.py \
+		$< $@
 
 clean:
 	rm -rf asset-temp assets

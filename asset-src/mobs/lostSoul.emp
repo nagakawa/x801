@@ -1,0 +1,21 @@
+@Stats
+Level: 1
+School: "darkness"
+PowerPip: 0
+# The change of the Lost Soul's health from 65 to 55 in Wizard101
+# was unwarranted.
+# We're giving these 75 health.
+Health: 75
+# Give 10% boost to light and 10% resist to darkness.
+=SEntry
+School: "light"
+Defence: -100
+=SEntry
+School: "darkness"
+Defence: 100
+@Misc
+Rank: 1
+Type: "common1"
+Internal: "lostSoul"
+Title: ""
+Name: "Lost Soul"
