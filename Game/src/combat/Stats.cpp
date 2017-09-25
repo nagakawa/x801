@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
+#include <utils.h>
+
 namespace x801 {
   namespace game {
     size_t baseMana(size_t level) {
@@ -38,6 +40,28 @@ namespace x801 {
       maxHealth = schools[school].getBaseHealth(level);
       maxMana = baseMana(level);
       powerPipChance = basePowerChance(level);
+    }
+    Stats::Stats(std::istream& fh) {
+      using namespace x801::base;
+      level = readInt<uint16_t>(fh);
+      school = readInt<uint16_t>(fh);
+      powerPipChance = readInt<uint16_t>(fh);
+      size_t nSchools = readInt<uint16_t>(fh);
+      readMPZ(fh, maxHealth);
+      maxMana = 1000000000;
+      for (size_t i = 0; i < nSchools; ++i) {
+        size_t index = readInt<uint16_t>(fh);
+        if (ss.size() < index + 1)
+          ss.resize(index + 1);
+        ss[index] = SchoolSpecific(fh);
+      }
+    }
+    Stats::SchoolSpecific::SchoolSpecific(std::istream& fh) {
+      using namespace x801::base;
+      accuracy = readInt<int16_t>(fh);
+      pierce = readInt<uint16_t>(fh);
+      readMPZ(fh, damage);
+      readMPZ(fh, resist);
     }
   }
 }

@@ -196,6 +196,7 @@ namespace x801 {
 
     bool canBeConvertedToPositiveInt(const char* s, int* out = nullptr);
     mpz_class readMPZ(std::istream& fh);
+    void readMPZ(std::istream& fh, mpz_class& n);
     void writeMPZ(std::ostream& fh, const mpz_class& n);
 #ifndef NDEBUG
 #define XTRACE(...) ::x801::base::ftrace(__FILE__, __LINE__, __VA_ARGS__)

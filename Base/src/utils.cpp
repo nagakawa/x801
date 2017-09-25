@@ -349,6 +349,19 @@ namespace x801 {
       delete[] buf;
       return isneg ? -n : n; // Here you go!
     }
+    
+    void readMPZ(std::istream& fh, mpz_class& n) {
+      size_t bytes = readInt<uint32_t>(fh);
+      bool isneg = (bytes & (1u << 31)) != 0;
+      bytes &= (1u << 31) - 1;
+      char* buf = new char[bytes];
+      fh.read(buf, bytes);
+      // No C++ version of the following function,
+      // so we act on the underlying mpz_t.
+      mpz_import(n.get_mpz_t(), bytes, -1, 1, -1, 0, buf);
+      delete[] buf;
+      if (isneg) n = -n;
+    }
 
     void writeMPZ(std::ostream& fh, const mpz_class& n) {
       size_t bytes;

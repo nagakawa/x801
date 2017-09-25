@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <iosfwd>
 #include <vector>
 
 #include <gmpxx.h>
@@ -39,9 +40,11 @@ namespace x801 {
     class Stats {
     public:
       Stats(const StatsUser& su, const std::vector<School>& schools);
+      Stats(std::istream& fh);
       class SchoolSpecific {
       public:
         SchoolSpecific() : damage(0), resist(0), accuracy(0), pierce(0) {}
+        SchoolSpecific(std::istream& fh);
         mpz_class damage;
         mpz_class resist;
         int accuracy; // 0.1%s
