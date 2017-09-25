@@ -357,6 +357,7 @@ namespace x801 {
       if (sgn(n) < 0) nbytes |= (1u << 31);
       writeInt<uint32_t>(fh, nbytes);
       fh.write((char*) buf, bytes);
+      free(buf);
     }
   }
 }
