@@ -43,8 +43,8 @@ namespace x801 {
     public:
       MobPath(
         zekku::AABB<float> bounds,
-        x801::map::PathSec&& ps
-      ) : mobs(bounds), ps(std::move(ps)) {}
+        x801::map::Path&& path
+      ) : mobs(bounds), path(std::move(path)) {}
       /*
       template<class E, class... Args>
       size_t addEntity(Args&&... args) {
@@ -64,13 +64,13 @@ namespace x801 {
       void deleteEntity(zekku::Handle<> id);
       void forEach(std::function<void(Mob&)> cb);
       // void forEachOver(std::function<void(Mob&, OverheadName&)> cb);
-      void advanceFrame();
+      void advanceFrame(float s);
     private:
       mutable boost::shared_mutex entityMutex;
       zekku::QuadTree<Mob,
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY> mobs;
-      x801::map::PathSec ps;
+      x801::map::Path path;
     };
   }
 }

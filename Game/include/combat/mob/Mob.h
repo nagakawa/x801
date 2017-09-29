@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glm/glm.hpp>
 
 namespace x801 {
+  namespace map { class Path; }
   namespace game {
     class MobInfo;
     class Mob {
@@ -32,6 +33,7 @@ namespace x801 {
       glm::vec2 pos;
       float progress;
       MobInfo* info;
+      void advanceFrame(float s, const x801::map::Path& path);
     };
     struct MobGetXY {
       glm::vec2 getPos(const Mob& m) const { return m.pos; }

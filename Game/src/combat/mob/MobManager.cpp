@@ -38,5 +38,19 @@ namespace x801 {
         cb(mob);
       });
     }
+    void MobPath::advanceFrame(float s) {
+      auto mapcond = [this, s](const Mob& m) {
+        Mob m2 = m;
+        m2.advanceFrame(s, path);
+        return m2;
+      };
+      auto filtcond = [this](const Mob& m) {
+        return m.progress < path.vertices.size();
+      };
+      zekku::QuadTree<Mob,
+        uint16_t, float, zekku::QUADTREE_NODE_COUNT,
+        MobGetXY> mobs2 = mobs.mapIf(mapcond, filtcond);
+      mobs = std::move(mobs2);
+    }
   }
 }
