@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <iosfwd>
 #include <string>
 #include <glm/glm.hpp>
 
@@ -31,6 +32,7 @@ namespace x801 {
   namespace game {
     class MobInfo {
     public:
+      MobInfo(std::istream& fh);
       Stats stats;
       std::string id;
       std::string dispname, title;

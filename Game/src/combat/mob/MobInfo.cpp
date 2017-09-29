@@ -20,8 +20,18 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <utils.h>
+
 namespace x801 {
   namespace game {
-    //
+    MobInfo::MobInfo(std::istream& fh) {
+      using namespace x801::base;
+      rank = readInt<uint16_t>(fh);
+      type = readInt<uint16_t>(fh);
+      id = readString<uint16_t>(fh);
+      dispname = readString<uint16_t>(fh);
+      title = readString<uint16_t>(fh);
+      stats = Stats(fh);
+    }
   }
 }

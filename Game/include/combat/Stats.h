@@ -41,6 +41,7 @@ namespace x801 {
     public:
       Stats(const StatsUser& su, const std::vector<School>& schools);
       Stats(std::istream& fh);
+      Stats() {}
       class SchoolSpecific {
       public:
         SchoolSpecific() : damage(0), resist(0), accuracy(0), pierce(0) {}
