@@ -22,31 +22,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
-#include <boost/optional.hpp>
+#include <unordered_set>
 #include <boost/thread/shared_mutex.hpp>
 
-#include <Texture.h>
+#include "combat/mob/MobInfo.h"
 
 namespace x801 {
   namespace game {
     class Patcher;
-    class TextureView {
+    class MobInfoView {
     public:
-      TextureView(Patcher* underlying) : underlying(underlying) {}
-      boost::optional<agl::Texture>
-          getTextureTransient(const std::string& name);
-      agl::Texture* getTexture(const std::string& name);
-      void purge(const std::string& name);
+      MobInfoView(Patcher* underlying) : underlying(underlying) {}
+      const MobInfo* getInfo(const std::string& nae);
     private:
       Patcher* underlying;
       mutable boost::shared_mutex mapMutex;
-      std::unordered_map<std::string, std::unique_ptr<agl::Texture>> textures;
+      std::unordered_map<std::string, std::unique_ptr<MobInfo>> infos;
     };
-    inline void bindTextureFromPointer(agl::Texture* t) {
-      if (t != nullptr) t->bind();
-      else glBindTexture(GL_TEXTURE_2D, 0);
-    }
   }
 }

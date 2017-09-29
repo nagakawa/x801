@@ -1,4 +1,4 @@
-#include "window/patcher_views/TextureView.h"
+#include "window/patcher_views/MobInfoView.h"
 
 /*
 Copyright (C) 2016 AGC.
@@ -26,43 +26,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    static agl::TexInitInfo opts = {GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, true, false, false};
-    boost::optional<agl::Texture>
-        TextureView::getTextureTransient(const std::string& name) {
-      std::cerr << "Getting texture " << name << "\n";
-      underlying->fetchFile(name.c_str());
-      uint32_t version, contentLength;
-      uint8_t* contents = nullptr;
-      bool status = underlying->getFileEntry(
-        name.c_str(),
-        version, contentLength, contents
-      );
-      if (status)
-        return agl::Texture(contents, (int) contentLength, opts);
-      return boost::none;
-    }
-    agl::Texture* TextureView::getTexture(const std::string& name) {
+    const MobInfo* MobInfoView::getInfo(const std::string& name) {
       mapMutex.lock_shared();
-      auto iterator = textures.find(name);
-      if (iterator != textures.end()) {
+      auto iterator = infos.find(name);
+      if (iterator != infos.end()) {
         mapMutex.unlock_shared();
         return iterator->second.get();
       }
+      std::string fullname = "assets/mobs/" + name + ".mob";
+      underlying->fetchFile(fullname.c_str());
+      uint32_t version, contentLength;
+      uint8_t* contents = nullptr;
+      bool status = underlying->getFileEntry(
+        fullname.c_str(),
+        version, contentLength, contents
+      );
       mapMutex.unlock_shared();
-      auto texopt = getTextureTransient(name);
-      if (texopt) {
+      if (status) {
         boost::unique_lock<boost::shared_mutex> guard(mapMutex);
-        agl::Texture* t = new agl::Texture(std::move(*texopt));
-        textures[name] = std::unique_ptr<agl::Texture>(t);
-        return textures[name].get();
+        std::string inputStr((char*) contents, contentLength);
+        std::stringstream input(inputStr);
+        std::unique_ptr<MobInfo> mi = std::make_unique<MobInfo>(input);
+        infos[name] = std::move(mi);
+        // This is equivalent to &(infos[name])
+        // but doesn't require MobInfo to have a default ctor.
+        return infos.find(name)->second.get();
       } else {
         std::cerr << "Requesting file " << name << "\n";
         underlying->requestFile(name.c_str());
         return nullptr;
       }
-    }
-    void TextureView::purge(const std::string& name) {
-      textures.erase(name);
     }
   }
 }
