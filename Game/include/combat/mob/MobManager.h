@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <memory>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 #include <boost/thread/shared_mutex.hpp>
@@ -71,6 +72,12 @@ namespace x801 {
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY> mobs;
       x801::map::Path path;
+    };
+    class MobManager {
+    public:
+      MobManager(x801::map::PathSec&& ps);
+    private:
+      std::unordered_multimap<int, MobPath> paths;
     };
   }
 }

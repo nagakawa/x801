@@ -52,5 +52,19 @@ namespace x801 {
         MobGetXY> mobs2 = mobs.mapIf(mapcond, filtcond);
       mobs = std::move(mobs2);
     }
+    MobManager::MobManager(x801::map::PathSec&& ps) {
+      // I will `suck` the paths out of this section
+      // Cssssssssssssssssssssssssssssssss
+      for (x801::map::Path& p : ps.paths) {
+        zekku::AABB<float> box = {
+          {(p.maxX + p.minX) / 2.0, (p.maxY + p.minY) / 2.0},
+          {(p.maxX - p.minX) / 2.0, (p.maxY - p.minY) / 2.0}
+        };
+        int z = p.z;
+        paths.emplace(std::piecewise_construct,
+          std::forward_as_tuple(z),
+          std::forward_as_tuple(box, std::move(p)));
+      }
+    }
   }
 }
