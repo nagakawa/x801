@@ -36,7 +36,7 @@ namespace x801 {
     class MobInfoView {
     public:
       MobInfoView(Patcher* underlying) : underlying(underlying) {}
-      const MobInfo* getInfo(const std::string& nae);
+      const MobInfo* getInfo(const std::string& name);
     private:
       Patcher* underlying;
       mutable boost::shared_mutex mapMutex;
