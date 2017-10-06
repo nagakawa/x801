@@ -37,6 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Player.h"
 #include "packet.h"
 #include "combat/mob/MobInfo.h"
+#include "combat/mob/MobManager.h"
 
 namespace x801 {
   namespace game {
@@ -44,8 +45,9 @@ namespace x801 {
     class ClientGameState;
     class AreaWithPlayers {
     public:
-      // dummy
-      AreaWithPlayers() {}
+      AreaWithPlayers() {
+        initMobManager();
+      }
       // linkback to ClientGameState and read map data
       AreaWithPlayers(ClientGameState* g, std::istream& fh) :
           cg(g), area(new x801::map::Area(fh)) {}
@@ -83,6 +85,7 @@ namespace x801 {
       void setArea(std::shared_ptr<x801::map::Area> a) {
         area = a;
       }
+      void initMobManager();
       // Mutex to make sure multiple threads aren't mutating
       // the set of players in this area simultaneously.
       // This is public so users of the class can use the mutex to
@@ -95,6 +98,7 @@ namespace x801 {
       // only one AreaWithPlayers.
       ClientGameState* cg = nullptr;
       std::shared_ptr<x801::map::Area> area = nullptr;
+      MobManager* mman = nullptr;
       friend class Client;
       friend class Server;
       friend class GameState;
@@ -150,8 +154,8 @@ namespace x801 {
         x801::map::QualifiedAreaID, std::unique_ptr<AreaWithPlayers>,
         x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
       > areas;
-      friend class Server;
       std::unordered_map<std::string, std::unique_ptr<MobInfo>> mobInfos;
+      friend class Server;
     };
 
     class ClientGameState {
