@@ -21,12 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <assert.h>
+#include <algorithm>
 #include <utility>
 
 #include <utils.h>
 
 namespace x801 {
   namespace game {
+    static constexpr float SPAWN_DELAY = 2.5f;
     Mob& MobPath::getEntity(zekku::Handle<> id) {
       return mobs.deref(id);
     }
@@ -51,8 +53,21 @@ namespace x801 {
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY> mobs2 = mobs.mapIf(mapcond, filtcond);
       mobs = std::move(mobs2);
+      timeLeft -= s;
+      if (s <= 0) {
+        s += SPAWN_DELAY;
+        std::cout << "Mobs should spawn now\n";
+      }
     }
-    MobManager::MobManager(x801::map::PathSec&& ps) {
+    size_t MobPath::randomMob() {
+      std::uniform_int_distribution<uint32_t> dist(0, weightSum - 1);
+      uint32_t value = dist(gen);
+      auto it = std::upper_bound(
+        weightCumul.begin(), weightCumul.end(), value);
+      // it now points one element after the one we want
+      return it - weightCumul.begin() - 1;
+    }
+    MobManager::MobManager(x801::map::PathSec&& ps, GameState* gs) {
       // I will `suck` the paths out of this section
       // Cssssssssssssssssssssssssssssssss
       for (x801::map::Path& p : ps.paths) {
@@ -63,8 +78,9 @@ namespace x801 {
         int z = p.z;
         paths.emplace(std::piecewise_construct,
           std::forward_as_tuple(z),
-          std::forward_as_tuple(box, std::move(p)));
+          std::forward_as_tuple(box, std::move(p), this));
       }
+      this->gs = gs;
     }
   }
 }

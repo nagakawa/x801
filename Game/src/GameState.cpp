@@ -114,6 +114,25 @@ void x801::game::GameState::logout(uint32_t id) {
   playerMutex.unlock();
 }
 
+MobInfo* x801::game::GameState::getMobInfo(std::string name) {
+  MobInfo* mi;
+  miMutex.lock_shared();
+  auto it = mobInfos.find(name);
+  if (it != mobInfos.end()) {
+    mi = it->second.get();
+    miMutex.unlock_shared();
+    return mi;
+  }
+  miMutex.unlock_shared();
+  std::ifstream fh("assets/mobs/" + name + ".mob");
+  std::unique_ptr<MobInfo> umi = std::make_unique<MobInfo>(fh);
+  miMutex.lock();
+  mobInfos[name] = std::move(umi);
+  mi = mobInfos[name].get();
+  miMutex.unlock();
+  return mi;
+}
+
 void x801::game::ClientGameState::addUser(uint32_t id, const std::string& name) {
   lookupMutex.lock();
   addUserUnsynchronised(id, name);

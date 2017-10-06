@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Database.h"
 #include "Player.h"
 #include "packet.h"
+#include "combat/mob/MobInfo.h"
 
 namespace x801 {
   namespace game {
@@ -136,8 +137,10 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return allPlayers.cend();
       }
+      MobInfo* getMobInfo(std::string name);
       // void addArea(x801::map::QualifiedAreaID);
       mutable boost::shared_mutex playerMutex;
+      mutable boost::shared_mutex miMutex;
     private:
       Database db;
       std::unordered_map<uint32_t, Player> allPlayers;
@@ -148,6 +151,7 @@ namespace x801 {
         x801::map::QualifiedAreaIDHash, x801::map::QualifiedAreaIDEqual
       > areas;
       friend class Server;
+      std::unordered_map<std::string, std::unique_ptr<MobInfo>> mobInfos;
     };
 
     class ClientGameState {

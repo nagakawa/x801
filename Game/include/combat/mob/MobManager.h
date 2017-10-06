@@ -26,10 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <random>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
 
+#include <boost/random/random_device.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
 #include <zekku/QuadTree.h>
@@ -39,13 +41,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
+    class GameState;
+    class MobManager;
     // A server-side instantiation of a mob path.
     class MobPath {
     public:
       MobPath(
         zekku::AABB<float> bounds,
-        x801::map::Path&& path
-      ) : mobs(bounds), path(std::move(path)) {}
+        x801::map::Path&& path,
+        MobManager* manager) :
+            mobs(bounds), path(std::move(path)),
+            manager(manager) {
+          weightSum = 0;
+          size_t size = this->path.weights.size();
+          weightCumul = std::vector<uint32_t>(size);
+          for (size_t i = 0; i < size; ++i) {
+            weightCumul[i] = weightSum;
+            weightSum += this->path.weights[i];
+          }
+          boost::random::random_device rd;
+          unsigned int seed = rd();
+          gen.seed(seed);
+        }
       /*
       template<class E, class... Args>
       size_t addEntity(Args&&... args) {
@@ -72,12 +89,19 @@ namespace x801 {
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY> mobs;
       x801::map::Path path;
+      MobManager* manager;
+      float timeLeft = 0.0f;
+      uint32_t weightSum;
+      std::vector<uint32_t> weightCumul;
+      size_t randomMob();
+      std::mt19937 gen;
     };
     class MobManager {
     public:
-      MobManager(x801::map::PathSec&& ps);
+      MobManager(x801::map::PathSec&& ps, GameState* gs);
     private:
       std::unordered_multimap<int, MobPath> paths;
+      GameState* gs;
     };
   }
 }
