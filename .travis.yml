@@ -1,6 +1,10 @@
-language: cpp
+language:
+  - cpp
+  - python
 sudo: enabled
 dist: trusty
+python:
+  - "3.5"
 before_install:
   - pip3 install numpy simpleeval
   - chmod +x install-dependencies.sh
