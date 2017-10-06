@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <utils.h>
 
+#include "GameState.h"
+
 namespace x801 {
   namespace game {
     static constexpr float SPAWN_DELAY = 2.5f;
@@ -56,7 +58,13 @@ namespace x801 {
       timeLeft -= s;
       if (s <= 0) {
         s += SPAWN_DELAY;
-        std::cout << "Mobs should spawn now\n";
+        std::cout << "Mobs should spawn NOW!\n";
+        size_t index = randomMob();
+        Mob m;
+        m.pos = { path.vertices[0].x, path.vertices[0].y };
+        m.progress = 0.0f;
+        m.info = manager->gs->getMobInfo(path.mobNames[index]);
+        mobs.insert(m);
       }
     }
     size_t MobPath::randomMob() {

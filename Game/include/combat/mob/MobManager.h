@@ -102,6 +102,7 @@ namespace x801 {
     private:
       std::unordered_multimap<int, MobPath> paths;
       GameState* gs;
+      friend class MobPath;
     };
   }
 }
