@@ -55,6 +55,7 @@ namespace x801 {
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY> mobs2 = mobs.mapIf(mapcond, filtcond);
       mobs = std::move(mobs2);
+      mobs.dump();
       timeLeft -= s;
       if (timeLeft <= 0) {
         timeLeft += SPAWN_DELAY;
