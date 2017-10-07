@@ -41,6 +41,8 @@ namespace x801 {
         minY = std::min(minY, y);
         maxY = std::max(maxY, y);
       }
+      minX -= 0.5; maxX += 0.5;
+      minY -= 0.5; maxY += 0.5;
       for (size_t i = 0; i < mobCount; ++i) {
         weights.push_back(readInt<uint8_t>(fh));
         mobNames.push_back(readString<uint16_t>(fh));

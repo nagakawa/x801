@@ -99,6 +99,7 @@ namespace x801 {
     class MobManager {
     public:
       MobManager(x801::map::PathSec&& ps, GameState* gs);
+      void advanceFrame(float s);
     private:
       std::unordered_multimap<int, MobPath> paths;
       GameState* gs;

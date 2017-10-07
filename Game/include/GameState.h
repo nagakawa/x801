@@ -46,14 +46,17 @@ namespace x801 {
     class AreaWithPlayers {
     public:
       AreaWithPlayers() {
-        initMobManager();
       }
       // linkback to ClientGameState and read map data
       AreaWithPlayers(ClientGameState* g, std::istream& fh) :
-          cg(g), area(new x801::map::Area(fh)) {}
+          cg(g), area(new x801::map::Area(fh)) {
+        initMobManager();
+      }
       // linkback to GameState and read map data
       AreaWithPlayers(GameState* g, std::istream& fh) :
-          g(g), area(new x801::map::Area(fh)) {}
+          g(g), area(new x801::map::Area(fh)) {
+        initMobManager();
+      }
       AreaWithPlayers(const AreaWithPlayers& other) = delete;
       AreaWithPlayers& operator=(const AreaWithPlayers& other) = delete;
       ~AreaWithPlayers();
@@ -142,6 +145,7 @@ namespace x801 {
         return allPlayers.cend();
       }
       MobInfo* getMobInfo(std::string name);
+      void advanceFrame(float s);
       // void addArea(x801::map::QualifiedAreaID);
       mutable boost::shared_mutex playerMutex;
       mutable boost::shared_mutex miMutex;

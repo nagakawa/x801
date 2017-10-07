@@ -121,6 +121,12 @@ namespace x801 {
       usernamesByID.erase(id);
       playerMutex.unlock();
     }
+
+    void GameState::advanceFrame(float s) {
+      for (auto& p : areas) {
+        p.second->mman->advanceFrame(s);
+      }
+    }
     
     MobInfo* GameState::getMobInfo(std::string name) {
       MobInfo* mi;

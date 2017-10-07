@@ -56,8 +56,8 @@ namespace x801 {
         MobGetXY> mobs2 = mobs.mapIf(mapcond, filtcond);
       mobs = std::move(mobs2);
       timeLeft -= s;
-      if (s <= 0) {
-        s += SPAWN_DELAY;
+      if (timeLeft <= 0) {
+        timeLeft += SPAWN_DELAY;
         std::cout << "Mobs should spawn NOW!\n";
         size_t index = randomMob();
         Mob m;
@@ -89,6 +89,12 @@ namespace x801 {
           std::forward_as_tuple(box, std::move(p), this));
       }
       this->gs = gs;
+    }
+    void MobManager::advanceFrame(float s) {
+      std::cout << "bepis " << paths.size() << "\n";
+      for (auto& p : paths) {
+        p.second.advanceFrame(s);
+      }
     }
   }
 }

@@ -507,6 +507,7 @@ void x801::game::Server::broadcastLocationsTo(
 
 void x801::game::Server::broadcastLocations() {
   using namespace std::chrono_literals;
+  RakNet::TimeUS t = RakNet::GetTimeUS();
   while (!done) {
     g.playerMutex.lock_shared();
     // Location packets should be sent only to those in the same area
@@ -515,6 +516,9 @@ void x801::game::Server::broadcastLocations() {
       broadcastLocationsTo(area);
     }
     g.playerMutex.unlock_shared();
+    RakNet::TimeUS t2 = RakNet::GetTimeUS();
+    g.advanceFrame((t2 - t) * 1e-6f);
+    t = t2;
     std::this_thread::sleep_for(50ms);
   }
   std::cerr << "Exiting broadcast thread\n";
