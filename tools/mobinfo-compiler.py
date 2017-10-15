@@ -48,6 +48,7 @@ writeInt(dest, typesByName[miscSec["Type"][0][0]], 2)
 writeString16(dest, miscSec["Internal"][0][0])
 writeString16(dest, miscSec["Name"][0][0])
 writeString16(dest, miscSec["Title"][0][0])
+writeString16(dest, miscSec["Texture"][0][0])
 
 # Write mob stats
 

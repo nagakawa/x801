@@ -37,6 +37,7 @@ namespace x801 {
       std::string id;
       std::string dispname, title;
       uint16_t rank, type;
+      std::string texname;
     };
   }
 }

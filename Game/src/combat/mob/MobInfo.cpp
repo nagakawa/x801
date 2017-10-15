@@ -31,6 +31,7 @@ namespace x801 {
       id = readString<uint16_t>(fh);
       dispname = readString<uint16_t>(fh);
       title = readString<uint16_t>(fh);
+      texname = readString<uint16_t>(fh);
       stats = Stats(fh);
     }
   }

@@ -49,5 +49,12 @@ namespace x801 {
         0, EntityClassifier::NPC
       );
     }
+    OverheadName MobEntity::overheadName() {
+      return OverheadName(
+        mi->title,
+        mi->dispname,
+        0, (EntityClassifier) mi->type
+      );
+    }
   }
 }

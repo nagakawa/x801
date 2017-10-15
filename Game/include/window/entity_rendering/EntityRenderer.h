@@ -60,35 +60,6 @@ namespace x801 {
 
 namespace x801 {
   namespace game {
-    /*
-    constexpr size_t TILE_SIZE = 32;
-    class ChunkBuffer {
-    public:
-      struct MeshEntry {
-        uint16_t w;
-        uint8_t xy;
-        bool decorator;
-      };
-      ChunkBuffer(
-        const x801::map::ChunkXYZ& xyz,
-        TerrainRenderer* tr,
-        x801::map::Chunk* chunk) :
-        xyz(xyz), tr(tr), chunk(chunk) {}
-      void setUpRender();
-      void render();
-    private:
-      x801::map::ChunkXYZ xyz;
-      TerrainRenderer* tr;
-      x801::map::Chunk* chunk;
-      agl::VBO vbo;
-      std::vector<MeshEntry> mesh;
-      void createMesh();
-      agl::VBO ivbo;
-      agl::VAO vao;
-      agl::ShaderProgram program;
-      friend class TerrainRenderer;
-    };
-    */
     class EntityBuffer {
     public:
       struct MeshEntry {

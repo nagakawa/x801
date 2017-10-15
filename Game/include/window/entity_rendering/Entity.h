@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <Chunk.h>
 
 #include "Location.h"
+#include "combat/mob/MobInfo.h"
 #include "window/entity_rendering/OverheadName.h"
 
 namespace x801 {
@@ -94,6 +95,25 @@ namespace x801 {
       Location l;
       std::string title;
       std::string name;
+      size_t offset = 0;
+    };
+    class MobEntity : public Entity {
+    public:
+      MobEntity(const MobInfo* mi, const Location& l) :
+        mi(mi), l(l), texID(tb->getTexID(mi->texname)) {}
+      ~MobEntity() override {}
+      void advanceFrame() override {}
+      size_t getTexture() override { return texID + offset; };
+      Location getLocation() override { return l; }
+      bool setLocation(const Location& l) override {
+        this->l = l;
+        return true;
+      }
+      OverheadName overheadName() override;
+    private:
+      const MobInfo* mi;
+      Location l;
+      size_t texID;
       size_t offset = 0;
     };
   }
