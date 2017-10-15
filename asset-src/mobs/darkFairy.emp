@@ -1,0 +1,18 @@
+@Stats
+Level: 1
+School: "darkness"
+PowerPip: 0
+Health: 135
+# Give 10% boost to light and 10% resist to darkness.
+=SEntry
+School: "light"
+Defence: -100
+=SEntry
+School: "darkness"
+Defence: 100
+@Misc
+Rank: 1
+Type: "elite"
+Internal: "darkFairy"
+Title: ""
+Name: "DarkFairy"
