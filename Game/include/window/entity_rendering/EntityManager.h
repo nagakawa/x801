@@ -32,13 +32,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/thread/shared_mutex.hpp>
 
 #include "window/entity_rendering/Entity.h"
+#include "window/entity_rendering/EntityRenderer.h"
 #include "window/entity_rendering/OverheadName.h"
 
 namespace x801 {
   namespace game {
+    class ClientWindow;
     class EntityManager {
     public:
-      EntityManager() : firstVacant(0) {}
+      EntityManager(ClientWindow* cw, agl::FBOTexMS& ft) :
+        er(cw, ft, this), firstVacant(0) {}
       template<class E, class... Args>
       size_t addEntity(Args&&... args) {
         static_assert(std::is_base_of<Entity, E>::value,
@@ -58,6 +61,7 @@ namespace x801 {
       void forEachOver(std::function<void(Entity&, OverheadName&)> cb);
       void advanceFrame();
       void updateUsernames();
+      EntityRenderer er;
     private:
       mutable boost::shared_mutex entityMutex;
       std::unordered_map<size_t, std::unique_ptr<Entity>> entities;

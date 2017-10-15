@@ -30,6 +30,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <utils.h>
 
 #include "x801_rect.h"
+#include "Client.h"
+#include "window/ClientWindow.h"
+#include "window/Patcher.h"
+#include "window/patcher_views/TextureView.h"
+#include "window/entity_rendering/EntityManager.h"
 
 namespace x801 {
   namespace game {

@@ -65,7 +65,6 @@ namespace x801 {
       ChatWindow* chat = nullptr;
       TerrainRenderer* tr = nullptr;
       EntityManager* em = nullptr;
-      EntityRenderer* er = nullptr;
       agl::Sprite2D* terrain;
       agl::Sprite2D* fuck;
       static constexpr size_t FTIMES_TO_STORE = 128;

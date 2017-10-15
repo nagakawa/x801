@@ -48,18 +48,21 @@ namespace x801 {
     class EntityRenderer;
   }
 }
-#include "Client.h"
+// #include "Client.h"
 #include "GameState.h"
-#include "window/ClientWindow.h"
-#include "window/Patcher.h"
-#include "window/patcher_views/BlueprintView.h"
-#include "window/patcher_views/PartView.h"
-#include "window/patcher_views/TextureView.h"
+// #include "window/ClientWindow.h"
+// #include "window/Patcher.h"
+// #include "window/patcher_views/TextureView.h"
 #include "window/entity_rendering/Entity.h"
-#include "window/entity_rendering/EntityManager.h"
+// #include "window/entity_rendering/EntityManager.h"
 
 namespace x801 {
   namespace game {
+    class Client;
+    class ClientWindow;
+    class EntityManager;
+    class Patcher;
+    class TextureView;
     class EntityBuffer {
     public:
       struct MeshEntry {
