@@ -248,8 +248,8 @@ static const char* CREATE_PLAYER_LOCATION_TABLE_QUERY =
   "  areaID INTEGER NOT NULL,"
   "  x DOUBLE NOT NULL,"
   "  y DOUBLE NOT NULL,"
-  "  z DOUBLE NOT NULL,"
-  "  rot DOUBLE NOT NULL"
+  "  z INTEGER NOT NULL,"
+  "  rot INTEGER NOT NULL"
   ");"
   ;
 
@@ -292,9 +292,9 @@ void x801::game::Database::savePlayerLocation(
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   stat = sqlite3_bind_double(statement, 5, location.y);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = sqlite3_bind_double(statement, 6, location.z);
+  stat = sqlite3_bind_int(statement, 6, location.z);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
-  stat = sqlite3_bind_double(statement, 7, location.rot);
+  stat = sqlite3_bind_int(statement, 7, location.rot);
   if (stat != SQLITE_OK) throw sqlite3_errmsg(auth);
   // All parameters bound.
   stepBlock(statement, auth);
@@ -308,8 +308,8 @@ uint32_t x801::game::Database::locationRowToStruct(
   location.areaID.areaID = (uint16_t) sqlite3_column_int(statement, 2);
   location.x = (float) sqlite3_column_double(statement, 3);
   location.y = (float) sqlite3_column_double(statement, 4);
-  location.z = (float) sqlite3_column_double(statement, 5);
-  location.rot = (float) sqlite3_column_double(statement, 6);
+  location.z = (uint8_t) sqlite3_column_int(statement, 5);
+  location.rot = (uint8_t) sqlite3_column_int(statement, 6);
   return sqlite3_column_int(statement, 0);
 }
 

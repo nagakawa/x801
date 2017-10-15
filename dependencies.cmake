@@ -53,18 +53,18 @@ INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
 
 # OPTION(Boost_NO_BOOST_CMAKE "" ON)
 OPTION(Boost_DEBUG "" OFF)
-FIND_PACKAGE(BoostCustom REQUIRED COMPONENTS filesystem)
+FIND_PACKAGE(Boost REQUIRED COMPONENTS filesystem system random thread)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 # Will have to make this work with other platforms.
 
 IF (NOT Boost_LIBRARIES)
-  MESSAGE(STATUS "Didn't find the library files.")
-  MESSAGE(STATUS "Setting them to defaults.")
-  FILE(
-    GLOB Boost_LIBRARIES
-    /usr/lib/x86_64-linux-gnu/libboost_*.so.*.*.*
-  )
+  MESSAGE(FATAL_ERROR "Didn't find the Boost library files.")
+  #MESSAGE(STATUS "Setting them to defaults.")
+  #FILE(
+  #  GLOB Boost_LIBRARIES
+  #  /usr/lib/x86_64-linux-gnu/libboost_*.so.*.*.*
+  #)
 ENDIF()
 
 FIND_PACKAGE(LibPThread REQUIRED)

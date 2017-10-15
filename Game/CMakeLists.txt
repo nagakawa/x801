@@ -17,6 +17,7 @@ SET(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/main.cpp
+  ${PROJECT_SOURCE_DIR}/x801_rect.cpp
   ${PROJECT_SOURCE_DIR}/Config.cpp
   ${PROJECT_SOURCE_DIR}/Server.cpp
   ${PROJECT_SOURCE_DIR}/Client.cpp
@@ -27,6 +28,7 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/Credentials.cpp
   ${PROJECT_SOURCE_DIR}/packet.cpp
   ${PROJECT_SOURCE_DIR}/Location.cpp
+  ${PROJECT_SOURCE_DIR}/sizelimit.cpp
   ${PROJECT_SOURCE_DIR}/window/ClientWindow.cpp
   ${PROJECT_SOURCE_DIR}/window/ChatWindow.cpp
   ${PROJECT_SOURCE_DIR}/window/TerrainRenderer.cpp
@@ -34,9 +36,16 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/window/Axes.cpp
   ${PROJECT_SOURCE_DIR}/window/Launcher.cpp
   ${PROJECT_SOURCE_DIR}/window/imgui_hooks.cpp
+  ${PROJECT_SOURCE_DIR}/window/entity_rendering/Entity.cpp
+  ${PROJECT_SOURCE_DIR}/window/entity_rendering/EntityManager.cpp
+  ${PROJECT_SOURCE_DIR}/window/entity_rendering/EntityRenderer.cpp
+  ${PROJECT_SOURCE_DIR}/window/entity_rendering/Atlas.cpp
+  ${PROJECT_SOURCE_DIR}/window/entity_rendering/OverheadName.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/TextureView.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/ModelView.cpp
   ${PROJECT_SOURCE_DIR}/window/patcher_views/MapView.cpp
+  ${PROJECT_SOURCE_DIR}/window/patcher_views/PartView.cpp
+  ${PROJECT_SOURCE_DIR}/window/patcher_views/BlueprintView.cpp
 )
 
 include_directories(${PROJECT_BINARY_DIR})

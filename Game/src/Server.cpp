@@ -232,8 +232,8 @@ void x801::game::Server::listen() {
 }
 
 x801::game::Server::~Server() {
-  if (publicKey != nullptr) delete[] publicKey;
-  if (privateKey != nullptr) delete[] privateKey;
+  delete[] publicKey;
+  delete[] privateKey;
   RakNet::RakPeerInterface::DestroyInstance(peer);
 }
 
@@ -426,6 +426,7 @@ void x801::game::Server::processChatRequest(
   output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
   output.Write(static_cast<uint16_t>(LPACKET_CHAT));
   output.Write(static_cast<uint8_t>(stat));
+  output.Write(static_cast<uint16_t>(0));
   peer->Send(
     &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     p->systemAddress, false
@@ -495,11 +496,10 @@ void x801::game::Server::broadcastLocationsTo(
     const Location& loc = g.allPlayers.at(id).getLocation();
     int32_t xfix = (int32_t) (loc.x * 65536.0f);
     int32_t yfix = (int32_t) (loc.y * 65536.0f);
-    uint32_t tfix =
-      (uint32_t) ((fmod(loc.rot, 2 * M_PI) / (2 * M_PI)) * 65536.0f * 65536.0f);
     output.Write(xfix);
     output.Write(yfix);
-    output.Write(tfix);
+    output.Write((uint8_t) loc.rot);
+    output.Write((uint8_t) loc.z);
   }
   for (auto it = begin; it != end; ++it) {
     // std::cerr << "* Sending to player #" << *it << "\n";

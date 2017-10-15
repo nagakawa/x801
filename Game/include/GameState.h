@@ -182,6 +182,16 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(locationMutex);
         return playersByID[id];
       }
+      Player& getPlayerUnsynchronised(uint32_t id) {
+        return playersByID[id];
+      }
+      void purgePlayers() {
+        boost::unique_lock<boost::shared_mutex> guard(locationMutex);
+        purgePlayersUnsynchronised();
+      }
+      void purgePlayersUnsynchronised() {
+        playersByID.clear();
+      }
       // Write all of the elements of alreadyRequestedIDs into
       // a buffer. It should be big enough to fit the total
       // number of elements in the set; use totalRequested()
@@ -221,7 +231,9 @@ namespace x801 {
       friend class Client;
       friend class ClientWindow;
       friend class TerrainRenderer;
-      friend class ChunkMeshBuffer;
+      friend class ChunkBuffer;
+      friend class EntityRenderer;
+      friend class EntityBuffer;
     };
   }
 }

@@ -27,18 +27,96 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace x801::base;
 
+template<> uint8_t x801::base::convLER<uint8_t>(uint8_t x) { return x; }
 template<> uint16_t x801::base::convLER<uint16_t>(uint16_t x) { return le16toh(x); }
 template<> uint32_t x801::base::convLER<uint32_t>(uint32_t x) { return le32toh(x); }
 template<> uint64_t x801::base::convLER<uint64_t>(uint64_t x) { return le64toh(x); }
+template<> uint8_t x801::base::convLEW<uint8_t>(uint8_t x) { return x; }
 template<> uint16_t x801::base::convLEW<uint16_t>(uint16_t x) { return htole16(x); }
 template<> uint32_t x801::base::convLEW<uint32_t>(uint32_t x) { return htole32(x); }
 template<> uint64_t x801::base::convLEW<uint64_t>(uint64_t x) { return htole64(x); }
+template<> int8_t x801::base::convLER<int8_t>(int8_t x) { return x; }
 template<> int16_t x801::base::convLER<int16_t>(int16_t x) { return le16toh(x); }
 template<> int32_t x801::base::convLER<int32_t>(int32_t x) { return le32toh(x); }
 template<> int64_t x801::base::convLER<int64_t>(int64_t x) { return le64toh(x); }
+template<> int8_t x801::base::convLEW<int8_t>(int8_t x) { return x; }
 template<> int16_t x801::base::convLEW<int16_t>(int16_t x) { return htole16(x); }
 template<> int32_t x801::base::convLEW<int32_t>(int32_t x) { return htole32(x); }
 template<> int64_t x801::base::convLEW<int64_t>(int64_t x) { return htole64(x); }
+template<> uint8_t x801::base::convBER<uint8_t>(uint8_t x) { return x; }
+template<> uint16_t x801::base::convBER<uint16_t>(uint16_t x) { return be16toh(x); }
+template<> uint32_t x801::base::convBER<uint32_t>(uint32_t x) { return be32toh(x); }
+template<> uint64_t x801::base::convBER<uint64_t>(uint64_t x) { return be64toh(x); }
+template<> uint8_t x801::base::convBEW<uint8_t>(uint8_t x) { return x; }
+template<> uint16_t x801::base::convBEW<uint16_t>(uint16_t x) { return htobe16(x); }
+template<> uint32_t x801::base::convBEW<uint32_t>(uint32_t x) { return htobe32(x); }
+template<> uint64_t x801::base::convBEW<uint64_t>(uint64_t x) { return htobe64(x); }
+template<> int8_t x801::base::convBER<int8_t>(int8_t x) { return x; }
+template<> int16_t x801::base::convBER<int16_t>(int16_t x) { return be16toh(x); }
+template<> int32_t x801::base::convBER<int32_t>(int32_t x) { return be32toh(x); }
+template<> int64_t x801::base::convBER<int64_t>(int64_t x) { return be64toh(x); }
+template<> int8_t x801::base::convBEW<int8_t>(int8_t x) { return x; }
+template<> int16_t x801::base::convBEW<int16_t>(int16_t x) { return htobe16(x); }
+template<> int32_t x801::base::convBEW<int32_t>(int32_t x) { return htobe32(x); }
+template<> int64_t x801::base::convBEW<int64_t>(int64_t x) { return htobe64(x); }
+
+static_assert(std::numeric_limits<float>::is_iec559, "Float is not IEEE 754!");
+
+float x801::base::readFloat(std::istream& fh) {
+  // Get integer representation
+  uint32_t val;
+  fh.read(reinterpret_cast<char*> (&val), sizeof(val));
+  val = convBER<uint32_t>(val);
+  return *(reinterpret_cast<float*> (&val));
+}
+
+void x801::base::writeFloat(std::ostream& fh, float x) {
+  uint32_t val = *(reinterpret_cast<float*> (&x));
+  val = convBEW<uint32_t>(val);
+  fh.write(reinterpret_cast<char*> (&val), sizeof(val));
+}
+
+glm::quat x801::base::readQuaternion(std::istream& fh) {
+  glm::quat q;
+  q.x = readFloat(fh);
+  q.y = readFloat(fh);
+  q.z = readFloat(fh);
+  q.w = readFloat(fh);
+  return q;
+}
+
+void x801::base::writeQuaternion(std::ostream& fh, const glm::quat& q) {
+  writeFloat(fh, q.x);
+  writeFloat(fh, q.y);
+  writeFloat(fh, q.z);
+  writeFloat(fh, q.w);
+}
+
+glm::vec3 x801::base::readVec3(std::istream& fh) {
+  glm::vec3 v;
+  v.x = readFloat(fh);
+  v.y = readFloat(fh);
+  v.z = readFloat(fh);
+  return v;
+}
+
+void x801::base::writeVec3(std::ostream& fh, const glm::vec3& v) {
+  writeFloat(fh, v.x);
+  writeFloat(fh, v.y);
+  writeFloat(fh, v.z);
+}
+
+glm::vec2 x801::base::readVec2(std::istream& fh) {
+  glm::vec2 v;
+  v.x = readFloat(fh);
+  v.y = readFloat(fh);
+  return v;
+}
+
+void x801::base::writeVec2(std::ostream& fh, const glm::vec2& v) {
+  writeFloat(fh, v.x);
+  writeFloat(fh, v.y);
+}
 
 std::stringstream x801::base::fromCharArray(char* array, unsigned int size) {
   std::string s{array, size};
@@ -53,6 +131,8 @@ int x801::base::readZipped(
     uint32_t& amtReadC,
     uint32_t& amtReadU
 ) {
+  // Save old file position
+  long base = f.tellg();
   unsigned int bsize = 1;
   int ret = Z_OK;
   char* src = (char*) malloc(CHUNK);
@@ -107,6 +187,8 @@ int x801::base::readZipped(
     block = nullptr;
   }
   (void) inflateEnd(&strm);
+  f.clear();
+  f.seekg(base + amtReadC);
   return ret;
 }
 

@@ -38,10 +38,10 @@ namespace x801 {
         x(x), y(y), z(z) {}
       BlockXYZ() : x(0), y(0), z(0) {}
       ChunkXYZ home() const {
-        return ChunkXYZ(x >> 4, y >> 4, z >> 4);
+        return ChunkXYZ(x >> 4, y >> 4, z);
       }
       BlockXYZ chunkLocal() const {
-        return BlockXYZ(x & 15, y & 15, z & 15);
+        return BlockXYZ(x & 15, y & 15, 0);
       }
       bool operator==(const BlockXYZ& that) const {
         return x == that.x && y == that.y && z == that.z;

@@ -1,0 +1,161 @@
+HitboxSize: 0.9 0.9 1.8
+# components section -- defines the components of the model
+@Components
+=Component The human's torso.
+Name: "torso"
+Parent: "ground"
+# The "ground" component is centred at the ground and has its axes at
+# straight-east, straight-north and straight-up.
+# To have our component face a different direction, we need to specify
+# an offset angle.
+# Since we're fine with the same axes anyway, we can just specify...
+OffsetAngle: "identity"
+# in terms of the parent component's axes
+OffsetCoordinates: 0 0 0.5
+# scale the xyz axes by some factor. This is absolute regardless of
+# the parent component, and provided for convenience.
+AxisScale: 0.3 0.15 0.8
+=Component The left leg.
+Name: "leftLeg"
+Parent: "torso"
+# Point the leg in the opposite direction by default.
+# Angles are in degrees CCW, looking from the origin toward
+# the positive end of the axis you're rotating around.
+OffsetAngle: "aroundXAxis" 180
+# Origin is at the bottom of the torso, but a little higher to
+# minimise gaps.
+OffsetCoordinates: -0.25 0 0.1
+# Scale axes to span the leg.
+AxisScale: 0.15 0.15 0.5
+# Control angle.
+# This doesn't need to be unique.
+# Net angle of child component =
+#   net angle of parent component * offset angle * control angle
+Control: "leftLeg"
+=Component The right leg.
+Name: "rightLeg"
+Parent: "torso"
+OffsetAngle: "aroundXAxis" 180
+OffsetCoordinates: 0.25 0 0.1
+AxisScale: 0.15 0.15 0.5
+Control: "rightLeg"
+=Component The left arm.
+Name: "leftArm"
+Parent: "torso"
+OffsetAngle: "aroundYAxis" 180
+# This means that our x ranges from 0 to 1 here.
+OffsetCoordinates: -0.3 0 1.2
+AxisScale: 0.15 0.15 1
+Control: "leftArm"
+=Component The right arm.
+Name: "rightArm"
+Parent: "torso"
+OffsetAngle: "aroundYAxis" -180
+# This means that our x ranges from 0 to 1 here.
+OffsetCoordinates: 0.3 0 1.2
+AxisScale: 0.15 0.15 1
+Control: "rightArm"
+=Component The head.
+Name: "head"
+Parent: "torso"
+OffsetAngle: "identity"
+OffsetCoordinates: 0 0 1.2
+AxisScale: 0.25 0.25 0.25
+Control: "head"
+# faces section -- defines faces that this model has
+@Faces
+UVDivisor: 64
+# This is equivalent to 12 Triangle declarations, or 6 Quads.
+# With this sugar, we can declare well-behaved cuboids lying within
+# one component easily.
+=CubeRanged torso
+# Specify ranges for component-local xyz.
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 1
+# 60 x 30 x 80 cm.
+# Here one unit is 5 cm.
+# Total space taken: (0, 0) to (12, 60)
+UVzp: 0 0 12 6
+UVzm: 0 6 12 12
+UVxp: 0 12 6 28
+UVxm: 6 12 12 28
+UVyp: 0 28 12 44
+UVym: 0 44 12 60
+Component: "torso"
+=CubeRanged left leg
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 1
+# 30 x 30 x 50 cm.
+# Here, too, one unit is 5 cm.
+# All UVs will be adjusted by this value.
+# Total space taken: (12, 0) to (24, 26)
+UVoffset: 12 0
+UVzp: 0 0 6 6
+UVzm: 6 0 12 6
+UVxp: 0 6 6 16
+UVxm: 6 6 12 16
+UVyp: 0 16 6 26
+UVym: 6 16 12 26
+Component: "leftLeg"
+=CubeRanged right leg
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 1
+# 30 x 30 x 50 cm.
+# Here, too, one unit is 5 cm.
+# Total space taken: (12, 26) to (24, 52)
+UVoffset: 12 26
+UVzp: 0 0 6 6
+UVzm: 6 0 12 6
+UVxp: 0 6 6 16
+UVxm: 6 6 12 16
+UVyp: 0 16 6 26
+UVym: 6 16 12 26
+Component: "rightLeg"
+=CubeRanged left arm
+XRange: 0 1
+YRange: -1 1
+ZRange: 0 1
+# 30 x 30 x 100 cm.
+# Here, too, one unit is 5 cm.
+# Total space taken: (24, 0) to (36, 46)
+UVoffset: 24 0
+UVzp: 0 0 6 6
+UVzm: 6 0 12 6
+UVxp: 0 6 6 26
+UVxm: 6 6 12 26
+UVyp: 0 26 6 46
+UVym: 6 26 12 46
+Component: "leftArm"
+=CubeRanged right arm
+XRange: 0 1
+YRange: -1 1
+ZRange: 0 1
+# 30 x 30 x 100 cm.
+# Here, too, one unit is 5 cm.
+# Total space taken: (36, 0) to (48, 46)
+UVoffset: 36 0
+UVzp: 0 0 6 6
+UVzm: 6 0 12 6
+UVxp: 0 6 6 26
+UVxm: 6 6 12 26
+UVyp: 0 26 6 46
+UVym: 6 26 12 46
+Component: "rightArm"
+=CubeRanged head
+XRange: -1 1
+YRange: -1 1
+ZRange: 0 2
+# 50 x 50 x 50 cm.
+# Here, too, one unit is 5 cm, so each faces is 10 x 10 units.
+# Total space taken: (48, 0) to (58, 60)
+UVoffset: 48 0
+UVzp: 0 0 10 10
+UVzm: 0 10 10 20
+UVxp: 0 20 10 30
+UVxm: 0 30 10 40
+UVyp: 0 40 10 50
+UVym: 0 50 10 60
+Component: "head"

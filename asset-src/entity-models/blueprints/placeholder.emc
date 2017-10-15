@@ -1,0 +1,8 @@
+@Parts
+=Part The only part there is.
+PartName: "human"
+# PartID: "human-1" # Use this if you have multiples of one part.
+Texture: "placeholder"
+Parent: ""
+OffsetAngle: "identity"
+OffsetCoordinates: 0 0 0

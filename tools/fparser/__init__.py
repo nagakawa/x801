@@ -49,6 +49,7 @@ def parse(source):
   mlCurrentString = ""
   dsCount = 0
   for line in source:
+    line = line.rstrip('\n')
     if mlStringNames: # we are in the middle of a multi-line string
       if line == mlStringNames[0][0]: # end of string
         li = mlStringNames[0][1]
@@ -57,7 +58,7 @@ def parse(source):
         mlCurrentString = ""
         mlStringNames = mlStringNames[1:]
       else:
-        mlCurrentString += line
+        mlCurrentString += line + '\n'
       continue
     line = line.strip()
     if re.match(commentRE, line): continue

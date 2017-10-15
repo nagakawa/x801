@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    enum ClientOrServer { HUH, CLIENT, SERVER };
+    enum ClientOrServer { HUH, CLIENT, SERVER, DB_ADD_USER };
     struct CLineConfig {
       ClientOrServer mode = HUH;
       std::string ip = "localhost";

@@ -1,6 +1,6 @@
-# Takes an mdf and an mda an creates a mod.
+# Takes an msf and creates a model.
 # Usage: python3 tools/model-compiler.py
-#   <something.mdf> <something.mda>
+#   <something.msf> <something.mdf>
 #   <something.tti>
 
 import argparse

@@ -28,7 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <Version.h>
 #include "QualifiedAreaID.h"
+#include "POISec.h"
 #include "TileSec.h"
+#include "XDatSec.h"
 
 namespace x801 {
   namespace map {
@@ -42,12 +44,18 @@ namespace x801 {
       int getError() const { return error; }
       QualifiedAreaID getQualifiedAreaID() const { return id; }
       TileSec& getTileSec() const { return *ts; }
+      XDatSec& getXDatSec() { return xs; }
+      POISec& getPOISec() { return ps; }
     private:
       x801::base::Version version;
       QualifiedAreaID id;
       TileSec* ts = nullptr;
+      XDatSec xs;
+      POISec ps;
       int readSection(std::istream& fh, bool dontCare);
       void writeTileSection(std::ostream& fh, int& ds) const;
+      void writeXDatSection(std::ostream& fh, int& ds) const;
+      void writePOISection(std::ostream& fh, int& ds) const;
       void writeSection(std::ostream& fh, uint32_t sectionID, const char* data, uint32_t len, int& ds) const;
       int error;
       int index;

@@ -30,8 +30,8 @@ namespace x801 {
   namespace game {
     const Location defaultLocation = {
       {0, 0},
-      0.0f, 0.0f, 0.0f,
-      0.0f
+      0.0f, 0.0f,
+      0, 0
     };
     class Player {
     public:

@@ -13,6 +13,7 @@ SET(Base_library_SRCS
   ${PROJECT_SOURCE_DIR}/utils.cpp
   ${PROJECT_SOURCE_DIR}/Version.cpp
   ${PROJECT_SOURCE_DIR}/CircularQueue.cpp
+  ${PROJECT_SOURCE_DIR}/pixelratio.cpp
 )
 
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})

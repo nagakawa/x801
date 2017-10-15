@@ -47,7 +47,30 @@
     "functional": "cpp",
     "tuple": "cpp",
     "utility": "cpp",
-    "system_error": "cpp"
+    "system_error": "cpp",
+    "bitset": "cpp",
+    "string_view": "cpp",
+    "valarray": "cpp",
+    "atomic": "cpp",
+    "chrono": "cpp",
+    "codecvt": "cpp",
+    "condition_variable": "cpp",
+    "iosfwd": "cpp",
+    "limits": "cpp",
+    "memory": "cpp",
+    "mutex": "cpp",
+    "ratio": "cpp",
+    "stdexcept": "cpp",
+    "complex": "cpp",
+    "fstream": "cpp",
+    "future": "cpp",
+    "iomanip": "cpp",
+    "istream": "cpp",
+    "optional": "cpp",
+    "ostream": "cpp",
+    "sstream": "cpp",
+    "streambuf": "cpp"
   },
-  "python.linting.pylintEnabled": false
+  "python.linting.pylintEnabled": false,
+  "python.formatting.provider": "autopep8"
 }

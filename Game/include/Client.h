@@ -43,6 +43,8 @@ namespace x801 {
 #include "window/patcher_views/MapView.h"
 #include "window/patcher_views/ModelView.h"
 #include "window/patcher_views/TextureView.h"
+#include "window/patcher_views/PartView.h"
+#include "window/patcher_views/BlueprintView.h"
 
 namespace x801 {
   namespace game {
@@ -121,6 +123,7 @@ namespace x801 {
         RakNet::Packet* p
       );
       void sendKeyInput(const KeyInput& input);
+      void switchAreaToCurrent();
       RakNet::RakPeerInterface* peer = nullptr;
       std::string ipAddress;
       bool useIPV6;
@@ -142,11 +145,14 @@ namespace x801 {
       TextureView* textureView = nullptr;
       ModelView* modelView = nullptr;
       MapView* mapView = nullptr;
+      PartView* partView = nullptr;
+      BlueprintView* blueprintView = nullptr;
       bool debug = false;
       int width = 1280;
       int height = 960;
       friend class ClientWindow;
       friend class TerrainRenderer;
+      friend class EntityRenderer;
     };
   }
 }

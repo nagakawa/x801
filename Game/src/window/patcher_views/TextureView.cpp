@@ -22,33 +22,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
 
-using namespace x801::game;
-
-std::shared_ptr<agl::Texture> x801::game::TextureView::getTexture(const std::string& name) {
-  mapMutex.lock_shared();
-  auto iterator = textures.find(name);
-  if (iterator != textures.end()) {
-    mapMutex.unlock_shared();
-    return iterator->second;
-  }
-  underlying->fetchFile(name.c_str());
-  uint32_t version, contentLength;
-  uint8_t* contents = nullptr;
-  bool status = underlying->getFileEntry(
-    name.c_str(),
-    version, contentLength, contents
-  );
-  mapMutex.unlock_shared();
-  if (status) {
-    boost::unique_lock<boost::shared_mutex> guard(mapMutex);
-    std::shared_ptr<agl::Texture> tex = std::make_shared<agl::Texture>(
-      contents, (int) contentLength
-    );
-    textures[name] = std::move(tex);
-    return textures[name];
-  } else {
-    std::cerr << "Requesting file " << name << "\n";
-    underlying->requestFile(name.c_str());
-    return nullptr;
+namespace x801 {
+  namespace game {
+    static agl::TexInitInfo opts = {GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, true, false, false};
+    boost::optional<agl::Texture>
+        TextureView::getTextureTransient(const std::string& name) {
+      std::cerr << "Getting texture " << name << "\n";
+      underlying->fetchFile(name.c_str());
+      uint32_t version, contentLength;
+      uint8_t* contents = nullptr;
+      bool status = underlying->getFileEntry(
+        name.c_str(),
+        version, contentLength, contents
+      );
+      if (status)
+        return agl::Texture(contents, (int) contentLength, opts);
+      return boost::none;
+    }
+    agl::Texture* TextureView::getTexture(const std::string& name) {
+      mapMutex.lock_shared();
+      auto iterator = textures.find(name);
+      if (iterator != textures.end()) {
+        mapMutex.unlock_shared();
+        return &(iterator->second);
+      }
+      mapMutex.unlock_shared();
+      auto texopt = getTextureTransient(name);
+      if (texopt) {
+        boost::unique_lock<boost::shared_mutex> guard(mapMutex);
+        textures[name] = std::move(*texopt);
+        return &(textures[name]);
+      } else {
+        std::cerr << "Requesting file " << name << "\n";
+        underlying->requestFile(name.c_str());
+        return nullptr;
+      }
+    }
+    void TextureView::purge(const std::string& name) {
+      textures.erase(name);
+    }
   }
 }

@@ -25,8 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <zlib.h>
 #include <boost/functional/hash.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include "portable_endian.h"
 
 // Since I expect Int and UInt to be used frequently,
@@ -34,6 +37,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 typedef int_fast32_t Int;
 typedef uint_fast32_t UInt;
+
+// C++17 or up doesn't support `register`
+#if __cplusplus > 201402L
+#define REGISTER
+#else
+#define REGISTER register
+#endif
 
 #define DEFINE_OFFSETS_AND_FLAGS(type, name, offsetValue) \
   const type OFFSET#name = offsetValue; \
@@ -53,18 +63,48 @@ namespace x801 {
         "convLEW has not been specialised for this type");
       return 0;
     }
+    template<typename T> T convBER(T) {
+      static_assert(assert_false<T>::value,
+        "convBER has not been specialised for this type");
+      return 0;
+    }
+    template<typename T> T convBEW(T) {
+      static_assert(assert_false<T>::value,
+        "convBEW has not been specialised for this type");
+      return 0;
+    }
+    template<> uint8_t convLER<uint8_t>(uint8_t x);
     template<> uint16_t convLER<uint16_t>(uint16_t x);
     template<> uint32_t convLER<uint32_t>(uint32_t x);
     template<> uint64_t convLER<uint64_t>(uint64_t x);
+    template<> uint8_t convLEW<uint8_t>(uint8_t x);
     template<> uint16_t convLEW<uint16_t>(uint16_t x);
     template<> uint32_t convLEW<uint32_t>(uint32_t x);
     template<> uint64_t convLEW<uint64_t>(uint64_t x);
+    template<> int8_t convLER<int8_t>(int8_t x);
     template<> int16_t convLER<int16_t>(int16_t x);
     template<> int32_t convLER<int32_t>(int32_t x);
     template<> int64_t convLER<int64_t>(int64_t x);
+    template<> int8_t convLEW<int8_t>(int8_t x);
     template<> int16_t convLEW<int16_t>(int16_t x);
     template<> int32_t convLEW<int32_t>(int32_t x);
     template<> int64_t convLEW<int64_t>(int64_t x);
+    template<> uint8_t convBER<uint8_t>(uint8_t x);
+    template<> uint16_t convBER<uint16_t>(uint16_t x);
+    template<> uint32_t convBER<uint32_t>(uint32_t x);
+    template<> uint64_t convBER<uint64_t>(uint64_t x);
+    template<> uint8_t convBEW<uint8_t>(uint8_t x);
+    template<> uint16_t convBEW<uint16_t>(uint16_t x);
+    template<> uint32_t convBEW<uint32_t>(uint32_t x);
+    template<> uint64_t convBEW<uint64_t>(uint64_t x);
+    template<> int8_t convBER<int8_t>(int8_t x);
+    template<> int16_t convBER<int16_t>(int16_t x);
+    template<> int32_t convBER<int32_t>(int32_t x);
+    template<> int64_t convBER<int64_t>(int64_t x);
+    template<> int8_t convBEW<int8_t>(int8_t x);
+    template<> int16_t convBEW<int16_t>(int16_t x);
+    template<> int32_t convBEW<int32_t>(int32_t x);
+    template<> int64_t convBEW<int64_t>(int64_t x);
     template<typename T> T readInt(std::istream& fh) {
       T val;
       fh.read(reinterpret_cast<char*> (&val), sizeof(T));
@@ -74,6 +114,30 @@ namespace x801 {
       val = convLEW(val);
       fh.write(reinterpret_cast<char*> (&val), sizeof(T));
     }
+    float readFloat(std::istream& fh);
+    void writeFloat(std::ostream& fh, float x);
+    template<typename T> std::string readString(std::istream& fh) {
+      T len = readInt<T>(fh);
+      std::string s(len, '\0'); // empty string with len characters
+      fh.read(&s[0], len);
+      return s;
+    }
+    template<typename T> void writeString(std::ostream& fh, const std::string& s) {
+      intmax_t len = s.length();
+      if (len > std::numeric_limits<T>::max()) {
+        throw std::string("Length exceeds limit: max is ") +
+          std::to_string(std::numeric_limits<T>::max()) +
+          " but given " + std::to_string(len);
+      }
+      writeInt<T>(fh, static_cast<T> (len));
+      fh.write(&s[0], len);
+    }
+    glm::quat readQuaternion(std::istream& fh);
+    void writeQuaternion(std::ostream& fh, const glm::quat& q);
+    glm::vec3 readVec3(std::istream& fh);
+    void writeVec3(std::ostream& fh, const glm::vec3& v);
+    glm::vec2 readVec2(std::istream& fh);
+    void writeVec2(std::ostream& fh, const glm::vec2& v);
     std::stringstream fromCharArray(char* array, unsigned int size);
     template<int len> std::string construct(
         const char (&s)[len],
@@ -131,5 +195,25 @@ namespace x801 {
     std::string getPathOfCurrentExecutable();
 
     bool canBeConvertedToPositiveInt(const char* s, int* out = nullptr);
+#ifndef NDEBUG
+#define XTRACE(...) ::x801::base::ftrace(__FILE__, __LINE__, __VA_ARGS__)
+    inline void trace() {
+      std::cout << '\n';
+    }
+    template<typename T, typename... U>
+    inline void trace(T arg0, U... args) {
+      std::cout << arg0;
+      trace(args...);
+    }
+    template<typename... T>
+    inline void ftrace(const char* file, int line, T... args) {
+      std::cout << file << ":" << line << ": ";
+      trace(args...);
+    }
+#else
+#define XTRACE(...)
+    template<typename... T>
+    inline void trace(T... /*args*/) {}
+#endif
   }
 }

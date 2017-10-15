@@ -206,6 +206,10 @@ bool x801::game::Client::handleLPacket(
   return true;
 }
 
+void x801::game::Client::switchAreaToCurrent() {
+  g.currentArea.setArea(mapView->getArea(g.selfPosition.areaID));
+}
+
 static const double GAP = 10e-3;
 static const double THRESH = 2e-3;
 
@@ -342,6 +346,7 @@ void x801::game::Client::processUsernameResponse(
     g.addUserUnsynchronised(userID, username);
   }
   g.lookupMutex.unlock();
+  cw->em->updateUsernames();
 }
 
 std::string x801::game::Client::getUsername(uint32_t id) {
@@ -365,9 +370,6 @@ void x801::game::Client::sendChatMessage(const char* message) {
     &stream, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
     RakNet::UNASSIGNED_RAKNET_GUID, true
   );
-  textureView->getTexture("textures/terrain/blocks.png");
-  modelView->getMAI();
-  modelView->getMFI();
 }
 
 void x801::game::Client::processFilehostURIResponse(
@@ -381,6 +383,8 @@ void x801::game::Client::processFilehostURIResponse(
   textureView = new TextureView(patcher);
   modelView = new ModelView(patcher);
   mapView = new MapView(patcher);
+  partView = new PartView(patcher);
+  blueprintView = new BlueprintView(patcher);
 }
 
 static const char* statusMessages[] = {
@@ -426,20 +430,29 @@ void x801::game::Client::processMovement(
   RakNet::BitStream stream(lbody, llength, false);
   uint32_t playerCount;
   stream.Read(playerCount);
+  g.locationMutex.lock();
+  // XXX this is slightly hackish
+  g.purgePlayersUnsynchronised();
   for (size_t i = 0; i < playerCount; ++i) {
     uint32_t playerID;
-    int32_t xfix, yfix, tfix;
+    int32_t xfix, yfix;
     stream.Read(playerID);
+    Player& p = g.getPlayerUnsynchronised(playerID);
+    Location& l = p.getLocation();
     stream.Read(xfix);
     stream.Read(yfix);
-    stream.Read(tfix);
-    Player& p = g.getPlayer(playerID);
-    Location& l = p.getLocation();
+    uint8_t t;
+    int8_t z;
+    stream.Read(t);
+    stream.Read(z);
     l.x = xfix / 65536.0f;
     l.y = yfix / 65536.0f;
-    l.rot = 2 * M_PI * tfix / (65536.0f * 65536.0f);
-    // std::cerr << playerID << " " <<  xfix << " " << yfix << " " << tfix << '\n';
+    l.z = z;
+    l.rot = t;
+    // std::cerr << playerID << "\n";
+    // std::cerr << playerID << " " <<  xfix << " " << yfix << " " << l.rot << '\n';
   }
+  g.locationMutex.unlock();
   g.selfPositionMutex.lock();
   g.locationMutex.lock_shared();
   auto it = g.playersByID.find(g.myID);
@@ -537,7 +550,7 @@ void x801::game::Client::sendKeyInput(const KeyInput& input) {
 void x801::game::Client::openWindow() {
   glfwInit();
   if (debug)
-    cw = new ClientWindow(width, height, 0, 0, "Experiment801 (live debug)", 4, 5, true);
+    cw = new ClientWindow(width, height, 0, 0, "Experiment801 (live debug)", 4, 3, true);
   else
     cw = new ClientWindow(width, height, 0, 0, "Experiment801", 3, 3, false);
   cw->c = this;
@@ -561,4 +574,6 @@ x801::game::Client::~Client() {
   delete patcher;
   delete textureView;
   delete modelView;
+  delete partView;
+  delete blueprintView;
 }

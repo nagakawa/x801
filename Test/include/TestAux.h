@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <string.h>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -91,6 +92,21 @@ namespace x801 {
       feed(ss, b);
       std::string s = ss.str();
       assertPrivate(a == b, what, file, line, func, s.c_str());
+    }
+    template<typename T> void assertApproximatePrivate(
+        T a, T b, T e,
+        const char* what,
+        const char* file,
+        int line,
+        const char* func) {
+      std::stringstream ss;
+      feed(ss, a);
+      ss << " is approximately equal to ";
+      feed(ss, b);
+      ss << " with error ";
+      feed(ss, e);
+      std::string s = ss.str();
+      assertPrivate(std::abs(a - b) <= e, what, file, line, func, s.c_str());
     }
     void assertEqualPrivate(
         const char* a, const char* b,

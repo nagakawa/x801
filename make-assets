@@ -8,16 +8,20 @@ substDirListTs1 = $(foreach dir, $(1), \
 	$(patsubst %.$(2), %.$(3), \
 	$(patsubst asset-src/models/functions/%, asset-temp/models/%, $(wildcard $(dir)/*.$(2)))))
 
-all: maps terrain models
+all: maps terrain entity-sprites
 	python3 tools/rebuild-index.py
+
+## MAPS ###
 
 maps: $(call substDirList,asset-src/maps,msf,map)
 
-assets/maps/%.map: asset-src/maps/%.msf models
+assets/maps/%.map: asset-src/maps/%.msf
 	mkdir -p assets/maps
-	python3 tools/compile-map.py --level=9 $< asset-temp/models/applications.tab $@
+	python3 tools/compile-map.py --level=9 $< asset-src/textures/terrain/gimpfiles/blocknames.tti asset-src/textures/decorations/gimpfiles/blocknames.tti $@
 
-terrain: assets/textures/terrain/blocks.png
+## TERRAIN AND DECORATIONS ##
+
+terrain: assets/textures/terrain/blocks.0.png assets/textures/decorations/blocks.0.png
 
 terrain-pngs: $(call substDirListT,asset-src/textures/terrain/gimpfiles,xcf,png)
 
@@ -25,31 +29,36 @@ asset-temp/textures/terrain/gimpfiles/%.png: asset-src/textures/terrain/gimpfile
 	mkdir -p asset-temp/textures/terrain/gimpfiles
 	xcf2png $< > $@
 
-assets/textures/terrain/blocks.png: terrain-pngs
+assets/textures/terrain/blocks.0.png: terrain-pngs
 	mkdir -p assets/textures/terrain
-	python3 tools/autostitch.py assets/textures/terrain/blocks.png assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
+	python3 tools/autostitch.py assets/textures/terrain/blocks asset-src/textures/terrain/gimpfiles/blocknames.tti assets/textures/terrain/blocks.tti asset-temp/textures/terrain/gimpfiles
 
-models: terrain modfuncs modapps assets/models/all.mfi assets/models/all.mai
+decoration-pngs: $(call substDirListT,asset-src/textures/decorations/gimpfiles,xcf,png)
 
-assets/models/all.mfi: modfuncs
-	mkdir -p asset-temp/models assets/models
-	python3 tools/model-archiver.py asset-temp/models/functions/ assets/models/all.mfi asset-temp/models/functions.tab
+asset-temp/textures/decorations/gimpfiles/%.png: asset-src/textures/decorations/gimpfiles/%.xcf
+	mkdir -p asset-temp/textures/decorations/gimpfiles
+	xcf2png $< > $@
 
-modfuncs: $(call substDirListT,asset-src/models/functions,mdf,cmf)
+assets/textures/decorations/blocks.0.png: decoration-pngs
+	mkdir -p assets/textures/decorations
+	python3 tools/autostitch.py assets/textures/decorations/blocks asset-src/textures/decorations/gimpfiles/blocknames.tti assets/textures/decorations/blocks.tti asset-temp/textures/decorations/gimpfiles
 
-asset-temp/models/functions/%.cmf: asset-src/models/functions/%.mdf
-	mkdir -p asset-temp/models/ftables asset-temp/models/functions
-	python3 tools/model-compiler.py $< $@ $(patsubst asset-temp/models/functions/%.cmf, asset-temp/models/ftables/%.tab, $@)
+## ENTITY SPRITES ##
 
-assets/models/all.mai: modapps
-	mkdir -p assets/models
-	python3 tools/model-archiver.py asset-temp/models/applications/ assets/models/all.mai asset-temp/models/applications.tab --magic XMDA --extension cma
+entity-sprites: assets/textures/entity/entities.0.png
 
-modapps: modfuncs $(call substDirListT,asset-src/models/applications,mda,cma)
+assets/textures/entity/entities.0.png: entity-pngs
+	mkdir -p assets/textures/entity
+	python3 tools/autostitch.py assets/textures/entity/entities "*" assets/textures/entity/entities.tti asset-temp/textures/entity/gimpfiles
 
-asset-temp/models/applications/%.cma: asset-src/models/applications/%.mda
-	mkdir -p asset-temp/models/applications
-	python3 tools/model-app-compiler.py $< asset-temp/models/functions.tab asset-temp/models/ftables/ assets/textures/terrain/blocks.tti $@
+entity-pngs: $(call substDirListT,asset-src/textures/entity/gimpfiles,xcf,png)
+
+asset-temp/textures/entity/gimpfiles/%.png: asset-src/textures/entity/gimpfiles/%.xcf
+	mkdir -p asset-temp/textures/entity/gimpfiles
+	xcf2png $< > $@
+
+clean:
+	rm -rf asset-temp assets
 
 yukkuri:
 	@echo "ゆっくりしていってね！"

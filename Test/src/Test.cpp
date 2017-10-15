@@ -27,6 +27,7 @@ using namespace x801::test;
 #include <stdlib.h>
 #include <string.h>
 #include <exception>
+#include <fstream>
 #include <sstream>
 #include <vector>
 #include <boost/filesystem.hpp>
@@ -34,6 +35,7 @@ using namespace x801::test;
 #include <Chunk.h>
 #include <CircularQueue.h>
 #include <Database.h>
+#include <EntityModel.h>
 #include <Location.h>
 #include <Model.h>
 #include <TileSec.h>
@@ -54,6 +56,8 @@ int main(int argc, char** argv) {
     return 0;
   } else runAll(parts, partCount, arg, isDefault);
   summary();
+  return (TestDiag::current.passedTests == TestDiag::current.totalTests)
+    ? 0 : -1;
 }
 
 void testSystem() {
@@ -141,22 +145,20 @@ void testChunkIO() {
   assertEqual(chunk.isEmpty(), false, "Chunk should not be empty");
   x801::map::Block wall(0x80000001);
   x801::map::Block space(0);
-  x801::map::Block shouldBeWall = chunk.getMapBlockAt(0, 5, 3);
+  x801::map::Block shouldBeWall = chunk.getMapBlockAt(0, 5);
   assertEqual(shouldBeWall, wall, "Wall on west edge");
-  shouldBeWall = chunk.getMapBlockAt(15, 7, 2);
+  shouldBeWall = chunk.getMapBlockAt(15, 7);
   assertEqual(shouldBeWall, wall, "Wall on east edge");
-  shouldBeWall = chunk.getMapBlockAt(6, 0, 1);
+  shouldBeWall = chunk.getMapBlockAt(6, 0);
   assertEqual(shouldBeWall, wall, "Wall on north edge");
-  shouldBeWall = chunk.getMapBlockAt(3, 15, 2);
+  shouldBeWall = chunk.getMapBlockAt(3, 15);
   assertEqual(shouldBeWall, wall, "Wall on south edge");
-  shouldBeWall = chunk.getMapBlockAt(7, 9, 0);
-  assertEqual(shouldBeWall, wall, "Wall on floor (wtf?)");
-  x801::map::Block shouldBeSpace = chunk.getMapBlockAt(5, 5, 7);
+  x801::map::Block shouldBeSpace = chunk.getMapBlockAt(5, 5);
   assertEqual(shouldBeSpace, space, "Space in center");
-  chunk.setMapBlockAt(5, 5, 7, wall);
-  shouldBeWall = chunk.getMapBlockAt(5, 5, 7);
+  chunk.setMapBlockAt(5, 5, wall);
+  shouldBeWall = chunk.getMapBlockAt(5, 5);
   assertEqual(shouldBeWall, wall, "Newly-set wall");
-  chunk.setMapBlockAt(5, 5, 7, space); // Revert the change
+  chunk.setMapBlockAt(5, 5, space); // Revert the change
   std::stringstream output(std::ios_base::out | std::ios_base::binary);
   chunk.write(output);
   assertEqual(output.str(), s, "Input and output match");
@@ -180,7 +182,7 @@ void testTileSecIO() {
   x801::map::TileSec ts(input);
   x801::map::Block wall(0x80000001);
   x801::map::Block shouldBeWall =
-    ts.getBlock(x801::map::BlockXYZ(35, 63, -30));
+    ts.getBlock(x801::map::BlockXYZ(35, 63, -2));
   assertEqual(shouldBeWall, wall, "Wall on south edge of chunk 1");
   std::stringstream output(std::ios_base::out | std::ios_base::binary);
   ts.write(output);
@@ -191,13 +193,20 @@ void testAreaIO() {
   // Make a chunk map.
   std::string s = x801::base::construct(
     "XMap" // magic number
-    "\x00\x00\x00\x00\x00\x00\x00\x00" // version
+    "\x00\x00\x00\x00\x02\x00\x00\x00" // version
     "\x03\x00\x03\x00" // World 3 Area 3
-    "\x01\x00\x00\x00" // This world has one data section.
+    "\x03\x00\x00\x00" // This world has 2 data sections.
     // Data Section 0
-    "TIL3" // id
-    "\x12\x80\x00\x00" // this is 32786 bytes long
-    "\x00\x00\x00\x00"
+    "XDAT" // id
+    "\x11\x00\x00\x00" // this is 17 bytes long
+    "\x00\x00\x00\x00" // don't care
+    "\x05\x00" "bepis" // World name
+    "\x05\x00" "bepis" // Area name
+    "\x00\x00\xff" // Sky is perfectly blue
+    // Data Section 1
+    "TIL2" // id
+    "\x12\x08\x00\x00" // this is 2066 bytes long
+    "\x00\x00\x00\x00" // don't care
     "\x02\x00"
     // Chunk 1
     "\x02\x00\x03\x00\xfe\xff" // Location
@@ -207,6 +216,19 @@ void testAreaIO() {
     "\x03\x00\x03\x00\xfe\xff" // Location
     "\x00\x00" // Not empty
     A_CHUNK
+    // Data Section 2
+    "pOIS" // id
+    "\x2a\x00\x00\x00" // this is 42 bytes long
+    "\x00\x00\x00\x00" // don't care
+    "\x02\x00" // 2 POIs
+    "\x05\x00\x05\x00\x00" // (5, 5, 0)
+    "\x01" // with NPC
+    "\x0b\x00" "placeholder" // texname
+    "\x00" // offset = 0
+    "\x05\x00" "bepis" // title
+    "\x05\x00" "bepis" // name
+    "\x0f\x00\x0f\x00\x00" // (15, 15, 0)
+    "\x00" // empty
   );
   std::stringstream input(s, std::ios_base::in | std::ios_base::binary);
   x801::map::Area area(input, true);
@@ -217,6 +239,12 @@ void testAreaIO() {
   // feed(std::cout, str);
   x801::map::Area area2(output);
   assertEqual(area2.getError(), x801::map::MAPERR_OK, "Map should be read without error");
+  assertEqual(area2.getXDatSec().worldName, "bepis", "World name is correct");
+  const x801::map::POISec& ps = area2.getPOISec();
+  assertEqual(ps.pois.size(), 2U, "2 POIs");
+  assertEqual(ps.pois.at(0).x, 5, "1st POI has x = 5");
+  assertEqual(ps.entityPOIs.at(0).name, "bepis", "1st POI has correct name");
+  assertEqual(ps.entityPOIs.count(1), 0U, "2nd POI is empty");
   std::stringstream output2(std::ios_base::out | std::ios_base::binary);
   area2.write(output2);
   assertEqual(output.str(), output2.str(), "Outputs match");
@@ -251,7 +279,7 @@ void testDBAuth() {
   assertEqual(id, 0, "User Dworgyn does not exist, so 0 is returned");
   x801::game::Location locationOfUruwi = {
     { 0, 0 }, // Presumably messing around in the x801 counterpart of the Commons?
-    3.7f, 9.2f, 0.0f, -0.14f
+    3.7f, 9.2f, 0, 1
   };
   db.savePlayerLocation(1, locationOfUruwi);
   x801::game::Location shouldBeSame;
@@ -308,87 +336,6 @@ void testCircularQueue() {
     "Same element has index that is one less than before front was popped");
 }
 
-void testModelFunctionIO() {
-  using namespace std::literals::string_literals;
-  // Taken from block.cmf
-  std::string bdata =
-    "\x01\x00\x3F\x06\x08\x00\x0C\x00\xC0\xC0\x40\x40\xC0\x40\x40\x40"
-    "\x40\xC0\x40\x40\x40\xC0\xC0\xC0\xC0\xC0\xC0\x40\xC0\x40\x40\xC0"
-    "\x00\x00\x01\x00\x02\x00\x00\x00\x80\x00\x80\x80\x00\x01\x02\x00"
-    "\x03\x00\x00\x00\x80\x80\x00\x80\x00\x00\x00\x01\x04\x00\x05\x00"
-    "\x06\x00\x00\x80\x80\x00\x80\x80\x01\x02\x06\x00\x07\x00\x04\x00"
-    "\x80\x80\x00\x80\x00\x80\x01\x02\x02\x00\x03\x00\x06\x00\x00\x00"
-    "\x80\x00\x80\x80\x02\x04\x06\x00\x07\x00\x02\x00\x80\x80\x00\x80"
-    "\x00\x00\x02\x04\x00\x00\x01\x00\x04\x00\x00\x00\x80\x00\x80\x80"
-    "\x03\x08\x04\x00\x05\x00\x00\x00\x80\x80\x00\x80\x00\x00\x03\x08"
-    "\x01\x00\x02\x00\x07\x00\x00\x00\x80\x00\x80\x80\x04\x10\x07\x00"
-    "\x04\x00\x01\x00\x80\x80\x00\x80\x00\x00\x04\x10\x03\x00\x00\x00"
-    "\x05\x00\x00\x00\x80\x00\x80\x80\x05\x20\x05\x00\x06\x00\x03\x00"
-    "\x80\x80\x00\x80\x00\x00\x05\x20"
-    ""s;
-  std::stringstream input(bdata);
-  x801::map::ModelFunction block(input);
-  assertEqual(block.hitboxType, x801::map::HitboxType::HITBOX_FULL,
-    "Read that this is a full block");
-  assertEqual(block.textureCount, 6, "Uses 6 textures");
-  // First vertex is nnp.
-  assertEqual(block.vertices[0].x, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].y, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].z, 64, "Vertex 0 has X of +64 (+0.5)");
-  // First face is 0 - 1 - 2
-  assertEqual(block.faces[0].vertices[0].index, 0,
-    "First vertex of face 0 is vertex 0");
-  assertEqual(block.faces[0].vertices[0].u, 0,
-    "First vertex of face 0 has u = 0");
-  assertEqual(block.faces[0].vertices[0].v, 0,
-    "First vertex of face 0 has v = 0");
-  std::stringstream output;
-  block.write(output);
-  std::string outData = output.str();
-  assertEqual(outData, bdata, "Input and output are equal");
-}
-
-void testModelFunctionIndexIO() {
-  using namespace std::literals::string_literals;
-  std::string adata =
-    "\x58\x4D\x44\x46\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00"
-    "\x01\x00\x3F\x06\x08\x00\x0C\x00\xC0\xC0\x40\x40\xC0\x40\x40\x40"
-    "\x40\xC0\x40\x40\x40\xC0\xC0\xC0\xC0\xC0\xC0\x40\xC0\x40\x40\xC0"
-    "\x00\x00\x01\x00\x02\x00\x00\x00\x80\x00\x80\x80\x00\x01\x02\x00"
-    "\x03\x00\x00\x00\x80\x80\x00\x80\x00\x00\x00\x01\x04\x00\x05\x00"
-    "\x06\x00\x00\x80\x80\x00\x80\x80\x01\x02\x06\x00\x07\x00\x04\x00"
-    "\x80\x80\x00\x80\x00\x80\x01\x02\x02\x00\x03\x00\x06\x00\x00\x00"
-    "\x80\x00\x80\x80\x02\x04\x06\x00\x07\x00\x02\x00\x80\x80\x00\x80"
-    "\x00\x00\x02\x04\x00\x00\x01\x00\x04\x00\x00\x00\x80\x00\x80\x80"
-    "\x03\x08\x04\x00\x05\x00\x00\x00\x80\x80\x00\x80\x00\x00\x03\x08"
-    "\x01\x00\x02\x00\x07\x00\x00\x00\x80\x00\x80\x80\x04\x10\x07\x00"
-    "\x04\x00\x01\x00\x80\x80\x00\x80\x00\x00\x04\x10\x03\x00\x00\x00"
-    "\x05\x00\x00\x00\x80\x00\x80\x80\x05\x20\x05\x00\x06\x00\x03\x00"
-    "\x80\x80\x00\x80\x00\x00\x05\x20"
-    ""s;
-  std::stringstream input(adata);
-  x801::map::ModelFunctionIndex all(input);
-  x801::map::ModelFunction& block = all.models[0];
-  assertEqual(block.hitboxType, x801::map::HitboxType::HITBOX_FULL,
-    "Read that the first block is a full block");
-  assertEqual(block.textureCount, 6, "Uses 6 textures");
-  // First vertex is nnp.
-  assertEqual(block.vertices[0].x, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].y, -64, "Vertex 0 has X of -64 (-0.5)");
-  assertEqual(block.vertices[0].z, 64, "Vertex 0 has X of +64 (+0.5)");
-  // First face is 0 - 1 - 2
-  assertEqual(block.faces[0].vertices[0].index, 0,
-    "First vertex of face 0 is vertex 0");
-  assertEqual(block.faces[0].vertices[0].u, 0,
-    "First vertex of face 0 has u = 0");
-  assertEqual(block.faces[0].vertices[0].v, 0,
-    "First vertex of face 0 has v = 0");
-  std::stringstream output;
-  all.write(output);
-  std::string outData = output.str();
-  assertEqual(outData, adata, "Input and output are equal");
-}
-
 const char* x801::test::DEFAULT = "default";
 const Test x801::test::parts[] = {
   {"testSystem", testSystem, false},
@@ -402,8 +349,6 @@ const Test x801::test::parts[] = {
   {"area", testAreaIO, true},
   {"dbAuth", testDBAuth, true},
   {"circularQueue", testCircularQueue, true},
-  {"modelFunctionIO", testModelFunctionIO, true},
-  {"modelFunctionIndexIO", testModelFunctionIndexIO, true},
 };
 const int x801::test::partCount = sizeof(parts) / sizeof(*parts);
 

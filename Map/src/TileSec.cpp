@@ -48,7 +48,7 @@ Block x801::map::TileSec::getBlock(const BlockXYZ& xyz) {
   if (ci == chunks.end()) return Block();
   Chunk& c = ci->second;
   BlockXYZ clc = xyz.chunkLocal();
-  return c.getMapBlockAt(clc.x, clc.y, clc.z);
+  return c.getMapBlockAt(clc.x, clc.y);
 }
 
 void x801::map::TileSec::setBlock(const BlockXYZ& xyz, Block b) {
@@ -58,7 +58,7 @@ void x801::map::TileSec::setBlock(const BlockXYZ& xyz, Block b) {
   }
   Chunk& c = ci->second;
   BlockXYZ clc = xyz.chunkLocal();
-  c.setMapBlockAt(clc.x, clc.y, clc.z, b);
+  c.setMapBlockAt(clc.x, clc.y, b);
 }
 
 void x801::map::TileSec::createChunk(const ChunkXYZ& xyz) {
