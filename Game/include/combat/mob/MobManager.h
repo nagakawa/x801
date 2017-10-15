@@ -83,6 +83,9 @@ namespace x801 {
       void forEach(std::function<void(Mob&)> cb);
       // void forEachOver(std::function<void(Mob&, OverheadName&)> cb);
       void advanceFrame(float s);
+      zekku::QuadTree<Mob,
+        uint16_t, float, zekku::QUADTREE_NODE_COUNT,
+        MobGetXY>& getMobs() { return mobs; }
     private:
       mutable boost::shared_mutex entityMutex;
       zekku::QuadTree<Mob,
@@ -100,6 +103,11 @@ namespace x801 {
     public:
       MobManager(x801::map::PathSec&& ps, GameState* gs);
       void advanceFrame(float s);
+      using PI = std::unordered_multimap<int, MobPath>::iterator;
+      std::pair<PI, PI> getPathRange(int z) {
+        return paths.equal_range(z);
+      }
+      PI pathEnd() { return paths.end(); }
     private:
       std::unordered_multimap<int, MobPath> paths;
       GameState* gs;

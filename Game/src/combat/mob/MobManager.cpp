@@ -32,17 +32,21 @@ namespace x801 {
   namespace game {
     static constexpr float SPAWN_DELAY = 2.5f;
     Mob& MobPath::getEntity(zekku::Handle<> id) {
+      boost::shared_lock<boost::shared_mutex> guard(entityMutex);
       return mobs.deref(id);
     }
     void MobPath::deleteEntity(zekku::Handle<> id) {
+      boost::unique_lock<boost::shared_mutex> guard(entityMutex);
       mobs.deref(id).marked = true;
     }
     void MobPath::forEach(std::function<void(Mob&)> cb) {
+      boost::unique_lock<boost::shared_mutex> guard(entityMutex);
       mobs.querym(zekku::QueryAll<float>(), [cb](Mob& mob) {
         cb(mob);
       });
     }
     void MobPath::advanceFrame(float s) {
+      boost::unique_lock<boost::shared_mutex> guard(entityMutex);
       auto mapcond = [this, s](const Mob& m) {
         Mob m2 = m;
         m2.advanceFrame(s, path);
@@ -64,7 +68,11 @@ namespace x801 {
         Mob m;
         m.pos = { path.vertices[0].x, path.vertices[0].y };
         m.progress = 0.0f;
-        m.info = manager->gs->getMobInfo(path.mobNames[index]);
+        std::string name = path.mobNames[index];
+        m.info = manager->gs->getMobInfo(name);
+        if (m.info == nullptr) {
+          throw std::string("missing info of ") + name;
+        }
         mobs.insert(m);
       }
     }

@@ -138,7 +138,10 @@ namespace x801 {
         return mi;
       }
       miMutex.unlock_shared();
-      std::ifstream fh("assets/mobs/" + name + ".mob");
+      std::ifstream fh("assets/mobs/" + name + ".mob", std::ios_base::binary);
+      if (!fh.is_open()) {
+        return nullptr;
+      }
       std::unique_ptr<MobInfo> umi = std::make_unique<MobInfo>(fh);
       miMutex.lock();
       mobInfos[name] = std::move(umi);

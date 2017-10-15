@@ -505,6 +505,93 @@ void x801::game::Server::broadcastLocationsTo(
   area->playerMutex.unlock_shared();
 }
 
+void x801::game::Server::broadcastEnemyLocationsTo(
+    const std::unique_ptr<AreaWithPlayers>& area) {
+  // First, collect all the z's
+  std::unordered_set<int> zs;
+  // Send packets to those who deserve them
+  auto begin = area->playerBegin();
+  auto end = area->playerEnd();
+  area->playerMutex.lock_shared();
+  for (auto it = begin; it != end; ++it) {
+    const Location& loc = g.allPlayers.at(*it).getLocation();
+    zs.insert(loc.z);
+  }
+  area->playerMutex.unlock_shared();
+  for (int z : zs) broadcastEnemyLocationsTo(area, z);
+}
+
+void x801::game::Server::broadcastEnemyLocationsTo(
+    const std::unique_ptr<AreaWithPlayers>& area,
+    int z) {
+  if (area->mman == nullptr) return;
+  auto its = area->mman->getPathRange(z);
+  if (its.first == area->mman->pathEnd()) return;
+  RakNet::BitStream output;
+  output.Write(static_cast<uint8_t>(ID_TIMESTAMP));
+  output.Write(RakNet::GetTime());
+  output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  output.Write(static_cast<uint16_t>(LPACKET_ENEMY));
+  // Both # of enemy names and # of enemies are unknown.
+  // We will fill them in when we know them.
+  size_t nEnemyNames = 0;
+  std::unordered_map<std::string, size_t> indicesByName;
+  std::vector<std::string> namesByIndices;
+  std::vector<std::pair<size_t, Location>> enemyLocations;
+  for (auto it = its.first; it != its.second; ++it) {
+    auto& mobs = it->second.getMobs();
+    mobs.query(zekku::QueryAll<float>(),
+        [&indicesByName, &enemyLocations,
+          &nEnemyNames, &namesByIndices, z](const Mob& m) {
+      // Whew!
+      const std::string& name = m.info->id;
+      size_t index;
+      if (indicesByName.count(name) == 0) {
+        indicesByName[name] = (index = nEnemyNames++);
+        namesByIndices.push_back(name);
+      } else {
+        index = indicesByName[name];
+      }
+      enemyLocations.push_back({
+        index,
+        {
+          { 0, 0 },
+          m.pos.x, m.pos.y,
+          z, 0
+        }
+      });
+    });
+  }
+  output.Write((uint16_t) nEnemyNames);
+  output.Write((uint16_t) enemyLocations.size());
+  for (size_t i = 0; i < nEnemyNames; ++i)
+    writeStringToBitstream16(output, namesByIndices[i]);
+  for (const auto& p : enemyLocations) {
+    output.Write((uint16_t) p.first);
+    const Location& loc = p.second;
+    int32_t xfix = (int32_t) (loc.x * 65536.0f);
+    int32_t yfix = (int32_t) (loc.y * 65536.0f);
+    output.Write(xfix);
+    output.Write(yfix);
+    output.Write((uint8_t) loc.rot);
+    output.Write((uint8_t) loc.z);
+  }
+  // Send packets to those who deserve them
+  auto begin = area->playerBegin();
+  auto end = area->playerEnd();
+  area->playerMutex.lock_shared();
+  for (auto it = begin; it != end; ++it) {
+    const Location& loc = g.allPlayers.at(*it).getLocation();
+    if (loc.z != z) continue;
+    // std::cerr << "* Sending to player #" << *it << "\n";
+    peer->Send(
+      &output, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 2,
+      addressesByPlayer[*it], false
+    );
+  }
+  area->playerMutex.unlock_shared();
+}
+
 void x801::game::Server::broadcastLocations() {
   using namespace std::chrono_literals;
   RakNet::TimeUS t = RakNet::GetTimeUS();
@@ -514,6 +601,7 @@ void x801::game::Server::broadcastLocations() {
     for (const auto& pair : g.areas) {
       const std::unique_ptr<AreaWithPlayers>& area = pair.second;
       broadcastLocationsTo(area);
+      broadcastEnemyLocationsTo(area);
     }
     g.playerMutex.unlock_shared();
     RakNet::TimeUS t2 = RakNet::GetTimeUS();
