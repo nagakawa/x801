@@ -56,7 +56,9 @@ namespace x801 {
       bindings[1] = new x801::map::BlockTextureBindings(bFile2);
       tr = new TerrainRenderer(this, ft);
       em = new EntityManager(this, ft);
+      mem = new EntityManager(this, ft);
       em->er.setUpRender();
+      mem->er.setUpRender();
       terrain = new agl::Sprite2D(&*(ft.ss.texture));
       terrain->setApp(this);
       terrain->addSprite({
@@ -117,6 +119,8 @@ namespace x801 {
       readPlayersFromGS();
       em->er.feed();
       em->er.render();
+      mem->er.feed();
+      mem->er.render();
       ft.ms.fbo->blitTo(*(ft.ss.fbo), getWidth(), getHeight());
       agl::setDefaultFBOAsActive();
       terrain->tick();
@@ -272,6 +276,7 @@ namespace x801 {
       delete chat;
       delete tr;
       delete em;
+      delete mem;
       delete terrain;
       delete fuck;
       delete bindings[0];

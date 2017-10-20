@@ -112,6 +112,13 @@ namespace x801 {
           name.colour());
       });
       returnFromFull();
+      /*
+        XXX: for some reason, this check must occur here and not in
+        push(), although the behaviour should be equivalent.
+        [as of g++ (GCC) 8.0.0 20170501 (experimental)]
+        Undefined behaviour, perhaps?
+      */
+      if (mesh.size() == 0) return;
       push();
     }
     static const char* VERTEX_SOURCE =
@@ -184,6 +191,7 @@ namespace x801 {
       if (!setup)
         throw "ChunkBuffer: render() called before setUpRender()";
 #endif
+      if (mesh.size() == 0) return;
       er->tex->bindTo(0);
       glDisable(GL_DEPTH_TEST);
       glDepthMask(false);
