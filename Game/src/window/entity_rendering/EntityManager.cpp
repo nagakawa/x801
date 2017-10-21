@@ -74,5 +74,11 @@ namespace x801 {
       }
       entityMutex.unlock();
     }
+    void EntityManager::clear() {
+      entityMutex.lock();
+      entities.clear();
+      firstVacant = 0;
+      entityMutex.unlock();
+    }
   }
 }

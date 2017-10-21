@@ -528,12 +528,8 @@ void x801::game::Server::broadcastEnemyLocationsTo(
   auto its = area->mman->getPathRange(z);
   if (its.first == area->mman->pathEnd()) return;
   RakNet::BitStream output;
-  output.Write(static_cast<uint8_t>(ID_TIMESTAMP));
-  output.Write(RakNet::GetTime());
   output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
   output.Write(static_cast<uint16_t>(LPACKET_ENEMY));
-  // Both # of enemy names and # of enemies are unknown.
-  // We will fill them in when we know them.
   size_t nEnemyNames = 0;
   std::unordered_map<std::string, size_t> indicesByName;
   std::vector<std::string> namesByIndices;

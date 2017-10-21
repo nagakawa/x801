@@ -117,10 +117,10 @@ namespace x801 {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       tr->draw();
       readPlayersFromGS();
-      em->er.feed();
-      em->er.render();
       mem->er.feed();
       mem->er.render();
+      em->er.feed();
+      em->er.render();
       ft.ms.fbo->blitTo(*(ft.ss.fbo), getWidth(), getHeight());
       agl::setDefaultFBOAsActive();
       terrain->tick();

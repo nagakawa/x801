@@ -33,7 +33,7 @@ namespace x801 {
         mapMutex.unlock_shared();
         return iterator->second.get();
       }
-      std::string fullname = "assets/mobs/" + name + ".mob";
+      std::string fullname = "mobs/" + name + ".mob";
       underlying->fetchFile(fullname.c_str());
       uint32_t version, contentLength;
       uint8_t* contents = nullptr;
@@ -53,7 +53,7 @@ namespace x801 {
         return infos.find(name)->second.get();
       } else {
         std::cerr << "Requesting file " << name << "\n";
-        underlying->requestFile(name.c_str());
+        underlying->requestFile(fullname.c_str());
         return nullptr;
       }
     }

@@ -52,8 +52,9 @@ namespace x801 {
         m2.advanceFrame(s, path);
         return m2;
       };
-      auto filtcond = [this](const Mob& m) {
-        return m.progress < path.vertices.size();
+      size_t maxSize = path.vertices.size();
+      auto filtcond = [maxSize](const Mob& m) {
+        return m.progress < maxSize;
       };
       zekku::QuadTree<Mob,
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,

@@ -59,6 +59,7 @@ namespace x801 {
       void deleteEntity(size_t id);
       void forEach(std::function<void(Entity&)> cb);
       void forEachOver(std::function<void(Entity&, OverheadName&)> cb);
+      void clear();
       void advanceFrame();
       void updateUsernames();
       EntityRenderer er;

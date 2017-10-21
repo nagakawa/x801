@@ -41,6 +41,7 @@ namespace x801 {
 #include "window/ClientWindow.h"
 #include "window/Patcher.h"
 #include "window/patcher_views/MapView.h"
+#include "window/patcher_views/MobInfoView.h"
 #include "window/patcher_views/ModelView.h"
 #include "window/patcher_views/TextureView.h"
 #include "window/patcher_views/PartView.h"
@@ -122,6 +123,11 @@ namespace x801 {
         RakNet::Time t,
         RakNet::Packet* p
       );
+      void processMobs(
+        uint16_t lPacketType,
+        uint8_t* lbody, size_t llength,
+        RakNet::Packet* p
+      );
       void sendKeyInput(const KeyInput& input);
       void switchAreaToCurrent();
       RakNet::RakPeerInterface* peer = nullptr;
@@ -147,6 +153,7 @@ namespace x801 {
       MapView* mapView = nullptr;
       PartView* partView = nullptr;
       BlueprintView* blueprintView = nullptr;
+      MobInfoView* mobInfoView = nullptr;
       bool debug = false;
       int width = 1280;
       int height = 960;

@@ -51,6 +51,7 @@ namespace x801 {
     protected:
       static x801::map::EntityTextureBindings* tb;
       friend class EntityRenderer;
+      friend class Client;
     };
     class PlayerEntity : public Entity {
     public:

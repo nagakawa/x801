@@ -93,6 +93,9 @@ void x801::game::Client::initialise() {
   LPacketCallback moveCallback =
     MAKE_LPACKET_CALLBACK_CLIENT_TIMED(processMovement, -1);
   lCallbacks.insert({LPACKET_MOVE, moveCallback});
+  LPacketCallback mobCallback =
+    MAKE_LPACKET_CALLBACK_CLIENT(processMobs, -1);
+  lCallbacks.insert({LPACKET_ENEMY, mobCallback});
   listenConcurrent();
 }
 
@@ -386,6 +389,7 @@ void x801::game::Client::processFilehostURIResponse(
   mapView = new MapView(patcher);
   partView = new PartView(patcher);
   blueprintView = new BlueprintView(patcher);
+  mobInfoView = new MobInfoView(patcher);
 }
 
 static const char* statusMessages[] = {
@@ -463,6 +467,44 @@ void x801::game::Client::processMovement(
   g.locationMutex.unlock_shared();
   g.fastForwardSelf(t);
   g.selfPositionMutex.unlock();
+}
+
+void x801::game::Client::processMobs(
+    uint16_t lPacketType,
+    uint8_t* lbody, size_t llength,
+    RakNet::Packet* p)  {
+  (void) lPacketType; (void) p;
+  if (x801::game::Entity::tb == nullptr) return;
+  RakNet::BitStream stream(lbody, llength, false);
+  uint16_t nEnemyNames, nEnemies;
+  stream.Read(nEnemyNames);
+  stream.Read(nEnemies);
+  std::vector<std::string> enemyNames(nEnemyNames);
+  for (size_t i = 0; i < nEnemyNames; ++i) {
+    enemyNames[i] = readStringFromBitstream16S(stream);
+  }
+  cw->mem->clear();
+  for (size_t i = 0; i < nEnemies; ++i) {
+    uint16_t nameIndex;
+    uint32_t xfix, yfix;
+    uint8_t rot;
+    int8_t z;
+    stream.Read(nameIndex);
+    stream.Read(xfix);
+    stream.Read(yfix);
+    stream.Read(rot);
+    stream.Read(z);
+    const std::string& name = enemyNames.at(nameIndex);
+    const MobInfo* mi = mobInfoView->getInfo(name);
+    //if (mi == nullptr) continue;
+    Location l = {
+      {0, 0},
+      xfix / 65536.0f, yfix / 65536.0f,
+      z,
+      rot
+    };
+    cw->mem->addEntity<MobEntity>(mi, l);
+  }
 }
 
 void x801::game::Client::sendLoginPacket(PacketCallback loginCallback) {
@@ -577,4 +619,5 @@ x801::game::Client::~Client() {
   delete modelView;
   delete partView;
   delete blueprintView;
+  delete mobInfoView;
 }

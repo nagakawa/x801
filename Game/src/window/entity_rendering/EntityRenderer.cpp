@@ -39,6 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace game {
     void EntityBuffer::push() {
+      vao.setActive();
+      ivbo.setActive();
       ivbo.feedData(mesh.size() * sizeof(MeshEntry), mesh.data(), GL_STATIC_DRAW);
       glVertexAttribIPointer(
         1,
@@ -154,6 +156,7 @@ namespace x801 {
       "  vec2 realtc = (local + uvstart) / DIVISOR; \n"
       // "  colour = vec4(vec3(w % 4u, (w / 4u) % 4u, (w / 16u) % 4u) / 3.0, 1); \n"
       "  colour = texture(tex, realtc); \n"
+      "  if (w == 65535u) colour = vec4(1.0, 0.0, 0.0, 1.0); \n"
       "} \n"
       ;
     void EntityBuffer::setUpRender() {
@@ -192,6 +195,10 @@ namespace x801 {
         throw "ChunkBuffer: render() called before setUpRender()";
 #endif
       if (mesh.size() == 0) return;
+      for (const auto& m : mesh) {
+        std::cerr << "(" << m.x << ", " << m.y << ", " << m.texID << ") ";
+      }
+      std::cerr << '\n';
       er->tex->bindTo(0);
       glDisable(GL_DEPTH_TEST);
       glDepthMask(false);
@@ -220,8 +227,10 @@ namespace x801 {
       buffer = new EntityBuffer(this);
       std::stringstream eFile =
         c->patcher->getSStream("textures/entity/entities.tti");
-      tb = new x801::map::EntityTextureBindings(eFile);
-      Entity::tb = tb;
+      if (Entity::tb == nullptr) {
+        tb = new x801::map::EntityTextureBindings(eFile);
+        Entity::tb = tb;
+      }
     }
   }
 }
