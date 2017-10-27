@@ -86,6 +86,7 @@ namespace x801 {
       zekku::QuadTree<Mob,
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY>& getMobs() { return mobs; }
+      const x801::map::Path& getPath() const { return path; }
     private:
       mutable boost::shared_mutex entityMutex;
       zekku::QuadTree<Mob,

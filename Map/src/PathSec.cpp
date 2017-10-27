@@ -89,6 +89,7 @@ namespace x801 {
       size_t count = readInt<uint16_t>(fh);
       for (size_t i = 0; i < count; ++i) {
         paths.emplace_back(fh);
+        paths[i].index = i;
       }
       present = true;
     }

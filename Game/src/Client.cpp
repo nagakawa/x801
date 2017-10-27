@@ -484,24 +484,25 @@ void x801::game::Client::processMobs(
     enemyNames[i] = readStringFromBitstream16S(stream);
   }
   cw->mem->clear();
+  const x801::map::PathSec& ps =
+    g.getCurrentArea().getArea()->getPathSec();
   for (size_t i = 0; i < nEnemies; ++i) {
-    uint16_t nameIndex;
-    uint32_t xfix, yfix;
-    uint8_t rot;
-    int8_t z;
+    uint16_t nameIndex, pathIndex;
+    uint32_t pfix;
     stream.Read(nameIndex);
-    stream.Read(xfix);
-    stream.Read(yfix);
-    stream.Read(rot);
-    stream.Read(z);
+    stream.Read(pathIndex);
+    stream.Read(pfix);
+    const x801::map::Path& path = ps.paths[pathIndex];
+    float progress = pfix / 65536.0f;
     const std::string& name = enemyNames.at(nameIndex);
     const MobInfo* mi = mobInfoView->getInfo(name);
     //if (mi == nullptr) continue;
+    glm::vec2 pos = path.progressToCoordinates(progress);
     Location l = {
       {0, 0},
-      xfix / 65536.0f, yfix / 65536.0f,
-      z,
-      rot
+      pos.x, pos.y,
+      0, // doesn't matter
+      0  // TODO set rot
     };
     cw->mem->addEntity<MobEntity>(mi, l);
   }

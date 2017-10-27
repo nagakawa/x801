@@ -533,12 +533,13 @@ void x801::game::Server::broadcastEnemyLocationsTo(
   size_t nEnemyNames = 0;
   std::unordered_map<std::string, size_t> indicesByName;
   std::vector<std::string> namesByIndices;
-  std::vector<std::pair<size_t, Location>> enemyLocations;
+  std::vector<std::tuple<size_t, float, size_t>> enemyLocations;
   for (auto it = its.first; it != its.second; ++it) {
     auto& mobs = it->second.getMobs();
+    size_t pathno = it->second.getPath().index;
     mobs.query(zekku::QueryAll<float>(),
         [&indicesByName, &enemyLocations,
-          &nEnemyNames, &namesByIndices, z](const Mob& m) {
+          &nEnemyNames, &namesByIndices, pathno, z](const Mob& m) {
       // Whew!
       const std::string& name = m.info->id;
       size_t index;
@@ -548,14 +549,8 @@ void x801::game::Server::broadcastEnemyLocationsTo(
       } else {
         index = indicesByName[name];
       }
-      enemyLocations.push_back({
-        index,
-        {
-          { 0, 0 },
-          m.pos.x, m.pos.y,
-          z, 0
-        }
-      });
+      enemyLocations.push_back(
+        { index, m.progress, pathno });
     });
   }
   output.Write((uint16_t) nEnemyNames);
@@ -563,14 +558,10 @@ void x801::game::Server::broadcastEnemyLocationsTo(
   for (size_t i = 0; i < nEnemyNames; ++i)
     writeStringToBitstream16(output, namesByIndices[i]);
   for (const auto& p : enemyLocations) {
-    output.Write((uint16_t) p.first);
-    const Location& loc = p.second;
-    int32_t xfix = (int32_t) (loc.x * 65536.0f);
-    int32_t yfix = (int32_t) (loc.y * 65536.0f);
-    output.Write(xfix);
-    output.Write(yfix);
-    output.Write((uint8_t) loc.rot);
-    output.Write((uint8_t) loc.z);
+    output.Write((uint16_t) std::get<0>(p));
+    output.Write((uint16_t) std::get<2>(p));
+    int32_t pfix = (int32_t) (std::get<1>(p) * 65536.0f);
+    output.Write(pfix);
   }
   // Send packets to those who deserve them
   auto begin = area->playerBegin();

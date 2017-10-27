@@ -50,6 +50,7 @@ namespace x801 {
       std::vector<uint8_t> weights;
       std::vector<std::string> bossNames;
       int16_t minX, minY, maxX, maxY;
+      size_t index;
     };
     class PathSec {
     public:
