@@ -29,6 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include <glm/glm.hpp>
+
 #include <utils.h>
 
 namespace x801 {
@@ -40,6 +43,7 @@ namespace x801 {
       };
       Path(std::istream& fh);
       void write(std::ostream& fh) const;
+      glm::vec2 progressToCoordinates(float progress) const;
       int z;
       std::vector<Vertex> vertices;
       std::vector<std::string> mobNames;

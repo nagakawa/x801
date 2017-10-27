@@ -35,17 +35,7 @@ namespace x801 {
       const Path::Vertex& next = path.vertices[pathno + 1];
       float pathLength = hypotf(next.x - curr.x, next.y - curr.y);
       progress += s * MOB_SPEED / pathLength;
-      if (progress >= path.vertices.size() - 1) {
-        pos.x = path.vertices[path.vertices.size() - 1].x;
-        pos.y = path.vertices[path.vertices.size() - 1].y;
-      } else {
-        pathno = (size_t) progress;
-        float resid = progress - pathno;
-        const Path::Vertex& curr = path.vertices[pathno];
-        const Path::Vertex& next = path.vertices[pathno + 1];
-        pos.x = next.x * resid + curr.x * (1 - resid);
-        pos.y = next.y * resid + curr.y * (1 - resid);
-      }
+      pos = path.progressToCoordinates(progress);
     }
   }
 }

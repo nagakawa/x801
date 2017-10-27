@@ -69,6 +69,21 @@ namespace x801 {
         writeString<uint16_t>(fh, n);
       }
     }
+    glm::vec2 Path::progressToCoordinates(float progress) const {
+      glm::vec2 pos(glm::uninitialize);
+      if (progress >= vertices.size() - 1) {
+        pos.x = vertices[vertices.size() - 1].x;
+        pos.y = vertices[vertices.size() - 1].y;
+      } else {
+        size_t pathno = (size_t) progress;
+        float resid = progress - pathno;
+        const Path::Vertex& curr = vertices[pathno];
+        const Path::Vertex& next = vertices[pathno + 1];
+        pos.x = next.x * resid + curr.x * (1 - resid);
+        pos.y = next.y * resid + curr.y * (1 - resid);
+      }
+      return pos;
+    }
     PathSec::PathSec(std::istream& fh) {
       using namespace x801::base;
       size_t count = readInt<uint16_t>(fh);
