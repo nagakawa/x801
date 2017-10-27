@@ -52,7 +52,7 @@ namespace x801 {
         m2.advanceFrame(s, path);
         return m2;
       };
-      size_t maxSize = path.vertices.size();
+      size_t maxSize = path.vertices.size() - 1;
       auto filtcond = [maxSize](const Mob& m) {
         return m.progress < maxSize;
       };

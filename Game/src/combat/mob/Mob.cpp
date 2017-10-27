@@ -30,7 +30,7 @@ namespace x801 {
     void Mob::advanceFrame(float s, const x801::map::Path& path) {
       using namespace x801::map;
       size_t pathno = (size_t) progress;
-      if (pathno >= path.vertices.size()) return;
+      if (pathno >= path.vertices.size() - 1) return;
       const Path::Vertex& curr = path.vertices[pathno];
       const Path::Vertex& next = path.vertices[pathno + 1];
       float pathLength = hypotf(next.x - curr.x, next.y - curr.y);
@@ -43,8 +43,8 @@ namespace x801 {
         float resid = progress - pathno;
         const Path::Vertex& curr = path.vertices[pathno];
         const Path::Vertex& next = path.vertices[pathno + 1];
-        pos.x = curr.x * resid + next.x * (1 - resid);
-        pos.y = curr.y * resid + next.y * (1 - resid);
+        pos.x = next.x * resid + curr.x * (1 - resid);
+        pos.y = next.y * resid + curr.y * (1 - resid);
       }
     }
   }

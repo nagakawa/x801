@@ -195,10 +195,10 @@ namespace x801 {
         throw "ChunkBuffer: render() called before setUpRender()";
 #endif
       if (mesh.size() == 0) return;
-      for (const auto& m : mesh) {
+      /*for (const auto& m : mesh) {
         std::cerr << "(" << m.x << ", " << m.y << ", " << m.texID << ") ";
       }
-      std::cerr << '\n';
+      std::cerr << '\n';*/
       er->tex->bindTo(0);
       glDisable(GL_DEPTH_TEST);
       glDepthMask(false);
@@ -230,6 +230,7 @@ namespace x801 {
       if (Entity::tb == nullptr) {
         tb = new x801::map::EntityTextureBindings(eFile);
         Entity::tb = tb;
+        std::cerr << *tb;
       }
     }
   }
