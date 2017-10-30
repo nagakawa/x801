@@ -474,6 +474,7 @@ void x801::game::Client::processMobs(
     uint8_t* lbody, size_t llength,
     RakNet::Packet* p)  {
   (void) lPacketType; (void) p;
+  RakNet::TimeMS recv = RakNet::GetTimeMS();
   if (x801::game::Entity::tb == nullptr) return;
   RakNet::BitStream stream(lbody, llength, false);
   uint16_t nEnemyNames, nEnemies;
@@ -486,25 +487,18 @@ void x801::game::Client::processMobs(
   cw->mem->clear();
   const x801::map::PathSec& ps =
     g.getCurrentArea().getArea()->getPathSec();
+  const std::vector<x801::map::Path>* paths = &ps.paths;
   for (size_t i = 0; i < nEnemies; ++i) {
     uint16_t nameIndex, pathIndex;
     uint32_t pfix;
     stream.Read(nameIndex);
     stream.Read(pathIndex);
     stream.Read(pfix);
-    const x801::map::Path& path = ps.paths[pathIndex];
     float progress = pfix / 65536.0f;
     const std::string& name = enemyNames.at(nameIndex);
     const MobInfo* mi = mobInfoView->getInfo(name);
     //if (mi == nullptr) continue;
-    glm::vec2 pos = path.progressToCoordinates(progress);
-    Location l = {
-      {0, 0},
-      pos.x, pos.y,
-      0, // doesn't matter
-      0  // TODO set rot
-    };
-    cw->mem->addEntity<MobEntity>(mi, l);
+    cw->mem->addEntity<MobEntity>(mi, progress, recv, pathIndex, paths);
   }
 }
 

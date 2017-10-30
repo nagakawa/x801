@@ -19,6 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "window/ClientWindow.h"
 
+#include <GetTime.h>
+
+#include <movement_constants.h>
+
 namespace x801 {
   namespace game {
     x801::map::EntityTextureBindings* Entity::tb = nullptr;
@@ -55,6 +59,21 @@ namespace x801 {
         mi->dispname,
         0, (EntityClassifier) mi->type
       );
+    }
+    Location MobEntity::getLocation() {
+      float sPast = (RakNet::GetTimeMS() - recv) / 1000.0;
+      const x801::map::Path& path = (*paths)[pathno];
+      float pathLength = path.lengthOfPart(pathno);
+      float progressAdv =
+        progress + sPast * MOB_SPEED / pathLength;
+      glm::vec2 pos = path.progressToCoordinates(progressAdv);
+      Location l = {
+        {0, 0},
+        pos.x, pos.y,
+        0, // doesn't matter
+        0  // TODO set rot
+      };
+      return l;
     }
   }
 }

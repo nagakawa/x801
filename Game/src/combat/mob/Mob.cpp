@@ -24,16 +24,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <PathSec.h>
 
+#include <movement_constants.h>
+
 namespace x801 {
   namespace game {
-    static constexpr float MOB_SPEED = 2.5f;
     void Mob::advanceFrame(float s, const x801::map::Path& path) {
       using namespace x801::map;
       size_t pathno = (size_t) progress;
       if (pathno >= path.vertices.size() - 1) return;
-      const Path::Vertex& curr = path.vertices[pathno];
-      const Path::Vertex& next = path.vertices[pathno + 1];
-      float pathLength = hypotf(next.x - curr.x, next.y - curr.y);
+      float pathLength = path.lengthOfPart(pathno);
       progress += s * MOB_SPEED / pathLength;
       pos = path.progressToCoordinates(progress);
     }

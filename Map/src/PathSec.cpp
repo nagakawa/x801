@@ -84,6 +84,11 @@ namespace x801 {
       }
       return pos;
     }
+    float Path::lengthOfPart(size_t index) const {
+      const Vertex& curr = vertices[index];
+      const Vertex& next = vertices[index + 1];
+      return hypotf(next.x - curr.x, next.y - curr.y);
+    }
     PathSec::PathSec(std::istream& fh) {
       using namespace x801::base;
       size_t count = readInt<uint16_t>(fh);

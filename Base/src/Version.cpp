@@ -78,4 +78,4 @@ std::string x801::base::Version::toString() const {
   return s;
 }
 
-const Version x801::base::engineVersion(0, 0, 3, ALPHA, 2);
+const Version x801::base::engineVersion(0, 0, 3, ALPHA, 3);

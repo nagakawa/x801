@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <unordered_map>
 #include <vector>
 
+#include <RakNetTime.h>
+
 #include <Texture.h>
 
 #include <Chunk.h>
@@ -100,20 +102,25 @@ namespace x801 {
     };
     class MobEntity : public Entity {
     public:
-      MobEntity(const MobInfo* mi, const Location& l) :
-        mi(mi), l(l), texID(tb->getTexID(mi->texname)) {}
+      MobEntity(const MobInfo* mi, float progress,
+          RakNet::TimeMS recv, size_t pathno,
+          const std::vector<x801::map::Path>* paths) :
+        mi(mi), progress(progress), recv(recv), pathno(pathno),
+        paths(paths), texID(tb->getTexID(mi->texname)) {}
       ~MobEntity() override {}
       void advanceFrame() override {}
       size_t getTexture() override { return texID + offset; };
-      Location getLocation() override { return l; }
-      bool setLocation(const Location& l) override {
-        this->l = l;
-        return true;
+      Location getLocation() override;
+      bool setLocation(const Location& /*l*/) override {
+        return false;
       }
       OverheadName overheadName() override;
     private:
       const MobInfo* mi;
-      Location l;
+      float progress;
+      RakNet::TimeMS recv;
+      size_t pathno;
+      const std::vector<x801::map::Path>* paths;
       size_t texID;
       size_t offset = 0;
     };

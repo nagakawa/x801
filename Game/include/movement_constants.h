@@ -28,5 +28,7 @@ namespace x801 {
     constexpr float PLAYER_SPEED = 4.5f;
     // radians per second
     constexpr float PLAYER_ANGULAR_VELOCITY = 1.73f;
+    // blocks per second
+    constexpr float MOB_SPEED = 2.5f;
   }
 }

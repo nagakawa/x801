@@ -44,6 +44,7 @@ namespace x801 {
       Path(std::istream& fh);
       void write(std::ostream& fh) const;
       glm::vec2 progressToCoordinates(float progress) const;
+      float lengthOfPart(size_t index) const;
       int z;
       std::vector<Vertex> vertices;
       std::vector<std::string> mobNames;
