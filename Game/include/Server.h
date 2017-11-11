@@ -144,7 +144,6 @@ namespace x801 {
       std::thread broadcastLocationThread;
       std::string filehost;
       std::string motd;
-      RakNet::Time drift = 0;
       volatile bool done = false;
       GameState g;
     };

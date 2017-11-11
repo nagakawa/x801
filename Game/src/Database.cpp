@@ -28,6 +28,8 @@ using namespace x801::game;
 #include <utils.h>
 #define SHA2_USE_INTTYPES_H
 #include "sha2.h"
+#include "Location.h"
+#include "combat/Stats.h"
 
 int x801::game::stepBlock(sqlite3_stmt* statement, sqlite3* conn) {
   volatile int stat;

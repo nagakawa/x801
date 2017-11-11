@@ -46,7 +46,7 @@ namespace x801 {
         "intrinsic-assets/VLGothic/VL-PGothic-Regular.ttf",
         18.0f, nullptr, range);
       chat = new ChatWindow(this);
-      ft = std::move(agl::makeFBOForMeMS(getWidth(), getHeight()));
+      ft = agl::makeFBOForMeMS(getWidth(), getHeight());
       setPixelScale();
       std::stringstream bFile =
         c->patcher->getSStream("textures/terrain/blocks.tti");
@@ -62,15 +62,15 @@ namespace x801 {
       terrain = new agl::Sprite2D(&*(ft.ss.texture));
       terrain->setApp(this);
       terrain->addSprite({
-        0, 0, (float) getWidth(), (float) getHeight(),
-        0, 0, (float) getWidth(), (float) getHeight(),
+        { 0, 0, (float) getWidth(), (float) getHeight() },
+        { 0, 0, (float) getWidth(), (float) getHeight() },
       });
       terrain->setUp();
       fuck = new agl::Sprite2D(tr->texd);
       fuck->setApp(this);
       fuck->addSprite({
-        0, 0, (float) tr->texd->getWidth(), (float) tr->texd->getHeight(),
-        0, 0, (float) tr->texd->getWidth(), (float) tr->texd->getHeight(),
+        { 0, 0, (float) tr->texd->getWidth(), (float) tr->texd->getHeight() },
+        { 0, 0, (float) tr->texd->getWidth(), (float) tr->texd->getHeight() },
       });
       fuck->setUp();
       for (size_t i = 0; i < FTIMES_TO_STORE; ++i) {

@@ -131,13 +131,13 @@ namespace x801 {
         ++totalElements;
         if (totalElements > (size_t) (1 << capacity)) grow();
       }
-      std::atomic_size_t capacity = CIRCULAR_QUEUE_DEFAULT_CAPACITY;
+      std::atomic_size_t capacity;
       mutable std::mutex pointerMutex;
       T* elements = nullptr;
       // The maximum number of elements is actually (1 << capacity),
       // as to use bitwise operations rather than modulus.
-      std::atomic_size_t start = 0;
-      std::atomic_size_t totalElements = 0;
+      std::atomic_size_t start;
+      std::atomic_size_t totalElements;
       std::allocator<T> allocator;
     };
   }

@@ -26,11 +26,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <sqlite3.h>
 
 #include "Credentials.h"
-#include "Location.h"
-#include "combat/Stats.h"
 
 namespace x801 {
   namespace game {
+    struct Location;
+    class StatsUser;
     extern const char* DB_DIR;
     extern const char* DB_MAIN_PATH;
     int stepBlock(sqlite3_stmt* statement, sqlite3* conn);
@@ -64,7 +64,6 @@ namespace x801 {
       bool loadPlayerStats(uint32_t userID, StatsUser& su);
     private:
       sqlite3* me;
-      sqlite3* auth;
       void open(sqlite3*& handle, const char* path);
       void userRowToSC(sqlite3_stmt* statement, StoredCredentials& sc);
       uint32_t locationRowToStruct(sqlite3_stmt* statement, Location& location);
