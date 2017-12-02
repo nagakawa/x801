@@ -199,7 +199,7 @@ void x801::game::Server::handleLPacket(
 }
 #include <stdio.h>
 void x801::game::Server::listen() {
-  while (true) {
+  while (!done) {
     for (
         RakNet::Packet* p = peer->Receive();
         p != nullptr;
@@ -230,12 +230,15 @@ void x801::game::Server::listen() {
   }
 }
 
+static const char ign = PacketIDs::PACKET_IGNORE;
+
 x801::game::Server::~Server() {
   done = true;
   delete[] publicKey;
   delete[] privateKey;
+  peer->SendLoopback(&ign, 1);
   RakNet::RakPeerInterface::DestroyInstance(peer);
-  while (done) {}
+  while (done) { std::cerr << "waiting...\n"; }
 }
 
 const char* x801::game::KEY_DIR = "keys/";
@@ -539,7 +542,7 @@ void x801::game::Server::broadcastEnemyLocationsTo(
     size_t pathno = it->second.getPath().index;
     mobs.query(zekku::QueryAll<float>(),
         [&indicesByName, &enemyLocations,
-          &nEnemyNames, &namesByIndices, pathno, z](const Mob& m) {
+          &nEnemyNames, &namesByIndices, pathno](const Mob& m) {
       // Whew!
       const std::string& name = m.info->id;
       size_t index;

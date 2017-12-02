@@ -45,7 +45,7 @@ namespace x801 {
       // http://www.wizard101central.com/wiki/Basic:Level_Chart#Health.2C_Mana.2C_Power_Pip_Chance.2C_Energy
       // An important difference: Wizard101 starts at level 1,
       // but Experiment801 starts at level 0. We extrapolate to level 0.
-      // Also, Wizard101 doesn't have steady base health increases
+      // Also, Wizard101 doesn't have linear base health increases
       // per level. We simplify here.
       const size_t healthAtLevel0; // e. g. 403
       const size_t healthPerLevel; // e. g. 22
@@ -69,5 +69,7 @@ namespace x801 {
     // Hard-coded list of schools.
     // The base stats might need rebalancing.
     extern std::vector<School> defaultSchools;
+    // Returns true if the school "a" has mastery over school "b".
+    bool schoolMasters(size_t a, size_t b);
   }
 }

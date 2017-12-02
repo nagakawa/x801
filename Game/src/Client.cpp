@@ -283,7 +283,7 @@ void x801::game::Client::requestMOTD(PacketCallback motdCallback) {
 
 void x801::game::Client::requestMOTD() {
   PacketCallback motdCallback = {
-    [this](
+    [](
       uint8_t packetType,
       uint8_t* body, size_t length,
       RakNet::Time t,

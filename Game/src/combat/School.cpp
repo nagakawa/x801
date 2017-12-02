@@ -43,5 +43,22 @@ namespace x801 {
       School("Top", "###", 0, 0, false),
       School("Bottom", "###", 0, 0, false),
     };
+    uint64_t masteryTable[] = {
+      0x0000'0000'0000'0101,
+      0x0000'0000'0000'0102,
+      0x0000'0000'0000'0104,
+      0x0000'0000'0000'0108,
+      0x0000'0000'0000'0110,
+      0x0000'0000'0000'0120,
+      0x0000'0000'0000'0140,
+      0x0000'0000'0000'0180,
+      0x0000'0000'0000'0100,
+      0x0000'0000'0000'03FF,
+    };
+    bool schoolMasters(size_t a, size_t b) {
+      if (a > (sizeof(masteryTable) / sizeof(masteryTable[0])))
+        return a == b;
+      return (masteryTable[a] & (1 << b)) != 0;
+    }
   }
 }

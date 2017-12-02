@@ -96,6 +96,7 @@ namespace x801 {
       PACKET_IM_LOGGED_IN,
       PACKET_UNRECOGNISED_COOKIE,
       PACKET_FILE,
+      PACKET_IGNORE,
     };
     enum LoggedPacketIDs {
       LPACKET_CHAT = 0,

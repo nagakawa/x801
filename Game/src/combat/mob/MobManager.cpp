@@ -60,7 +60,6 @@ namespace x801 {
         uint16_t, float, zekku::QUADTREE_NODE_COUNT,
         MobGetXY> mobs2 = mobs.mapIf(mapcond, filtcond);
       mobs = std::move(mobs2);
-      mobs.dump();
       timeLeft -= s;
       if (timeLeft <= 0) {
         timeLeft += SPAWN_DELAY;
@@ -101,7 +100,6 @@ namespace x801 {
       this->gs = gs;
     }
     void MobManager::advanceFrame(float s) {
-      std::cout << "bepis " << paths.size() << "\n";
       for (auto& p : paths) {
         p.second.advanceFrame(s);
       }

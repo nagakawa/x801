@@ -50,6 +50,7 @@ SET(Game_library_SRCS
   ${PROJECT_SOURCE_DIR}/combat/Battle.cpp
   ${PROJECT_SOURCE_DIR}/combat/Stats.cpp
   ${PROJECT_SOURCE_DIR}/combat/School.cpp
+  ${PROJECT_SOURCE_DIR}/combat/SpellIndex.cpp
   ${PROJECT_SOURCE_DIR}/combat/mob/Mob.cpp
   ${PROJECT_SOURCE_DIR}/combat/mob/MobManager.cpp
   ${PROJECT_SOURCE_DIR}/combat/mob/MobInfo.cpp
