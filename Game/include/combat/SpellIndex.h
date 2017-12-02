@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <iosfwd>
+#include <random>
 #include <unordered_map>
 #include <vector>
 
@@ -36,17 +37,25 @@ namespace x801 {
     public:
       SpellIndex(std::istream& fh);
       struct Metadata {
-        uint32_t address;
+        uint32_t address; // TODO should we give up fixed mdentry size?
+        int16_t minSpeed;
+        int16_t maxSpeed;
         uint16_t accuracy; // 0.1%s
-        // XXX HARD LIMIT of 256 schools for alignment purposes;
-        // change if this is exceeded
-        uint8_t school;
+        uint16_t school;
         uint8_t cost;
-      }; // 8 bytes total
+        /*
+          bit 0: should player choose single enemy?
+          bit 1: should player choose single ally?
+          other bits unused
+        */
+        uint8_t flags;
+        uint16_t pad;
+      }; // 16 bytes total
       size_t getIDByName(const char* s) const;
       size_t getIDByName(const std::string& s) const;
       const Metadata& getMetadata(size_t id) const;
-      mpz_class evaluateQuantity(uint32_t q) const;
+      mpz_class evaluateQuantity(
+        uint32_t q, std::mt19937& r) const;
     private:
       std::unordered_map<std::string, size_t> idsByName;
       std::vector<Metadata> metadata;

@@ -22,8 +22,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utils.h"
 
+#define NEXTQTY quantities.at(q++)
+
 namespace x801 {
   namespace game {
+    enum class QuantityType : uint_fast16_t {
+      /*
+        Describes a a range of damage.
+        [0] minimum value (direct 32-bit)
+        [1] maximum value (direct 32-bit)
+      */
+      range = 0,
+    };
     SpellIndex::SpellIndex(std::istream& fh) {
       using namespace x801::base;
       size_t count = readInt<uint32_t>(fh);
@@ -38,9 +48,13 @@ namespace x801 {
       for (size_t i = 0; i < count; ++i) {
         Metadata& m = metadata[i];
         m.address = readInt<uint32_t>(fh);
+        m.minSpeed = readInt<int16_t>(fh);
+        m.maxSpeed = readInt<int16_t>(fh);
         m.accuracy = readInt<uint16_t>(fh);
-        m.school = readInt<uint8_t>(fh);
+        m.school = readInt<uint16_t>(fh);
         m.cost = readInt<uint8_t>(fh);
+        m.flags = readInt<uint8_t>(fh);
+        m.pad = readInt<uint16_t>(fh);
       }
       count = readInt<uint32_t>(fh);
       quantities.resize(count);
@@ -64,7 +78,8 @@ namespace x801 {
       auto it = idsByName.find(s);
       return (it != idsByName.end()) ? it->second : -1U;
     }
-    mpz_class SpellIndex::evaluateQuantity(uint32_t q) const {
+    mpz_class SpellIndex::evaluateQuantity(
+        uint32_t q, std::mt19937& r) const {
       uint32_t top = q & 0xC000'0000;
       // If the 2 most significant bits are 00 or 11,
       // then this is a direct quantity.
@@ -73,11 +88,17 @@ namespace x801 {
       }
       // Otherwise, look up the address.
       q -= (1 << 30);
-      uint_fast32_t typemeta = quantities[q];
-      uint_fast16_t type = typemeta & 0xFFFF;
+      uint_fast32_t typemeta = NEXTQTY;
+      QuantityType type = QuantityType(typemeta & 0xFFFF);
       uint_fast16_t meta = (typemeta >> 16) & 0xFFFF;
       switch (type) {
         // Insert quantity logic here.
+        case QuantityType::range: {
+          uint_fast32_t min = NEXTQTY;
+          uint_fast32_t max = NEXTQTY;
+          std::uniform_int_distribution<uint_fast32_t> dist(min, max);
+          return dist(r);
+        }
       }
       (void) meta;
       return 0;
