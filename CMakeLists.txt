@@ -18,8 +18,8 @@ ENDIF()
 
 # Argon2
 
-ADD_CUSTOM_TARGET(
-  Argon2
+ADD_CUSTOM_COMMAND(
+  OUTPUT argon2/libargon2.a
   COMMAND make
   WORKING_DIRECTORY argon2
 )
