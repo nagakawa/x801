@@ -20,6 +20,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <gmpxx.h>
+
 #include <utils.h>
 
 using namespace x801::game;
@@ -96,4 +98,29 @@ std::string x801::game::readStringFromBitstream16S(RakNet::BitStream& stream) {
   std::string s(length, '\0');
   stream.Read(&s[0], length);
   return s;
+}
+
+void x801::game::writeMPZToBitStream(
+    RakNet::BitStream& stream, const mpz_class& n) {
+  size_t bytes;
+  void* buf = mpz_export(nullptr, &bytes, -1, 1, -1, 0, n.get_mpz_t());
+  size_t nbytes = bytes;
+  if (sgn(n) < 0) nbytes |= (1u << 31);
+  stream.Write((uint32_t) nbytes);
+  stream.Write((const char*) buf, nbytes);
+  free(buf);
+}
+void x801::game::readMPZFromBitStream(
+    RakNet::BitStream& stream, mpz_class& n) {
+  uint32_t bytes;
+  stream.Read(bytes);
+  bool isneg = (bytes & (1u << 31)) != 0;
+  bytes &= (1u << 31) - 1;
+  char* buf = new char[bytes];
+  stream.Read(buf, bytes);
+  // No C++ version of the following function,
+  // so we act on the underlying mpz_t.
+  mpz_import(n.get_mpz_t(), bytes, -1, 1, -1, 0, buf);
+  delete[] buf;
+  if (isneg) n = -n;
 }

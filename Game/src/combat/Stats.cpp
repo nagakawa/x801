@@ -63,5 +63,21 @@ namespace x801 {
       readMPZ(fh, damage);
       readMPZ(fh, resist);
     }
+    mpz_class Stats::getDamage(size_t school) const {
+      return (school < ss.size()) ? ss[school].damage : 0;
+    }
+    mpz_class Stats::getResist(size_t school) const {
+      return (school < ss.size()) ? ss[school].resist : 0;
+    }
+    int Stats::getAccuracy(size_t school) const {
+      return (school < ss.size()) ? ss[school].accuracy : 0;
+    }
+    size_t Stats::getPierce(size_t school) const {
+      return (school < ss.size()) ? ss[school].pierce : 0;
+    }
+    static const Stats::SchoolSpecific DEFAULT_SS_STATS;
+    const Stats::SchoolSpecific& Stats::getSS(size_t school) const {
+      return (school < ss.size()) ? ss[school] : DEFAULT_SS_STATS;
+    }
   }
 }

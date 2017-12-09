@@ -35,6 +35,10 @@ namespace RakNet { class BitStream; }
 namespace x801 {
   namespace game {
     class Battle;
+    struct Targets {
+      uint8_t enemy;
+      uint8_t ally;
+    };
     class SpellIndex {
     public:
       SpellIndex(std::istream& fh);
@@ -62,14 +66,14 @@ namespace x801 {
       void quantityToString(uint32_t q, std::string& s) const;
       std::string quantityToString(uint32_t q) const;
       /*
-        Actuate the spell with id `sid` to `b`, casted by entity #`i`,
-        and write the data about the invocation to `out`. Use `r` as
-        the random number generator.
+        Actuate the spell with id `sid` to `b`, casted by entity
+        #`attacker`, and write the data about the invocation to `out`.
+        Use `r` as the random number generator.
       */
       bool actuate(
         uint32_t sid, Battle& b,
-        size_t i, RakNet::BitStream& out,
-        std::mt19937& r) const;
+        size_t attacker, RakNet::BitStream& out,
+        std::mt19937& r, Targets t) const;
     private:
       std::unordered_map<std::string, size_t> idsByName;
       std::vector<Metadata> metadata;
@@ -77,8 +81,9 @@ namespace x801 {
       std::vector<uint32_t> steps;
       bool actuateStep(
         uint32_t& address, Battle& b,
-        size_t i, RakNet::BitStream& out,
-        std::mt19937& r) const;
+        size_t attacker, RakNet::BitStream& out,
+        std::mt19937& r, Targets t,
+        size_t& nPacts) const;
     };
   }
 }

@@ -159,31 +159,47 @@ namespace x801 {
       (void) meta;
       return;
     }
+    size_t getDefender(size_t st, Targets t, size_t attacker) {
+      return
+        (st == 0) ? t.enemy :
+        (st == 1) ? t.ally :
+        (st == 2) ? ALL_ENEMIES :
+        (st == 3) ? ALL_ALLIES : attacker;
+    }
     bool SpellIndex::actuateStep(
         uint32_t& address, Battle& b,
-        size_t i, RakNet::BitStream& out,
-        std::mt19937& r) const {
+        size_t attacker, RakNet::BitStream& out,
+        std::mt19937& r, Targets t,
+        size_t& nPacts) const {
       uint32_t q = address;
       uint_fast32_t typemeta = NEXTSTEP;
       StepType type = StepType(typemeta & 0xFFFF);
       uint_fast16_t meta = (typemeta >> 16) & 0xFFFF;
       switch (type) {
         case StepType::damage: {
-          //
+          uint_fast32_t school = NEXTSTEP;
+          uint_fast32_t amtqty = NEXTSTEP;
+          uint_fast32_t target = NEXTSTEP;
+          size_t defender = getDefender(target, t, attacker);
+          b.damage(
+            attacker, defender,
+            school, evaluateQuantity(amtqty, r),
+            out, nPacts);
           break;
         }
         case StepType::healing: {
-          //
+          // NYI
           break;
         }
       }
-      (void) meta; (void) b; (void) i; (void) out; (void) r;
+      (void) meta;
+      address = q;
       return true;
     }
     bool SpellIndex::actuate(
         uint32_t sid, Battle& b,
-        size_t i, RakNet::BitStream& out,
-        std::mt19937& r) const {
+        size_t attacker, RakNet::BitStream& out,
+        std::mt19937& r, Targets t) const {
       if (sid >= metadata.size()) return false;
       // Information about all charms invoked before casting.
       // (none as of now)
@@ -197,14 +213,21 @@ namespace x801 {
         return true;
       }
       // By here, the spell succeeded.
+      // The identity of the spell.
+      out.Write((uint8_t) 1);
+      out.Write((uint32_t) sid);
       // Information about all charms invoked during casting.
       // (none as of now)
       out.Write((uint32_t) 0);
       uint32_t offset = md.address;
+      RakNet::BitStream lout;
+      size_t nPacts = 0;
       for (size_t j = 0; j < md.nSteps; ++j) {
-        bool res = actuateStep(offset, b, i, out, r);
+        bool res = actuateStep(offset, b, attacker, lout, r, t, nPacts);
         if (!res) return false;
       }
+      out.Write((uint32_t) nPacts);
+      out.Write(&lout);
       return true;
     }
   }

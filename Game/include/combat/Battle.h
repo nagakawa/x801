@@ -28,27 +28,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gmpxx.h>
 
+#include "combat/SpellIndex.h"
+
 namespace x801 {
   namespace game {
+    enum class PactTypes : uint_fast16_t {
+      /*
+        Indicates damage.
+        [0:uint16_t] the school
+        [1:uint8_t] the defender
+        [2:mpz_class] amount of damage
+      */
+      damage = 0,
+    };
     struct Pips {
       uint8_t normal;
       uint8_t power;
     };
     static constexpr size_t PLAYERS_PER_SIDE = 8;
+    static constexpr size_t ALL_ENEMIES = 16;
+    static constexpr size_t ALL_ALLIES = 17;
     class Stats;
     class Battle {
     public:
       class Entity {
       public:
         Pips pips = {0, 0};
-        int initiative;
+        int initiative = 0;
         size_t stunRounds = 0;
-        const Stats* s;
-        mpz_class health;
-        size_t mana;
-        uint32_t playerID; // 0 if enemy
+        const Stats* stats = nullptr; // if nullptr, no one here
+        mpz_class health = 0;
+        size_t mana = 0;
+        uint32_t playerID = 0; // 0 if enemy
       };
       std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
+      void damage(
+        size_t attacker, size_t defender,
+        size_t school, const mpz_class& amt,
+        RakNet::BitStream& out, size_t& nPacts);
     };
   }
 }

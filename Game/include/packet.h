@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #error Only C++11 or later supported.
 #endif
 
+#include <gmpxx.h>
+
 #include <stdint.h>
 #include <functional>
 #include <BitStream.h>
@@ -129,6 +131,8 @@ namespace x801 {
     char* readStringFromBitstream16(RakNet::BitStream& stream);
     std::string readStringFromBitstream32S(RakNet::BitStream& stream);
     std::string readStringFromBitstream16S(RakNet::BitStream& stream);
+    void writeMPZToBitStream(RakNet::BitStream& stream, const mpz_class& n);
+    void readMPZFromBitStream(RakNet::BitStream& stream, mpz_class& n);
     struct PacketCallback {
       std::function<
         void(

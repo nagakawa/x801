@@ -51,6 +51,11 @@ namespace x801 {
         int accuracy; // 0.1%s
         size_t pierce;
       };
+      mpz_class getDamage(size_t school) const;
+      mpz_class getResist(size_t school) const;
+      int getAccuracy(size_t school) const;
+      size_t getPierce(size_t school) const;
+      const SchoolSpecific& getSS(size_t school) const;
       size_t level;
       size_t school;
       mpz_class maxHealth;
