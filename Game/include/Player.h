@@ -22,10 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #include <stdint.h>
+#include <memory>
+
 #include <GetTime.h>
+
 #include "Database.h"
 #include "Location.h"
-
 #include "combat/Stats.h"
 
 namespace x801 {
@@ -43,6 +45,7 @@ namespace x801 {
         if (!db.loadPlayerLocation(id, location))
           location = defaultLocation;
         db.loadPlayerStats(id, su);
+        recalculateStats();
       }
       Player(const Player& other) :
         playerID(other.playerID), location(other.location),
@@ -57,6 +60,11 @@ namespace x801 {
       const Location& getLocation() const { return location; }
       StatsUser& getStatsU() { return su; }
       const StatsUser& getStatsU() const { return su; }
+      Stats& getStats() { return *stats; }
+      const Stats& getStats() const { return *stats; }
+      void recalculateStats() {
+        stats = std::make_unique<Stats>(su, defaultSchools);
+      }
       void applyKeyInput(KeyInput input, RakNet::Time last);
       void applyKeyInput(KeyInput input);
       void applyKeyInput(KeyInput input, RakNet::Time last,
@@ -67,6 +75,7 @@ namespace x801 {
       uint32_t playerID;
       Location location;
       StatsUser su;
+      std::unique_ptr<Stats> stats;
       RakNet::Time lastMoved;
     };
   }

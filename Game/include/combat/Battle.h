@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/variant.hpp>
 
+#include <gmpxx.h>
+
 namespace x801 {
   namespace game {
     struct Pips {
@@ -33,16 +35,20 @@ namespace x801 {
       uint8_t power;
     };
     static constexpr size_t PLAYERS_PER_SIDE = 8;
+    class Stats;
     class Battle {
     public:
-      class Player {
+      class Entity {
       public:
-        // boost::variant<Player, Enemy> description;
         Pips pips = {0, 0};
         int initiative;
         size_t stunRounds = 0;
+        const Stats* s;
+        mpz_class health;
+        size_t mana;
+        uint32_t playerID; // 0 if enemy
       };
-      std::array<Player, 2 * PLAYERS_PER_SIDE> players;
+      std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
     };
   }
 }

@@ -31,13 +31,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "combat/School.h"
 
+namespace RakNet { class BitStream; }
 namespace x801 {
   namespace game {
+    class Battle;
     class SpellIndex {
     public:
       SpellIndex(std::istream& fh);
       struct Metadata {
-        uint32_t address; // TODO should we give up fixed mdentry size?
+        uint32_t address; // Points to first step
         int16_t minSpeed;
         int16_t maxSpeed;
         uint16_t accuracy; // 0.1%s
@@ -49,18 +51,34 @@ namespace x801 {
           other bits unused
         */
         uint8_t flags;
-        uint16_t pad;
+        uint8_t nSteps;
+        uint8_t pad;
       }; // 16 bytes total
       size_t getIDByName(const char* s) const;
       size_t getIDByName(const std::string& s) const;
       const Metadata& getMetadata(size_t id) const;
       mpz_class evaluateQuantity(
         uint32_t q, std::mt19937& r) const;
+      void quantityToString(uint32_t q, std::string& s) const;
+      std::string quantityToString(uint32_t q) const;
+      /*
+        Actuate the spell with id `sid` to `b`, casted by entity #`i`,
+        and write the data about the invocation to `out`. Use `r` as
+        the random number generator.
+      */
+      bool actuate(
+        uint32_t sid, Battle& b,
+        size_t i, RakNet::BitStream& out,
+        std::mt19937& r) const;
     private:
       std::unordered_map<std::string, size_t> idsByName;
       std::vector<Metadata> metadata;
       std::vector<uint32_t> quantities;
       std::vector<uint32_t> steps;
+      bool actuateStep(
+        uint32_t& address, Battle& b,
+        size_t i, RakNet::BitStream& out,
+        std::mt19937& r) const;
     };
   }
 }
