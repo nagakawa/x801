@@ -20,6 +20,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "GameState.h"
 #include "packet.h"
 #include "combat/Stats.h"
 
@@ -46,5 +47,7 @@ namespace x801 {
       d.health -= effectiveAmt;
       if (sgn(d.health) < 0) d.health = 0;
     }
+    BattleManager::BattleManager(AreaWithPlayers* a) :
+      battles({{0, 0}, {2048, 2048}}), a(a) {}
   }
 }

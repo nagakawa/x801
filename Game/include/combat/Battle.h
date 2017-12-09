@@ -28,6 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <gmpxx.h>
 
+#include <glm/glm.hpp>
+
+#include <zekku/QuadTree.h>
+
 #include "combat/SpellIndex.h"
 
 namespace x801 {
@@ -62,10 +66,27 @@ namespace x801 {
         uint32_t playerID = 0; // 0 if enemy
       };
       std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
+      glm::vec2 position;
       void damage(
         size_t attacker, size_t defender,
         size_t school, const mpz_class& amt,
         RakNet::BitStream& out, size_t& nPacts);
+    };
+    struct BattleGetter {
+      glm::vec2 getPos(const std::unique_ptr<Battle>& b) { return b->position; }
+    };
+    class AreaWithPlayers;
+    // Used by the server to manage battles in a given area.
+    class BattleManager {
+    public:
+      BattleManager(AreaWithPlayers* a);
+      zekku::QuadTree<
+        std::unique_ptr<Battle>,
+        uint16_t,
+        float,
+        zekku::QUADTREE_NODE_COUNT, 
+        BattleGetter> battles;
+      AreaWithPlayers* a;
     };
   }
 }

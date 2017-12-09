@@ -110,6 +110,7 @@ void x801::game::writeMPZToBitStream(
   stream.Write((const char*) buf, nbytes);
   free(buf);
 }
+
 void x801::game::readMPZFromBitStream(
     RakNet::BitStream& stream, mpz_class& n) {
   uint32_t bytes;
