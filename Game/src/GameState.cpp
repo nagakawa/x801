@@ -25,8 +25,11 @@ using namespace x801::game;
 #include <assert.h>
 #include <string.h>
 #include <fstream>
+
 #include <mapErrors.h>
+
 #include "Credentials.h"
+#include "combat/SpellIndex.h"
 
 
 namespace x801 {
@@ -62,6 +65,7 @@ namespace x801 {
         db.savePlayerLocation(id, location);
         db.savePlayerStats(id, su);
       }
+      delete spells;
     }
     
     LoginStatus GameState::login(Credentials& c, uint32_t& id) {
@@ -232,6 +236,10 @@ namespace x801 {
       x801::map::Area& a = *(currentArea.getArea());
       selfPosition.applyKeyInput(ki, lastTimeClient, a);
       lastTimeClient = ki.time;
-    }    
+    }
+    
+    ClientGameState::~ClientGameState() {
+      delete spells;
+    } 
   }
 }

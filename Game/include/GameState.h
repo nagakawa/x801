@@ -43,6 +43,7 @@ namespace x801 {
   namespace game {
     class GameState;
     class ClientGameState;
+    class SpellIndex;
     class AreaWithPlayers {
     public:
       AreaWithPlayers() {
@@ -149,6 +150,7 @@ namespace x801 {
       // void addArea(x801::map::QualifiedAreaID);
       mutable boost::shared_mutex playerMutex;
       mutable boost::shared_mutex miMutex;
+      SpellIndex* spells = nullptr;
     private:
       Database db;
       std::unordered_map<uint32_t, Player> allPlayers;
@@ -164,6 +166,7 @@ namespace x801 {
 
     class ClientGameState {
     public:
+      ~ClientGameState();
       auto findUsernameByID(uint32_t id) const {
         boost::shared_lock<boost::shared_mutex> guard(lookupMutex);
         return usernamesByID.find(id);
@@ -230,6 +233,7 @@ namespace x801 {
       mutable boost::shared_mutex historyMutex;
       mutable std::mutex selfPositionMutex;
       //mutable boost::shared_mutex keyHistoryMutex;
+      SpellIndex* spells = nullptr;
     private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;
