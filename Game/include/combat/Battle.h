@@ -55,6 +55,8 @@ namespace x801 {
     class Stats;
     class Battle {
     public:
+      Battle() {}
+      Battle(glm::vec2 xy);
       class Entity {
       public:
         Pips pips = {0, 0};
@@ -73,7 +75,9 @@ namespace x801 {
         RakNet::BitStream& out, size_t& nPacts);
     };
     struct BattleGetter {
-      glm::vec2 getPos(const std::unique_ptr<Battle>& b) { return b->position; }
+      glm::vec2 getPos(const std::unique_ptr<Battle>& b) {
+        return b->position;
+      }
     };
     class AreaWithPlayers;
     // Used by the server to manage battles in a given area.
@@ -87,6 +91,8 @@ namespace x801 {
         zekku::QUADTREE_NODE_COUNT, 
         BattleGetter> battles;
       AreaWithPlayers* a;
+      using Handle = zekku::Handle<uint16_t>;
+      Handle spawnBattle(glm::vec2 xy);
     };
   }
 }
