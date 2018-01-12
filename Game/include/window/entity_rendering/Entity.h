@@ -109,7 +109,7 @@ namespace x801 {
         paths(paths), texID(tb->getTexID(mi->texname)) {}
       ~MobEntity() override {}
       void advanceFrame() override {}
-      size_t getTexture() override { return texID + offset; };
+      size_t getTexture() override;
       Location getLocation() override;
       bool setLocation(const Location& /*l*/) override {
         return false;
@@ -121,8 +121,9 @@ namespace x801 {
       RakNet::TimeMS recv;
       size_t pathno;
       const std::vector<x801::map::Path>* paths;
-      size_t texID;
-      size_t offset = 0;
+      uint32_t texID;
+      uint32_t offset = 0;
+      uint8_t cachedRot;
     };
   }
 }

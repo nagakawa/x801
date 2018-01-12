@@ -63,17 +63,23 @@ namespace x801 {
     Location MobEntity::getLocation() {
       float sPast = (RakNet::GetTimeMS() - recv) / 1000.0;
       const x801::map::Path& path = (*paths)[pathno];
-      float pathLength = path.lengthOfPart(pathno);
+      size_t partno = (size_t) progress;
+      float pathLength = path.lengthOfPart(partno);
       float progressAdv =
         progress + sPast * MOB_SPEED / pathLength;
       glm::vec2 pos = path.progressToCoordinates(progressAdv);
+      if (partno < path.vertices.size() - 1)
+        cachedRot = (uint8_t) path.pathDirectionCardinal(partno);
       Location l = {
         {0, 0},
         pos.x, pos.y,
         0, // doesn't matter
-        0  // TODO set rot
+        cachedRot
       };
       return l;
+    }
+    size_t MobEntity::getTexture() {
+      return texID + offset + cachedRot;
     }
   }
 }

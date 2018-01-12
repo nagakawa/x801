@@ -498,7 +498,13 @@ void x801::game::Client::processMobs(
     const std::string& name = enemyNames.at(nameIndex);
     const MobInfo* mi = mobInfoView->getInfo(name);
     //if (mi == nullptr) continue;
-    cw->mem->addEntity<MobEntity>(mi, progress, recv, pathIndex, paths);
+    if (pathIndex >= paths->size()) {
+      // Path index out of bounds
+      std::cerr << "Only " << paths->size() << " paths but mob has path #"
+        << pathIndex << "\n";
+    } else {
+      cw->mem->addEntity<MobEntity>(mi, progress, recv, pathIndex, paths);
+    }
   }
 }
 

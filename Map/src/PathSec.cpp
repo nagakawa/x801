@@ -89,6 +89,16 @@ namespace x801 {
       const Vertex& next = vertices[index + 1];
       return hypotf(next.x - curr.x, next.y - curr.y);
     }
+    float Path::pathDirection(size_t index) const {
+      const Vertex& curr = vertices[index];
+      const Vertex& next = vertices[index + 1];
+      return atan2f(next.y - curr.y, next.x - curr.x);
+    }
+    size_t Path::pathDirectionCardinal(size_t index) const {
+      float t = pathDirection(index);
+      long k = lroundf(-t / (M_PI / 2.0f));
+      return (size_t) (k & 3); // like % 4 but takes care of negatives
+    }
     PathSec::PathSec(std::istream& fh) {
       using namespace x801::base;
       size_t count = readInt<uint16_t>(fh);
