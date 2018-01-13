@@ -26,8 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace x801 {
   namespace game {
-    Battle::Battle(glm::vec2 xy) :
-        position(xy) {}
+    Battle::Battle(glm::vec2 xy, uint32_t id) :
+        position(xy), id(id) {}
     void Battle::damage(
         size_t attacker, size_t defender,
         size_t school, const mpz_class& amt,
@@ -50,9 +50,12 @@ namespace x801 {
       if (sgn(d.health) < 0) d.health = 0;
     }
     BattleManager::BattleManager(AreaWithPlayers* a) :
-      battles({{0, 0}, {2048, 2048}}), a(a) {}
+      battles({{0, 0}, {2048, 2048}}), a(a), globalID(0) {}
     BattleManager::Handle BattleManager::spawnBattle(glm::vec2 xy) {
-      return battles.insert(std::make_unique<Battle>(xy));
+      uint32_t id = globalID++;
+      std::unique_ptr<Battle> battle = std::make_unique<Battle>(xy, id);
+      battlesByID[id] = battle.get();
+      return battles.insert(std::move(battle));
     }
   }
 }

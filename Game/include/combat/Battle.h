@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <array>
+#include <atomic>
 
 #include <boost/variant.hpp>
 
@@ -56,7 +57,7 @@ namespace x801 {
     class Battle {
     public:
       Battle() {}
-      Battle(glm::vec2 xy);
+      Battle(glm::vec2 xy, uint32_t id);
       class Entity {
       public:
         Pips pips = {0, 0};
@@ -69,6 +70,7 @@ namespace x801 {
       };
       std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
       glm::vec2 position;
+      uint32_t id;
       void damage(
         size_t attacker, size_t defender,
         size_t school, const mpz_class& amt,
@@ -93,6 +95,8 @@ namespace x801 {
       AreaWithPlayers* a;
       using Handle = zekku::Handle<uint16_t>;
       Handle spawnBattle(glm::vec2 xy);
+      std::atomic_int32_t globalID;
+      std::unordered_map<uint32_t, Battle*> battlesByID;
     };
   }
 }

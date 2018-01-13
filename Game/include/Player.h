@@ -65,6 +65,9 @@ namespace x801 {
       void recalculateStats() {
         stats = std::make_unique<Stats>(su, defaultSchools);
       }
+      uint32_t getPlayerID() const { return playerID; }
+      uint32_t getBattleID() const { return battleID; }
+      void setBattleID(uint32_t id) { battleID = id; }
       void applyKeyInput(KeyInput input, RakNet::Time last);
       void applyKeyInput(KeyInput input);
       void applyKeyInput(KeyInput input, RakNet::Time last,
@@ -73,6 +76,7 @@ namespace x801 {
       ~Player();
     private:
       uint32_t playerID;
+      uint32_t battleID;
       Location location;
       StatsUser su;
       std::unique_ptr<Stats> stats;
