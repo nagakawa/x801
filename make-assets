@@ -59,7 +59,7 @@ asset-temp/textures/entity/gimpfiles/%.png: asset-src/textures/entity/gimpfiles/
 
 ## COMBAT-RELATED ##
 
-combat: mobinfo
+combat: mobinfo spellinfo
 
 ### Mob info ###
 
@@ -69,6 +69,15 @@ assets/mobs/%.mob: asset-src/mobs/%.emp
 	mkdir -p assets/mobs
 	python3 tools/mobinfo-compiler.py \
 		$< $@
+
+### Spell info ###
+
+spellinfo: assets/spells/spellIndex.dat
+
+assets/spells/spellIndex.dat: \
+		$(shell find asset-src/spells/behaviours -name '*.emp')
+	mkdir -p assets/spells
+	tools/compile-spells.py asset-src/spells/behaviours assets/spells/spellIndex.dat
 
 clean:
 	rm -rf asset-temp assets
