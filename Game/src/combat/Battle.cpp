@@ -49,6 +49,13 @@ namespace x801 {
       d.health -= effectiveAmt;
       if (sgn(d.health) < 0) d.health = 0;
     }
+    void Battle::Entity::read(Mob& m) {
+      m.marked = true;
+      mobInfo = m.info;
+      stats = &(mobInfo.stats);
+      health = stats.maxHealth;
+      mana = stats.maxMana;
+    }
     BattleManager::BattleManager(AreaWithPlayers* a) :
       battles({{0, 0}, {2048, 2048}}), a(a), globalID(0) {}
     BattleManager::Handle BattleManager::spawnBattle(glm::vec2 xy) {

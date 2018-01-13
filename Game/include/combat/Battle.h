@@ -64,9 +64,12 @@ namespace x801 {
         int initiative = 0;
         size_t stunRounds = 0;
         const Stats* stats = nullptr; // if nullptr, no one here
+        const MobInfo* mobInfo = nullptr; // nullptr if player
         mpz_class health = 0;
         size_t mana = 0;
         uint32_t playerID = 0; // 0 if enemy
+        // Put here methods to read from players or enemies
+        void read(Mob& m);
       };
       std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
       glm::vec2 position;
