@@ -70,6 +70,7 @@ namespace x801 {
         uint32_t playerID = 0; // 0 if enemy
         // Put here methods to read from players or enemies
         void read(Mob& m);
+        void read(Player& p);
       };
       std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
       glm::vec2 position;

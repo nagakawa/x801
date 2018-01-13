@@ -53,8 +53,16 @@ namespace x801 {
       m.marked = true;
       mobInfo = m.info;
       stats = &(mobInfo.stats);
-      health = stats.maxHealth;
-      mana = stats.maxMana;
+      health = stats->maxHealth;
+      mana = stats->maxMana;
+    }
+    // XXX: does not set battle ID of player
+    void Battle::Entity::read(Player& p) {
+      assert(p.getBattleID() == 0);
+      playerID = p.getPlayerID();
+      stats = &(p.getStats());
+      health = stats->maxHealth; // TODO save player health
+      mana = stats->maxMana;     // and mana
     }
     BattleManager::BattleManager(AreaWithPlayers* a) :
       battles({{0, 0}, {2048, 2048}}), a(a), globalID(0) {}
