@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <array>
 #include <atomic>
 
+#include <boost/thread/shared_mutex.hpp>
 #include <boost/variant.hpp>
 
 #include <gmpxx.h>
@@ -54,6 +55,9 @@ namespace x801 {
     static constexpr size_t ALL_ENEMIES = 16;
     static constexpr size_t ALL_ALLIES = 17;
     class Stats;
+    class Player;
+    class Mob;
+    class MobInfo;
     class Battle {
     public:
       Battle() {}
@@ -75,6 +79,8 @@ namespace x801 {
       std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
       glm::vec2 position;
       uint32_t id;
+      void slot(Mob& m, size_t index);
+      void slot(Player& p, size_t index);
       void damage(
         size_t attacker, size_t defender,
         size_t school, const mpz_class& amt,
@@ -101,6 +107,7 @@ namespace x801 {
       Handle spawnBattle(glm::vec2 xy);
       std::atomic_int32_t globalID;
       std::unordered_map<uint32_t, Battle*> battlesByID;
+      mutable boost::shared_mutex lock;
     };
   }
 }

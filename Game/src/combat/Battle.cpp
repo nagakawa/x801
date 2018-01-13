@@ -21,8 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "GameState.h"
+#include "Player.h"
 #include "packet.h"
 #include "combat/Stats.h"
+#include "combat/mob/Mob.h"
+#include "combat/mob/MobInfo.h"
 
 namespace x801 {
   namespace game {
@@ -52,7 +55,7 @@ namespace x801 {
     void Battle::Entity::read(Mob& m) {
       m.marked = true;
       mobInfo = m.info;
-      stats = &(mobInfo.stats);
+      stats = &(mobInfo->stats);
       health = stats->maxHealth;
       mana = stats->maxMana;
     }
@@ -64,10 +67,24 @@ namespace x801 {
       health = stats->maxHealth; // TODO save player health
       mana = stats->maxMana;     // and mana
     }
+    void Battle::slot(Mob& m, size_t index) {
+      assert(index >= 0 && index < 2 * PLAYERS_PER_SIDE);
+      assert(players[index].stats == nullptr);
+      players[index].read(m);
+    }
+    void Battle::slot(Player& p, size_t index) {
+      assert(index >= 0 && index < 2 * PLAYERS_PER_SIDE);
+      assert(players[index].stats == nullptr);
+      players[index].read(p);
+      p.setBattleID(id);
+    }
     BattleManager::BattleManager(AreaWithPlayers* a) :
       battles({{0, 0}, {2048, 2048}}), a(a), globalID(0) {}
     BattleManager::Handle BattleManager::spawnBattle(glm::vec2 xy) {
-      uint32_t id = globalID++;
+      boost::shared_lock<boost::shared_mutex> guard(lock);
+      do ++globalID;
+      while (battlesByID.count(globalID) != 0);
+      uint32_t id = globalID;
       std::unique_ptr<Battle> battle = std::make_unique<Battle>(xy, id);
       battlesByID[id] = battle.get();
       return battles.insert(std::move(battle));
