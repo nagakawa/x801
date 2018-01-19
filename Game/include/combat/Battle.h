@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glm/glm.hpp>
 
+#include <RakNetTime.h>
+
 #include <zekku/QuadTree.h>
 
 #include "combat/SpellIndex.h"
@@ -54,6 +56,7 @@ namespace x801 {
     static constexpr size_t PLAYERS_PER_SIDE = 8;
     static constexpr size_t ALL_ENEMIES = 16;
     static constexpr size_t ALL_ALLIES = 17;
+    static constexpr size_t TURN_LENGTH_MS = 30'000;
     class Stats;
     class Player;
     class Mob;
@@ -79,6 +82,11 @@ namespace x801 {
       std::array<Entity, 2 * PLAYERS_PER_SIDE> players;
       glm::vec2 position;
       uint32_t id;
+      // True if waiting for client inputs, false if waiting for
+      // clients to play their animations.
+      bool isWaitingForClient;
+      // Time when the battle is expected to switch to the next phase.
+      RakNet::TimeMS expiry;
       void slot(Mob& m, size_t index);
       void slot(Player& p, size_t index);
       void damage(

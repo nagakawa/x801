@@ -166,6 +166,20 @@ namespace x801 {
         (st == 2) ? ALL_ENEMIES :
         (st == 3) ? ALL_ALLIES : attacker;
     }
+    /*
+      Actuates a step of a spell.
+      Returns true if the data are valid.
+      If this returns false, the data are invalid and the player is assumed
+      to pass.
+      address:  (in)    the address of the step
+      b:        (inout) the instance of the battle to apply it to
+      attacker: (in)    the index of the attacker into the battle
+      out:      (inout) the output to eventually send to clients
+      r:        (inout) the rng
+      t:        (in)    the enemy and ally targets the player chose
+      nPacts:   (inout) the number of pacts emitted. Incremented every time
+                        a pact is emitted.
+    */
     bool SpellIndex::actuateStep(
         uint32_t& address, Battle& b,
         size_t attacker, RakNet::BitStream& out,
@@ -196,11 +210,25 @@ namespace x801 {
       address = q;
       return true;
     }
+    /*
+      Actuate a spell.
+      Returns true if the data are valid.
+      If this returns false, the data are invalid and the player is assumed
+      to pass.
+      sid:      (in)    the ID of the spell
+      b:        (inout) the instance of the battle to apply it to
+      attacker: (in)    the index of the attacker into the battle
+      out:      (inout) the output to eventually send to clients
+      r:        (inout) the rng
+      t:        (in)    the enemy and ally targets the player chose
+    */
     bool SpellIndex::actuate(
         uint32_t sid, Battle& b,
         size_t attacker, RakNet::BitStream& out,
         std::mt19937& r, Targets t) const {
       if (sid >= metadata.size()) return false;
+      // Consult tr01 section 5.
+      // Assumes that a player is trying to cast a spell instead of passing.
       // Information about all charms invoked before casting.
       // (none as of now)
       out.Write((uint32_t) 0);

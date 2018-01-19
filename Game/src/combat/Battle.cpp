@@ -20,6 +20,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <GetTime.h>
+
 #include "GameState.h"
 #include "Player.h"
 #include "packet.h"
@@ -30,7 +32,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace x801 {
   namespace game {
     Battle::Battle(glm::vec2 xy, uint32_t id) :
-        position(xy), id(id) {}
+        position(xy), id(id), isWaitingForClient(true),
+        expiry(RakNet::GetTimeMS() + TURN_LENGTH_MS) {}
+    /*
+      Deals damage from the attacker to the defender.
+      attacker: (in)    the index of the attacker
+      defender: (in)    the index of the defender, or ALL_ENEMIES or
+                        ALL_ALLIES (NYI)
+      school:   (in)    the school of the attack
+      amt:      (in)    the base amount of damage (before hanging effects)
+      out:      (inout) the output to eventually send to clients
+      nPacts:   (inout) the number of pacts emitted. Incremented every time
+                        a pact is emitted.
+    */
     void Battle::damage(
         size_t attacker, size_t defender,
         size_t school, const mpz_class& amt,
