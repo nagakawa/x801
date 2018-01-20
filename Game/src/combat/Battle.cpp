@@ -92,6 +92,20 @@ namespace x801 {
       players[index].read(p);
       p.setBattleID(id);
     }
+    size_t Battle::indexOfPlayer(uint32_t p) const {
+      for (size_t i = 0; i < players.size(); ++i) {
+        const Entity& e = players[i];
+        if (e.playerID == p) return i;
+      }
+      return -1U;
+    }
+    void Battle::receive(uint32_t p,
+        std::unique_ptr<RakNet::BitStream> data) {
+      size_t i = indexOfPlayer(p);
+      if (i == -1U) return;
+      players[i].clientData = std::move(data);
+      // TODO when all players send data, proceed with the turn
+    }
     BattleManager::BattleManager(AreaWithPlayers* a) :
       battles({{0, 0}, {2048, 2048}}), a(a), globalID(0) {}
     BattleManager::Handle BattleManager::spawnBattle(glm::vec2 xy) {

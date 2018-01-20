@@ -72,6 +72,8 @@ namespace x801 {
         size_t stunRounds = 0;
         const Stats* stats = nullptr; // if nullptr, no one here
         const MobInfo* mobInfo = nullptr; // nullptr if player
+        // nullptr if not player or not received yet
+        std::unique_ptr<RakNet::BitStream> clientData = nullptr;
         mpz_class health = 0;
         size_t mana = 0;
         uint32_t playerID = 0; // 0 if enemy
@@ -93,6 +95,8 @@ namespace x801 {
         size_t attacker, size_t defender,
         size_t school, const mpz_class& amt,
         RakNet::BitStream& out, size_t& nPacts);
+      size_t indexOfPlayer(uint32_t p) const;
+      void receive(uint32_t p, std::unique_ptr<RakNet::BitStream> data);
     };
     struct BattleGetter {
       glm::vec2 getPos(const std::unique_ptr<Battle>& b) {
