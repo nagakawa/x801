@@ -106,6 +106,13 @@ namespace x801 {
       players[i].clientData = std::move(data);
       // TODO when all players send data, proceed with the turn
     }
+    void Battle::waitForClientInput() {
+      for (Entity& e : players) {
+        e.clientData = nullptr;
+      }
+      isWaitingForClient = true;
+      expiry = RakNet::GetTimeMS() + TURN_LENGTH_MS;
+    }
     BattleManager::BattleManager(AreaWithPlayers* a) :
       battles({{0, 0}, {2048, 2048}}), a(a), globalID(0) {}
     BattleManager::Handle BattleManager::spawnBattle(glm::vec2 xy) {

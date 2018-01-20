@@ -97,6 +97,7 @@ namespace x801 {
         RakNet::BitStream& out, size_t& nPacts);
       size_t indexOfPlayer(uint32_t p) const;
       void receive(uint32_t p, std::unique_ptr<RakNet::BitStream> data);
+      void waitForClientInput();
     };
     struct BattleGetter {
       glm::vec2 getPos(const std::unique_ptr<Battle>& b) {
