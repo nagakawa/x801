@@ -108,6 +108,7 @@ namespace x801 {
       LPACKET_IDENTIFY,
       LPACKET_CHANGE_AREA,
       LPACKET_ENEMY,
+      LPACKET_BATTLE_CHANGE,
     };
     enum ChatStatus {
       CHAT_OK = 0,

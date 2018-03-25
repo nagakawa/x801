@@ -61,6 +61,7 @@ namespace x801 {
     class Player;
     class Mob;
     class MobInfo;
+    class BattleManager;
     class Battle {
     public:
       Battle() {}
@@ -98,6 +99,9 @@ namespace x801 {
       size_t indexOfPlayer(uint32_t p) const;
       void receive(uint32_t p, std::unique_ptr<RakNet::BitStream> data);
       void waitForClientInput();
+      void playTurn();
+      void dissolve();
+      BattleManager* manager;
     };
     struct BattleGetter {
       glm::vec2 getPos(const std::unique_ptr<Battle>& b) {

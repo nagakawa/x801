@@ -94,8 +94,8 @@ void x801::game::Launcher::body() {
             boost::process::std_err > clientError
           );
           if (clientThread.joinable()) clientThread.join();
-          clientThread = std::move(
-            feedThread(client, clientOutput, clientError, clientLog));
+          clientThread =
+            feedThread(client, clientOutput, clientError, clientLog);
         }
       }
       ImGui::NextColumn();
@@ -123,8 +123,8 @@ void x801::game::Launcher::body() {
             boost::process::std_err > serverError
           );
           if (serverThread.joinable()) serverThread.join();
-          serverThread = std::move(
-            feedThread(server, serverOutput, serverError, serverLog));
+          serverThread =
+            feedThread(server, serverOutput, serverError, serverLog);
         }
       }
       ImGui::NextColumn();

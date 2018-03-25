@@ -53,13 +53,16 @@ namespace x801 {
           unsigned short maxConnections = DEFAULT_MAX_CONNECTIONS,
           bool useIPV6 = false
       ) : maxConnections(maxConnections), port(port),
-          useIPV6(useIPV6), playersByCookie() {}
+          useIPV6(useIPV6), playersByCookie() {
+        g.s = this;
+      }
       ~Server();
       Server(const Server& s) = delete;
       void operator=(const Server& s) = delete;
       void start();
       const unsigned short maxConnections;
       const uint16_t port;
+      void notifyClientBattle(uint32_t playerID, uint32_t newBattleID);
     private:
       bool readConfig();
       bool readMOTD();

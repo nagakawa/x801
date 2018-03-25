@@ -608,3 +608,22 @@ void x801::game::Server::broadcastLocationsConcurrent() {
     this->broadcastLocations();
   });
 }
+
+void x801::game::Server::notifyClientBattle(
+    uint32_t playerID,
+    uint32_t newBattleID) {
+  auto it = addressesByPlayer.find(playerID);
+  if (it == addressesByPlayer.end()) {
+    std::cerr << "Could not sent battle change message to player #";
+    std::cerr << playerID << "; ignoring\n";
+    return;
+  }
+  RakNet::BitStream output;
+  output.Write(static_cast<uint8_t>(PACKET_IM_LOGGED_IN));
+  output.Write(static_cast<uint16_t>(LPACKET_BATTLE_CHANGE));
+  output.Write(newBattleID);
+  peer->Send(
+    &output, HIGH_PRIORITY, RELIABLE_ORDERED, 1,
+    it->second, false
+  );
+}

@@ -95,19 +95,19 @@ namespace x801 {
       // This is public so users of the class can use the mutex to
       // safely iterate over all elements of a map.
       mutable boost::shared_mutex playerMutex;
+      GameState* g = nullptr;
+      ClientGameState* cg = nullptr;
     private:
       std::unordered_set<uint32_t> players;
-      GameState* g = nullptr;
       // Unsure whether this is needed, since ClientGameState can hold
       // only one AreaWithPlayers.
-      ClientGameState* cg = nullptr;
       std::shared_ptr<x801::map::Area> area = nullptr;
       MobManager* mman = nullptr;
       friend class Client;
       friend class Server;
       friend class GameState;
     };
-    
+    class Server;
     class GameState {
     public:
       ~GameState();
@@ -117,11 +117,11 @@ namespace x801 {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         return allPlayers.find(id);
       }
-      bool findPlayer(uint32_t id, Player& player) {
+      bool findPlayer(uint32_t id, Player*& player) {
         boost::shared_lock<boost::shared_mutex> guard(playerMutex);
         auto it = allPlayers.find(id);
         if (it != allPlayers.end()) {
-          player = it->second;
+          player = &(it->second);
           return true;
         } else return false;
       }
@@ -151,6 +151,7 @@ namespace x801 {
       mutable boost::shared_mutex playerMutex;
       mutable boost::shared_mutex miMutex;
       SpellIndex* spells = nullptr;
+      Server* s = nullptr;
     private:
       Database db;
       std::unordered_map<uint32_t, Player> allPlayers;
@@ -163,7 +164,7 @@ namespace x801 {
       std::unordered_map<std::string, std::unique_ptr<MobInfo>> mobInfos;
       friend class Server;
     };
-
+    class Client;
     class ClientGameState {
     public:
       ~ClientGameState();
@@ -234,6 +235,7 @@ namespace x801 {
       mutable std::mutex selfPositionMutex;
       //mutable boost::shared_mutex keyHistoryMutex;
       SpellIndex* spells = nullptr;
+      Client* c = nullptr;
     private:
       AreaWithPlayers currentArea;
       std::unordered_map<uint32_t, std::string> usernamesByID;

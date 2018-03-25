@@ -58,6 +58,7 @@ namespace x801 {
       ) : port(port),
           ipAddress(ipAddress),
           useIPV6(useIPV6) {
+        g.c = this;
         initialise();
       }
       ~Client();

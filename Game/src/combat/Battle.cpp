@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "GameState.h"
 #include "Player.h"
+#include "Server.h"
 #include "packet.h"
 #include "combat/Stats.h"
 #include "combat/mob/Mob.h"
@@ -91,6 +92,7 @@ namespace x801 {
       assert(players[index].stats == nullptr);
       players[index].read(p);
       p.setBattleID(id);
+      manager->a->g->s->notifyClientBattle(p.getPlayerID(), id);
     }
     size_t Battle::indexOfPlayer(uint32_t p) const {
       for (size_t i = 0; i < players.size(); ++i) {
@@ -104,7 +106,33 @@ namespace x801 {
       size_t i = indexOfPlayer(p);
       if (i == -1U) return;
       players[i].clientData = std::move(data);
-      // TODO when all players send data, proceed with the turn
+      bool allPlayersDone = true;
+      for (const Battle::Entity& e : players) {
+        if (e.playerID != 0 && e.clientData == nullptr) {
+          allPlayersDone = false;
+          break;
+        }
+      }
+      if (allPlayersDone) playTurn();
+    }
+    void Battle::playTurn() {
+      isWaitingForClient = false;
+      // TODO: simulate the turn
+      // TODO: send appropriate packets to the client
+      // TODO: calculate animation duration and set expiry accordingly
+    }
+    void Battle::dissolve() {
+      GameState* g = manager->a->g;
+      for (const Battle::Entity& e : players) {
+        if (e.playerID != 0) {
+          Player* p;
+          bool stat = g->findPlayer(e.playerID, p);
+          if (stat) {
+            p->setBattleID(0);
+            g->s->notifyClientBattle(e.playerID, 0);
+          }
+        }
+      }
     }
     void Battle::waitForClientInput() {
       for (Entity& e : players) {
@@ -121,6 +149,7 @@ namespace x801 {
       while (battlesByID.count(globalID) != 0);
       uint32_t id = globalID;
       std::unique_ptr<Battle> battle = std::make_unique<Battle>(xy, id);
+      battle->manager = this;
       battlesByID[id] = battle.get();
       return battles.insert(std::move(battle));
     }
